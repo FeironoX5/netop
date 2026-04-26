@@ -1,10 +1,8 @@
 <template>
   <div
-    v-if="rendered"
     class="sidebar"
-    :class="[`side-${side}`, stateClass]"
+    :class="[`side-${side}`, { closed: !isOpen }]"
     :aria-hidden="!isOpen"
-    @animationend="onAnimationEnd"
   >
     <div class="sidebar-content">
       <slot />
@@ -13,9 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
-
-const props = defineProps({
+defineProps({
   isOpen: {
     type: Boolean,
     default: true,
@@ -25,36 +21,6 @@ const props = defineProps({
     default: 'left',
   },
 });
-
-const rendered = ref(props.isOpen);
-const animState = ref<'idle' | 'opening' | 'closing'>('idle');
-
-watch(
-  () => props.isOpen,
-  (val) => {
-    if (val) {
-      rendered.value = true;
-      animState.value = 'opening';
-    } else {
-      animState.value = 'closing';
-    }
-  },
-  { immediate: true }
-);
-
-const stateClass = computed(() => {
-  return {
-    opening: animState.value === 'opening',
-    closing: animState.value === 'closing',
-  };
-});
-
-function onAnimationEnd() {
-  if (animState.value === 'closing') {
-    rendered.value = false;
-  }
-  animState.value = 'idle';
-}
 </script>
 
 <style scoped>
@@ -69,84 +35,51 @@ function onAnimationEnd() {
   padding: var(--s-spacing);
   background-color: var(--c-l1-bg);
   overflow: hidden;
-}
+  visibility: visible;
 
-.sidebar.side-left.opening {
-  animation: slide-in-left 0.15s ease-out forwards;
-}
+  transition:
+    margin 0.15s ease-out,
+    visibility 0s linear 0s;
 
-.sidebar.side-left.closing {
-  animation: slide-out-left 0.15s ease-out forwards;
-}
-
-.sidebar.side-right.opening {
-  animation: slide-in-right 0.15s ease-out forwards;
-}
-
-.sidebar.side-right.closing {
-  animation: slide-out-right 0.15s ease-out forwards;
-}
-
-@keyframes slide-in-left {
-  from {
-    margin-left: calc(-1 * var(--sidebar-width));
-    opacity: 0;
+  &.side-left {
+    border-right: var(--border);
   }
-  to {
-    margin-left: 0;
-    opacity: 1;
-  }
-}
 
-@keyframes slide-out-left {
-  from {
-    margin-left: 0;
-    opacity: 1;
-  }
-  to {
-    margin-left: calc(-1 * var(--sidebar-width));
-    opacity: 0;
-  }
-}
-
-@keyframes slide-in-right {
-  from {
-    margin-right: calc(-1 * var(--sidebar-width));
-    opacity: 0;
-  }
-  to {
-    margin-right: 0;
-    opacity: 1;
-  }
-}
-
-@keyframes slide-out-right {
-  from {
-    margin-right: 0;
-    opacity: 1;
-  }
-  to {
-    margin-right: calc(-1 * var(--sidebar-width));
-    opacity: 0;
-  }
-}
-
-.sidebar-content {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  gap: var(--s-spacing);
-  min-width: 0;
-}
-
-.sidebar-content :deep(.sidebar-section) {
-  display: contents;
-}
-
-.sidebar-content :deep(.sidebar-section + .sidebar-section) {
-  &::before {
-    content: '';
+  &.side-right {
     border-left: var(--border);
+  }
+
+  &.closed {
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      margin 0.15s ease-out,
+      visibility 0s linear 0.15s;
+  }
+
+  &.side-left.closed {
+    margin-left: calc(-1 * var(--sidebar-width));
+  }
+
+  &.side-right.closed {
+    margin-right: calc(-1 * var(--sidebar-width));
+  }
+
+  & .sidebar-content {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--s-spacing);
+    min-width: 0;
+
+    & :deep(.sidebar-section) {
+      display: contents;
+    }
+
+    & :deep(.sidebar-section + .sidebar-section)::before {
+      content: '';
+      border-left: var(--border);
+    }
   }
 }
 </style>

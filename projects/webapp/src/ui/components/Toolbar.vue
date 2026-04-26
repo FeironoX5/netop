@@ -14,16 +14,16 @@
   border: var(--border);
   border-radius: var(--s-border-radius);
   overflow: hidden;
-}
 
-.toolbar :deep(.toolbar-section) {
-  display: contents;
-}
+  & :deep(.toolbar-section) {
+    display: contents;
+  }
 
-.toolbar :deep(.toolbar-section + .toolbar-section) {
-  &::before {
-    content: '';
-    border-left: var(--border);
+  & :deep(.toolbar-section + .toolbar-section) {
+    &::before {
+      content: '';
+      border-left: var(--border);
+    }
   }
 }
 </style>

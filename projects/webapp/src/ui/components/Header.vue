@@ -23,12 +23,12 @@ import Button from '../bits/Button.vue';
   background-color: var(--c-l1-bg);
   border-bottom: var(--border);
   overflow: hidden;
-}
 
-.logo {
-  height: 1.3rem;
-  width: auto;
-  pointer-events: none;
-  margin-right: 0.5rem;
+  & .logo {
+    height: 1.3rem;
+    width: auto;
+    pointer-events: none;
+    margin-right: 0.5rem;
+  }
 }
 </style>
