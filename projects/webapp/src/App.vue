@@ -2,11 +2,11 @@
   <div class="fullscreen-view">
     <Header />
     <div class="content-area">
-      <Sidebar :is-open="leftSidebarContent !== null">
+      <Sidebar side="left" :is-open="leftSidebarContent !== null">
         {{ leftSidebarText }}
       </Sidebar>
       <canvas class="workspace-canvas" />
-      <Sidebar :is-open="rightSidebarContent !== null">
+      <Sidebar side="right" :is-open="rightSidebarContent !== null">
         {{ rightSidebarText }}
       </Sidebar>
     </div>
@@ -30,7 +30,7 @@
           <Button icon="mouse-pointer-2" :isSelectable="true" />
           <Button icon="hand" :isActive="true" :isSelectable="true" />
           <Button icon="cable" :isSelectable="true" />
-          <Button icon="sticky-note" :isSelectable="true" />
+          <Button icon="message-circle" :isSelectable="true" />
         </div>
         <div class="toolbar-section">
           <Button icon="play" text="Run" />
