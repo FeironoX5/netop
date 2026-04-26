@@ -1,30 +1,28 @@
 <template>
   <div class="header">
-    <img class="logo" src="/logo.svg" />
-    <Button text="File" />
-    <Button text="View" />
-    <Button text="Settings" />
-    <span class="spacer" />
-    <Button icon="code" text="Source" />
+    <List
+      direction="row"
+      :items="[{ name: 'File' }, { name: 'View' }, { name: 'Settings' }]"
+      :endItems="[{ name: 'Source', icon: 'code' }]"
+    >
+      <img class="logo" src="/logo.svg" />
+    </List>
   </div>
 </template>
 
 <script setup lang="ts">
-import Button from '../bits/Button.vue';
+import List from './List.vue';
 </script>
 
 <style scoped>
 .header {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: var(--s-spacing);
   padding: var(--s-spacing) 1rem;
   background-color: var(--c-l1-bg);
   border-bottom: var(--border);
   overflow: hidden;
 
   & .logo {
+    align-self: center;
     height: 1.3rem;
     width: auto;
     pointer-events: none;

@@ -1,16 +1,32 @@
 <template>
-  <div
-    class="sidebar"
-    :class="[`side-${side}`, { closed: !isOpen }]"
-    :aria-hidden="!isOpen"
-  >
+  <div class="sidebar" :class="[`side-${side}`, { closed: !isOpen }]" :aria-hidden="!isOpen">
     <div class="sidebar-content">
       <slot />
+      <List :items="sidebarItems" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import List from './List.vue';
+
+const sidebarItems = [
+  {
+    id: 1,
+    name: 'Name 1',
+    action: () => new Promise((resolve) => setTimeout(resolve, 1000)),
+  },
+  {
+    id: 2,
+    name: 'Name 2',
+    action: () => setTimeout(() => console.log(), 1000),
+  },
+  {
+    id: 3,
+    name: 'Name 3',
+  },
+];
+
 defineProps({
   isOpen: {
     type: Boolean,

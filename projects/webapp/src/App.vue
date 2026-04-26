@@ -25,6 +25,12 @@
             :isActive="leftSidebarContent === 'source'"
             @click="toggleLeftSidebar('source')"
           />
+          <Button
+            icon="network"
+            :isSelectable="true"
+            :isActive="leftSidebarContent === 'network'"
+            @click="toggleLeftSidebar('network')"
+          />
         </div>
         <div class="toolbar-section">
           <Button icon="mouse-pointer-2" :isSelectable="true" />
@@ -124,7 +130,7 @@ function toggleRightSidebar(content: string) {
 
   & .toolbar {
     margin-bottom: -20px;
-    transition: margin-bottom 0.1s ease-out;
+    transition: margin-bottom 0.15s ease-out;
   }
 
   &:hover .toolbar {
