@@ -1,6 +1,7 @@
 # Custom
 todo*.md
 netemul_sources
+.codex
 
 # Logs
 logs

@@ -1,0 +1,34 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap');
+@import './reset.css';
+
+:root {
+  --c-accent: #4557eb;
+  --c-l0-bg: #1e1e1e;
+  --c-l1-bg: #2b2b2b;
+  --c-l2-bg: #383838;
+  --c-el-bg: transparent;
+  --c-el-bg-hovered: #363636;
+  --c-el-bg-active: var(--c-accent);
+  --c-border: #3f3f3f;
+  --c-text: #e9e9e9;
+  --c-text-disabled: #afb1b2;
+  --s-spacing: 8px;
+  --s-border-radius: 15px;
+  --s-border-radius-inner: calc(var(--s-border-radius) - var(--s-spacing));
+  --s-border-width: 1px;
+  --border: var(--s-border-width) solid var(--c-border);
+}
+
+body {
+  font-family: 'Lato', sans-serif;
+  color: var(--c-text);
+  background-color: var(--c-l0-bg);
+}
+
+button {
+  border: none;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
