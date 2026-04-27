@@ -6,24 +6,9 @@
 </template>
 
 <script setup lang="ts">
-defineProps({
-  icon: {
-    type: String,
-    default: '',
-  },
-  text: {
-    type: String,
-    default: '',
-  },
-  isActive: {
-    type: Boolean,
-    default: false,
-  },
-  isSelectable: {
-    type: Boolean,
-    default: false,
-  },
-});
+import { buttonProps } from './Button.props';
+
+defineProps(buttonProps);
 </script>
 
 <style scoped>

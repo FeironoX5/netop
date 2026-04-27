@@ -2,41 +2,14 @@
   <div class="sidebar" :class="[`side-${side}`, { closed: !isOpen }]" :aria-hidden="!isOpen">
     <div class="sidebar-content">
       <slot />
-      <List :items="sidebarItems" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import List from './List.vue';
+import { sidebarProps } from './Sidebar.props';
 
-const sidebarItems = [
-  {
-    id: 1,
-    name: 'Name 1',
-    action: () => new Promise((resolve) => setTimeout(resolve, 1000)),
-  },
-  {
-    id: 2,
-    name: 'Name 2',
-    action: () => setTimeout(() => console.log(), 1000),
-  },
-  {
-    id: 3,
-    name: 'Name 3',
-  },
-];
-
-defineProps({
-  isOpen: {
-    type: Boolean,
-    default: true,
-  },
-  side: {
-    type: String,
-    default: 'left',
-  },
-});
+const props = defineProps(sidebarProps);
 </script>
 
 <style scoped>
@@ -87,15 +60,6 @@ defineProps({
     flex-direction: column;
     gap: var(--s-spacing);
     min-width: 0;
-
-    & :deep(.sidebar-section) {
-      display: contents;
-    }
-
-    & :deep(.sidebar-section + .sidebar-section)::before {
-      content: '';
-      border-left: var(--border);
-    }
   }
 }
 </style>
