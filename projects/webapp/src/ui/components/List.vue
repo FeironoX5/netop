@@ -24,7 +24,6 @@
 
 <script setup lang="ts">
 import { ref, type CSSProperties, type PropType } from 'vue';
-
 import Button from '../bits/Button.vue';
 
 interface ListItem {

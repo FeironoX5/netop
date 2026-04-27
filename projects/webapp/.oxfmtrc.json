@@ -3,6 +3,9 @@
   "ignorePatterns": ["dist/**", "*.md"],
   "semi": true,
   "singleQuote": true,
-  "sortImports": true,
-  "trailingComma": "all"
+  "sortImports": {
+    "newlinesBetween": false
+  },
+  "trailingComma": "all",
+  "tabWidth": 2
 }
