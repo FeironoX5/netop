@@ -10,17 +10,21 @@
     "build": "yarn workspaces run build",
     "preview": "yarn workspace @netop/webapp preview",
     "typecheck": "yarn workspaces run typecheck",
-    "lint": "yarn workspaces run lint",
-    "lint:fix": "yarn workspaces run lint:fix",
-    "format": "yarn workspaces run format",
-    "format:check": "yarn workspaces run format:check",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint . --fix",
+    "format": "oxfmt .",
+    "format:check": "oxfmt . --check",
     "prepare": "husky"
   },
   "devDependencies": {
     "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "oxfmt": "^0.45.0",
     "oxlint": "~1.60.0",
     "typescript": "~6.0.0"
   },
-  "packageManager": "yarn@1.22.22"
+  "packageManager": "yarn@1.22.22",
+  "lint-staged": {
+    "*.{js,ts,jsx,tsx,vue}": "oxfmt --write"
+  }
 }
