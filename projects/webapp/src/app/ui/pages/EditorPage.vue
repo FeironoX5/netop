@@ -2,9 +2,13 @@
   <div class="fullscreen-view">
     <Header />
     <div class="content-area">
-      <Sidebar side="left" :isOpen="activeLeftPanelIndex !== null"> </Sidebar>
+      <Sidebar side="left" :isOpen="activeLeftPanelIndex !== null">
+        <component :is="CurrentLeftPanel" />
+      </Sidebar>
       <canvas class="workspace-canvas" />
-      <Sidebar side="right" :isOpen="activeRightPanelIndex !== null"> </Sidebar>
+      <Sidebar side="right" :isOpen="activeRightPanelIndex !== null">
+        <component :is="CurrentRightPanel" />
+      </Sidebar>
     </div>
     <div class="toolbar-area">
       <Toolbar
@@ -18,11 +22,20 @@
 import Sidebar from '@components/Sidebar.vue';
 import Header from '@ui/parts/Header.vue';
 import Toolbar from '@ui/parts/Toolbar.vue';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { leftPanelTools, rightPanelTools } from './EditorPage.data';
 
 const activeLeftPanelIndex = ref<number | null>(null);
+const CurrentLeftPanel = computed(() => {
+  if (activeLeftPanelIndex.value === null) return null;
+  return leftPanelTools[activeLeftPanelIndex.value]?.view ?? null;
+});
+
 const activeRightPanelIndex = ref<number | null>(null);
+const CurrentRightPanel = computed(() => {
+  if (activeRightPanelIndex.value === null) return null;
+  return rightPanelTools[activeRightPanelIndex.value]?.view ?? null;
+});
 </script>
 
 <style scoped>

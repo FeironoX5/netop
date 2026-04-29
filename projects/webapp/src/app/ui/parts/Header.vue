@@ -33,6 +33,7 @@ import ButtonGroup from '@components/ButtonGroup.vue';
   background-color: var(--c-l1-bg);
   border-bottom: var(--border);
   overflow: hidden;
+  flex: 0 0 auto;
 
   & .logo {
     align-self: center;

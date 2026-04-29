@@ -1,5 +1,8 @@
 <template>
-  <div class="list" :style="{ flexDirection: direction }">
+  <div
+    class="list inline-container"
+    :class="{ row: direction === 'row', column: direction === 'column' }"
+  >
     <slot name="start" />
     <slot />
     <span class="spacer" />
@@ -15,9 +18,6 @@ defineProps(listProps);
 
 <style scoped>
 .list {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: stretch;
   gap: var(--s-spacing);
 }
 </style>

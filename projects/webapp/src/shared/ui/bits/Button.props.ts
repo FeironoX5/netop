@@ -1,8 +1,7 @@
+import { iconProps } from './Icon.props';
+
 export const buttonProps = {
-  icon: {
-    type: String,
-    default: '',
-  },
+  ...iconProps,
   text: {
     type: String,
     default: '',

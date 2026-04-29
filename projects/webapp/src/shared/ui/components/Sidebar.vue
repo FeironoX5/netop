@@ -1,8 +1,6 @@
 <template>
   <div class="sidebar" :class="[`side-${side}`, { closed: !isOpen }]" :aria-hidden="!isOpen">
-    <div class="sidebar-content">
-      <slot />
-    </div>
+    <slot />
   </div>
 </template>
 
@@ -18,10 +16,6 @@ const props = defineProps(sidebarProps);
 
   width: var(--sidebar-width);
   flex: 0 0 var(--sidebar-width);
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-spacing);
-  padding: var(--s-spacing);
   background-color: var(--c-l1-bg);
   overflow: hidden;
   visibility: visible;
@@ -52,14 +46,6 @@ const props = defineProps(sidebarProps);
 
   &.side-right.closed {
     margin-right: calc(-1 * var(--sidebar-width));
-  }
-
-  & .sidebar-content {
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: column;
-    gap: var(--s-spacing);
-    min-width: 0;
   }
 }
 </style>
