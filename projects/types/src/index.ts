@@ -1,1 +1,2 @@
-export type {} from './ws';
+export * from './ws';
+export * from './deviceDetails';
