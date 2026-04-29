@@ -10,7 +10,8 @@
       "@ui/*": ["./src/app/ui/*"],
       "@shared/*": ["./src/shared/*"],
       "@bits/*": ["./src/shared/ui/bits/*"],
-      "@components/*": ["./src/shared/ui/components/*"]
+      "@components/*": ["./src/shared/ui/components/*"],
+      "@netop/types": ["../types/src/index.ts"]
     }
   }
 }
