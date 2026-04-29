@@ -23,8 +23,8 @@
     "oxlint": "~1.60.0",
     "typescript": "~6.0.0"
   },
-  "packageManager": "yarn@1.22.22",
   "lint-staged": {
     "*.{js,ts,jsx,tsx,vue}": "oxfmt --write"
-  }
+  },
+  "packageManager": "yarn@1.22.22"
 }

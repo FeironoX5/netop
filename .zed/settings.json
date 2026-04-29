@@ -2,30 +2,30 @@
   "tab_size": 2,
   "languages": {
     "Vue.js": {
-      "language_servers": ["vue-language-server", "vtsls", "oxlint"],
+      "language_servers": ["vue-language-server", "vtsls", "oxlint"]
     },
     "TypeScript": {
-      "language_servers": ["vtsls", "oxlint"],
+      "language_servers": ["vtsls", "oxlint"]
     },
     "JavaScript": {
-      "language_servers": ["vtsls", "oxlint"],
-    },
+      "language_servers": ["vtsls", "oxlint"]
+    }
   },
   "lsp": {
     "oxlint": {
       "initialization_options": {
         "settings": {
           "run": "onType",
-          "fixKind": "safe_fix",
-        },
-      },
+          "fixKind": "safe_fix"
+        }
+      }
     },
     "oxfmt": {
       "initialization_options": {
         "settings": {
-          "run": "onSave",
-        },
-      },
-    },
-  },
+          "run": "onSave"
+        }
+      }
+    }
+  }
 }
