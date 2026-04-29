@@ -1,44 +1,43 @@
-# Custom
-todo*.md
-netemul_sources
-.codex
+# ── Dependencies ──────────────────────────────────────────────────────────────
+node_modules/
 
-# Logs
-logs
+# ── Build output ──────────────────────────────────────────────────────────────
+dist/
+dist-ssr/
+out/
+coverage/
+
+# ── Env & secrets ─────────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── SQLite ────────────────────────────────────────────────────────────────────
+*.db
+*.db-shm
+*.db-wal
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+logs/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-.DS_Store
-dist
-dist-ssr
-coverage
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
+# ── TypeScript ────────────────────────────────────────────────────────────────
 *.tsbuildinfo
 
-.eslintcache
-
-# Cypress
-/cypress/videos/
-/cypress/screenshots/
-
-# Vitest
-__screenshots__/
-
-# Vite
+# ── Vite ──────────────────────────────────────────────────────────────────────
 *.timestamp-*-*.mjs
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+
+# ── Editors ───────────────────────────────────────────────────────────────────
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.sw?
+
+# ── Project-specific ──────────────────────────────────────────────────────────
+todo*.md
+netemul_sources/
+.codex
