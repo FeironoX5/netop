@@ -14,6 +14,7 @@ export default defineConfig({
       '@shared': path.resolve(__dirname, './src/shared'),
       '@bits': path.resolve(__dirname, './src/shared/ui/bits'),
       '@components': path.resolve(__dirname, './src/shared/ui/components'),
+      '@netop/types': path.resolve(__dirname, '../types/src/index.ts'),
     },
     tsConfigPaths: true,
   },

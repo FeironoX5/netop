@@ -3,19 +3,23 @@
     ref="textarea"
     :placeholder="props.placeholder"
     :rows="props.rows"
-    @input="resize"
+    :value="model"
+    @input="onInput"
   ></textarea>
 </template>
+
 <script setup lang="ts">
 import { useTemplateRef } from 'vue';
 import { textareaProps } from './Textarea.props';
 
 const props = defineProps(textareaProps);
-const chat = useTemplateRef<HTMLTextAreaElement>('textarea');
+const model = defineModel<string>({ default: '' });
+const textarea = useTemplateRef<HTMLTextAreaElement>('textarea');
 
-const resize = () => {
-  const el = chat.value;
+const onInput = () => {
+  const el = textarea.value;
   if (!el) return;
+  model.value = el.value;
   el.style.height = 'auto';
   el.style.height = el.scrollHeight + 'px';
 };
