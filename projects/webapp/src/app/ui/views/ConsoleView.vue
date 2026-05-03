@@ -42,46 +42,41 @@
 import Button from '@bits/Button.vue';
 import Textarea from '@bits/Textarea.vue';
 import ButtonMultiGroup from '@components/ButtonMultiGroup.vue';
-import type { ServerMessage } from '@netop/types';
-import type { LogEntry } from '@shared/composables/useWs';
-import { useWs } from '@shared/composables/useWs';
+import { ServerMessageType, type ServerMessage } from '@netop/types';
+import { wsService, type LogEntry } from '@shared/services/wsService';
 import { computed, onMounted, ref } from 'vue';
 
-const MESSAGE_TYPES: ServerMessage['type'][] = ['connected', 'pong', 'commandResult', 'error'];
+const filterItems = Object.values(ServerMessageType).map((t) => ({ name: t }));
 
-const filterItems = MESSAGE_TYPES.map((t) => ({ name: t }));
-
-const filterCollapsed = ref<boolean>(false);
-
-const { connect, sendCommand, log, connected } = useWs();
+const filterCollapsed = ref<boolean>(true);
 
 const input = ref('');
 const activeItemIndexes = ref<number[]>([]);
 
-onMounted(connect);
+onMounted(() => wsService.connect());
 
 const activeTypes = computed<ServerMessage['type'][]>(() =>
   activeItemIndexes.value.length === 0
-    ? MESSAGE_TYPES
-    : activeItemIndexes.value.map((i) => MESSAGE_TYPES[i]!),
+    ? Object.values(ServerMessageType)
+    : activeItemIndexes.value.map((i) => Object.values(ServerMessageType)[i]!),
 );
 
 const filteredLog = computed(() =>
-  log.value.filter((e) => activeTypes.value.includes(e.message.type)),
+  wsService.log.value.filter((e) => activeTypes.value.includes(e.message.type)),
 );
 
 function submit() {
   const cmd = input.value.trim();
-  if (!cmd || !connected.value) return;
-  sendCommand(cmd);
+  if (!cmd) return;
+  wsService.sendCommand(cmd);
   input.value = '';
 }
 
 function entryText(msg: ServerMessage): string {
   switch (msg.type) {
-    case 'commandResult':
+    case ServerMessageType.CommandResult:
       return msg.result;
-    case 'error':
+    case ServerMessageType.Error:
       return msg.message;
     default:
       return '—';

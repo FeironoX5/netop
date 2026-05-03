@@ -1,7 +1,30 @@
 <template>
   <div class="header">
     <List direction="row">
-      <ButtonGroup :items="headerItems" />
+      <template #start>
+        <ConnectionButton />
+      </template>
+      <ButtonGroup
+        :items="[
+          {
+            name: 'Edit',
+            action: () =>
+              openMenu([
+                { name: 'Undo', icon: 'undo-2' },
+                { name: 'Redo', icon: 'redo-2' },
+              ]),
+          },
+          {
+            name: 'View',
+            action: () =>
+              openMenu([
+                { name: 'Zoom In', icon: 'zoom-in' },
+                { name: 'Zoom Out', icon: 'zoom-out' },
+              ]),
+          },
+          { name: 'About', action: () => openMenu([{ name: 'Learn More', icon: 'info' }]) },
+        ]"
+      />
       <template #center>
         <img class="logo" src="/logo.svg" />
       </template>
@@ -18,33 +41,7 @@ import List from '@bits/List.vue';
 import { openMenu, openSubmenu } from '@bits/menu';
 import type { MenuItemData } from '@bits/menu';
 import ButtonGroup from '@components/ButtonGroup.vue';
-
-const recentItems: readonly MenuItemData[] = [
-  { name: 'project-a.netop' },
-  { name: 'project-b.netop', action: () => openSubmenu(recentItems) },
-];
-
-const fileItems: readonly MenuItemData[] = [
-  { name: 'New File', icon: 'file-plus' },
-  { name: 'Open File', icon: 'folder-open' },
-  {
-    name: 'Open Recent',
-    icon: 'history',
-    endIcon: 'chevron-right',
-    action: () => openSubmenu(recentItems),
-  },
-];
-
-const editItems: readonly MenuItemData[] = [
-  { name: 'Undo', icon: 'undo-2' },
-  { name: 'Redo', icon: 'redo-2' },
-  { name: 'Preferences', icon: 'settings' },
-];
-
-const headerItems = [
-  { name: 'File', action: () => openMenu(fileItems) },
-  { name: 'Edit', action: () => openMenu(editItems) },
-];
+import ConnectionButton from './ConnectionButton.vue';
 </script>
 
 <style scoped>
