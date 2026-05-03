@@ -12,7 +12,8 @@ export class SceneWrapper extends CallableEntity {
           'ls',
           () => {
             const devices = this.scene.getDevices();
-            return devices.map((d) => `${d.toString()}`).join('\n');
+            if (devices.length === 0) return 'No devices in scene';
+            return `Devices:\n${devices.map((d) => `- ${d.toString()}`).join('\n')}`;
           },
         ],
         [
@@ -20,9 +21,9 @@ export class SceneWrapper extends CallableEntity {
           (type: string, name?: string) => {
             try {
               const d = this.scene.addDevice(type, name);
-              return `Device ${d.toString()} added`;
+              return `Device added:\n- ${d.toString()}`;
             } catch (e) {
-              return `Error when creating device: ${e}`;
+              return `Error when creating device:\n${e}`;
             }
           },
         ],
@@ -31,9 +32,9 @@ export class SceneWrapper extends CallableEntity {
           (id: string) => {
             try {
               this.scene.removeDevice(id);
-              return `Device ${id} removed`;
+              return `Device removed:\n- ${id}`;
             } catch (e) {
-              return `Error when removing device: ${e}`;
+              return `Error when removing device:\n${e}`;
             }
           },
         ],

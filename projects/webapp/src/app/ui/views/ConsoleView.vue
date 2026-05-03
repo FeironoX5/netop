@@ -142,6 +142,8 @@ function copy(entry: LogEntry) {
 }
 .output-item-content {
   font-family: var(--f-code);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 .output-item-actions {
   gap: 5px;

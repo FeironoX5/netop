@@ -13,10 +13,23 @@ export class CommandHandler extends CallableEntity {
           (entityCommand) => {
             const e = entityCommand;
             if (!e)
-              return `Commands are written as "<prefix>:<command>", where prefix is one of: ${this.callableEntities.map((e) => `${e.commandPrefix}${e.info ? ` (${e.info})` : ''}`).join(', ')}. Use ":help <prefix>" to see commands for a specific entity.`;
+              return [
+                'Commands are written as "<prefix>:<command>".',
+                'Available entities:',
+                ...this.callableEntities.map(
+                  (entity) =>
+                    `- ${entity.commandPrefix || '<root>'}${entity.info ? `: ${entity.info}` : ''}`,
+                ),
+                'Use ":help <prefix>" to see commands for a specific entity.',
+              ].join('\n');
             const entity = this.getCommandByPrefix(e);
-            if (!entity) return `No entity matched ${e}`;
-            return `Commands for ${entity.commandPrefix} entity: ${entity.getCommandNames().join(', ')}`;
+            if (!entity) return `No entity matched:\n${e}`;
+            return [
+              `Commands for ${entity.commandPrefix || '<root>'} entity:`,
+              ...entity
+                .getCommandNames()
+                .map((commandName) => `- ${entity.commandPrefix}:${commandName}`),
+            ].join('\n');
           },
         ],
       ]),
@@ -43,11 +56,11 @@ export class CommandHandler extends CallableEntity {
     const { prefix, command, args } = this.parseCommand(s);
     const entity = this.getCommandByPrefix(prefix);
     if (!entity) {
-      return `No entity matched ${prefix}`;
+      return `No entity matched:\n${prefix}`;
     }
     const commandFn = entity.getCommand(command);
     if (!commandFn) {
-      return `Entity command not found: ${command}`;
+      return `Entity command not found:\n${command}`;
     }
     return commandFn(...args);
   }
