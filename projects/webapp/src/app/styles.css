@@ -2,6 +2,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Iosevka+Charon+Mono:wght@400;500&display=swap');
 @import './reset.css';
 
+::-webkit-scrollbar {
+  display: none;
+}
+
 :root {
   --f-main: 'Lato', sans-serif;
   --f-code: 'Iosevka Charon Mono', monospace;

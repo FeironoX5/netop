@@ -1,19 +1,10 @@
 <template>
   <div class="header">
     <List direction="row">
-      <template #start>
+      <ButtonGroup :items="headerItems" />
+      <template #center>
         <img class="logo" src="/logo.svg" />
       </template>
-      <ButtonGroup
-        :items="[
-          {
-            name: 'File',
-          },
-          {
-            name: 'Edit',
-          },
-        ]"
-      />
       <template #end>
         <Button class="list-item" icon="code" text="Source" />
       </template>
@@ -24,7 +15,36 @@
 <script setup lang="ts">
 import Button from '@bits/Button.vue';
 import List from '@bits/List.vue';
+import { openMenu, openSubmenu } from '@bits/menu';
+import type { MenuItemData } from '@bits/menu';
 import ButtonGroup from '@components/ButtonGroup.vue';
+
+const recentItems: readonly MenuItemData[] = [
+  { name: 'project-a.netop' },
+  { name: 'project-b.netop', action: () => openSubmenu(recentItems) },
+];
+
+const fileItems: readonly MenuItemData[] = [
+  { name: 'New File', icon: 'file-plus' },
+  { name: 'Open File', icon: 'folder-open' },
+  {
+    name: 'Open Recent',
+    icon: 'history',
+    endIcon: 'chevron-right',
+    action: () => openSubmenu(recentItems),
+  },
+];
+
+const editItems: readonly MenuItemData[] = [
+  { name: 'Undo', icon: 'undo-2' },
+  { name: 'Redo', icon: 'redo-2' },
+  { name: 'Preferences', icon: 'settings' },
+];
+
+const headerItems = [
+  { name: 'File', action: () => openMenu(fileItems) },
+  { name: 'Edit', action: () => openMenu(editItems) },
+];
 </script>
 
 <style scoped>
