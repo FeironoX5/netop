@@ -1,4 +1,9 @@
-import { ClientMessage, ServerMessage } from '@netop/types';
+import {
+  ClientMessageType,
+  ServerMessageType,
+  type ClientMessage,
+  type ServerMessage,
+} from '@netop/types';
 import { commandHandler } from './app/main';
 import './db';
 import './app/main';
@@ -14,13 +19,13 @@ const parse = (raw: string | Buffer): ClientMessage | null => {
 
 const process = (message: ClientMessage): ServerMessage => {
   switch (message.type) {
-    case 'ping':
-      return { type: 'pong' };
-    case 'command':
+    case ClientMessageType.Ping:
+      return { type: ServerMessageType.Pong };
+    case ClientMessageType.Command:
       const result = commandHandler.executeCommand(message.command);
-      return { type: 'commandResult', result: result };
+      return { type: ServerMessageType.CommandResult, result: result };
     default:
-      return { type: 'error', message: 'Unknown message type' };
+      return { type: ServerMessageType.Error, message: 'Unknown message type' };
   }
 };
 
@@ -37,7 +42,7 @@ const server = Bun.serve({
   },
   websocket: {
     open(ws) {
-      send(ws, { type: 'connected' });
+      send(ws, { type: ServerMessageType.Connected });
     },
     message: (ws, raw) => {
       console.log(`Received ${raw}`);
@@ -45,7 +50,7 @@ const server = Bun.serve({
       const message = parse(raw);
       if (!message) {
         send(ws, {
-          type: 'error',
+          type: ServerMessageType.Error,
           message: 'Invalid JSON message',
         });
         return;
