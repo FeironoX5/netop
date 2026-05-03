@@ -42,9 +42,11 @@ body {
   font-size: var(--s-font-size);
   color: var(--c-text);
   background-color: var(--c-l0-bg);
+  user-select: none;
 }
 
 button {
+  outline: none;
   border: none;
 }
 

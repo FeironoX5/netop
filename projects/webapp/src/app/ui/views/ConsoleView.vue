@@ -1,11 +1,16 @@
 <template>
-  <div class="console-view inline-container column full">
+  <div
+    class="console-view inline-container column full"
+    :class="{ sending: isSendingCommand }"
+    :aria-busy="isSendingCommand"
+  >
     <div class="input-area inline-container row full">
       <span class="prefix">></span>
       <Textarea
         class="prompt"
         placeholder="Type :help to list commands"
         :rows="1"
+        :disabled="isSendingCommand"
         v-model="input"
         @keydown.enter.exact.prevent="submit"
       />
@@ -64,10 +69,11 @@ const activeTypes = computed<ServerMessage['type'][]>(() =>
 const filteredLog = computed(() =>
   wsService.log.value.filter((e) => activeTypes.value.includes(e.message.type)),
 );
+const isSendingCommand = computed(() => wsService.commandPending.value);
 
 function submit() {
   const cmd = input.value.trim();
-  if (!cmd) return;
+  if (!cmd || isSendingCommand.value) return;
   wsService.sendCommand(cmd);
   input.value = '';
 }
@@ -93,22 +99,44 @@ function copy(entry: LogEntry) {
 </script>
 
 <style scoped>
+.console-view {
+  min-height: 0;
+}
+
 .input-area {
+  position: relative;
+  flex: 0 0 auto;
   background: var(--c-l0-bg);
   font-family: var(--f-code);
   line-height: 1;
   padding: var(--s-spacing);
   gap: 5px;
 }
+
+.console-view.sending .input-area {
+  opacity: 0.65;
+}
+
+.console-view.sending .input-area::after {
+  content: '';
+  align-self: center;
+  width: 0.8em;
+  height: 0.8em;
+  border: 2px solid var(--c-border);
+  border-top-color: var(--c-accent);
+  border-radius: 50%;
+  animation: console-pending-spin 0.8s linear infinite;
+}
+
 .prompt {
   flex: 1;
 }
 .prefix {
-  user-select: none;
   color: var(--c-border);
 }
 
 .filter-area {
+  flex: 0 0 auto;
   align-items: flex-start;
   padding: var(--s-spacing);
 
@@ -139,11 +167,9 @@ function copy(entry: LogEntry) {
 }
 .output-area {
   background: var(--c-l0-bg);
-  flex: 1;
-  overflow-y: scroll;
-  display: flex;
-  flex-direction: column-reverse;
-  justify-content: flex-end;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
   padding-bottom: 30vh;
 }
 .output-item {
@@ -173,5 +199,11 @@ function copy(entry: LogEntry) {
 .output-item-actions {
   gap: 5px;
   font-size: var(--s-font-size-sm);
+}
+
+@keyframes console-pending-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

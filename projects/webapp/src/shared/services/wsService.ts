@@ -1,4 +1,9 @@
-import { ClientMessageType, type ClientMessage, type ServerMessage } from '@netop/types';
+import {
+  ClientMessageType,
+  ServerMessageType,
+  type ClientMessage,
+  type ServerMessage,
+} from '@netop/types';
 import { WebSocket as PartyWebSocket } from 'partysocket';
 import { ref } from 'vue';
 
@@ -24,11 +29,22 @@ class WsService {
   readonly connected = ref(false);
   readonly port = ref(DEFAULT_WS_PORT);
   readonly status = ref(WsConnectionStatus.Disconnected);
+  readonly commandPending = ref(false);
 
   private socket: PartyWebSocket | null = null;
+  private outbox: string[] = [];
 
   connect() {
-    if (this.socket) return;
+    if (this.socket) {
+      if (
+        this.socket.readyState !== WebSocket.CLOSING &&
+        this.socket.readyState !== WebSocket.CLOSED
+      ) {
+        return;
+      }
+
+      this.socket = null;
+    }
 
     this.status.value = WsConnectionStatus.Connecting;
 
@@ -41,6 +57,7 @@ class WsService {
       if (this.socket !== ws) return;
       this.connected.value = true;
       this.status.value = WsConnectionStatus.Connected;
+      this.flushOutbox();
     };
 
     ws.onclose = () => {
@@ -53,6 +70,12 @@ class WsService {
       try {
         const message = JSON.parse(event.data) as ServerMessage;
         this.log.value.push({ id: counter++, timestamp: new Date(), message });
+        if (
+          message.type === ServerMessageType.CommandResult ||
+          message.type === ServerMessageType.Error
+        ) {
+          this.commandPending.value = false;
+        }
       } catch {
         // ignore malformed messages
       }
@@ -69,17 +92,27 @@ class WsService {
   disconnect() {
     this.socket?.close();
     this.socket = null;
+    this.outbox = [];
     this.connected.value = false;
+    this.commandPending.value = false;
     this.status.value = WsConnectionStatus.Disconnected;
   }
 
   send(message: ClientMessage) {
+    this.outbox.push(JSON.stringify(message));
     this.connect();
-    this.socket?.send(JSON.stringify(message));
+    this.flushOutbox();
   }
 
   sendCommand(command: string) {
-    this.send({ type: ClientMessageType.Command, command, args: [] });
+    this.commandPending.value = true;
+
+    try {
+      this.send({ type: ClientMessageType.Command, command, args: [] });
+    } catch (error) {
+      this.commandPending.value = false;
+      throw error;
+    }
   }
 
   get url() {
@@ -95,6 +128,16 @@ class WsService {
     this.socket = null;
     this.connected.value = false;
     this.connect();
+  }
+
+  private flushOutbox() {
+    if (this.socket?.readyState !== WebSocket.OPEN) return;
+
+    while (this.outbox.length) {
+      const message = this.outbox.shift();
+      if (!message) continue;
+      this.socket.send(message);
+    }
   }
 }
 

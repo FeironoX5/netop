@@ -3,6 +3,7 @@
     ref="textarea"
     :placeholder="props.placeholder"
     :rows="props.rows"
+    :disabled="props.disabled"
     :value="model"
     @input="onInput"
   ></textarea>
@@ -36,5 +37,9 @@ textarea {
 }
 textarea::placeholder {
   color: var(--c-border);
+}
+textarea:disabled {
+  cursor: wait;
+  color: var(--c-text-disabled);
 }
 </style>

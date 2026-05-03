@@ -7,4 +7,8 @@ export const textareaProps = {
     type: Number,
     default: 2,
   },
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
 } as const;

@@ -1,5 +1,5 @@
 <template>
-  <button :class="{ active: isActive, selectable: isSelectable }">
+  <button :class="{ active: isActive, selectable: isSelectable }" :disabled="disabled">
     <Icon :icon="icon" />
     <span v-if="text">{{ text }}</span>
   </button>
@@ -49,6 +49,12 @@ button {
 
   &.selectable.active {
     background: var(--c-el-bg-active);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    color: var(--c-text-disabled);
+    opacity: 0.55;
   }
 }
 </style>

@@ -5,11 +5,11 @@
   >
     <slot name="start" />
     <slot />
-    <span class="spacer" />
-    <span class="center">
+    <span v-if="$slots.center || $slots.end" class="spacer" />
+    <span v-if="$slots.center" class="center">
       <slot name="center" />
     </span>
-    <span class="spacer" />
+    <span v-if="$slots.center" class="spacer" />
     <slot name="end" />
   </div>
 </template>

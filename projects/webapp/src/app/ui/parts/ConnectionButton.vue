@@ -39,7 +39,7 @@
             name: 'Import',
             icon: 'upload',
             action: () =>
-              openMenu([
+              openSubmenu([
                 {
                   name: 'From clipboard',
                   icon: 'clipboard',
@@ -54,7 +54,7 @@
             name: 'Export',
             icon: 'share',
             action: () =>
-              openMenu([
+              openSubmenu([
                 {
                   name: 'To clipboard',
                   icon: 'clipboard',
@@ -83,7 +83,7 @@
 <script setup lang="ts">
 import Button from '@bits/Button.vue';
 import ButtonSections from '@bits/ButtonSections.vue';
-import { openMenu } from '@bits/menu';
+import { openMenu, openSubmenu } from '@bits/menu';
 import type { MenuItemData } from '@bits/menu';
 import { wsService, WsConnectionStatus } from '@shared/services/wsService';
 import { computed } from 'vue';
@@ -151,8 +151,14 @@ function openConnectionMenu() {
 
 <style scoped>
 .connection-button {
-  :deep(button) {
-    border: none;
+  .view-picker {
+    background: var(--c-accent);
+  }
+  .view-picker:hover {
+    background: var(--c-accent);
+  }
+  .view-picker:active {
+    background: var(--c-accent);
   }
 }
 </style>

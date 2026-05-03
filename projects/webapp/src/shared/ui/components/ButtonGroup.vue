@@ -7,7 +7,6 @@
     :text="item.name"
     :isSelectable="isSelectable"
     :isActive="index === modelValue"
-    :disabled="index === modelValue"
     @click.stop="handleClick(index)"
   />
 </template>
