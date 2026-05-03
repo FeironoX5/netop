@@ -6,6 +6,10 @@
     <slot name="start" />
     <slot />
     <span class="spacer" />
+    <span class="center">
+      <slot name="center" />
+    </span>
+    <span class="spacer" />
     <slot name="end" />
   </div>
 </template>
@@ -19,5 +23,22 @@ defineProps(listProps);
 <style scoped>
 .list {
   gap: var(--s-spacing);
+
+  & .center {
+    display: contents;
+  }
+
+  &.row {
+    position: relative;
+
+    & .center {
+      display: inline-flex;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      align-self: center;
+    }
+  }
 }
 </style>
