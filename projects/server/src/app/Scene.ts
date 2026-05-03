@@ -1,5 +1,5 @@
-import { Device, DeviceType } from './devices/device';
-import { Router } from './devices/router';
+import { Device, DeviceType } from './objects/devices/Device';
+import { Router } from './objects/devices/Router';
 
 export class Scene {
   timer: NodeJS.Timeout;

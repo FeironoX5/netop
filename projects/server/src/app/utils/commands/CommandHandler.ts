@@ -1,5 +1,5 @@
 import { Command } from '../../types/command';
-import { CallableEntity } from './callableEntity';
+import { CallableEntity } from './CallableEntity';
 
 export class CommandHandler extends CallableEntity {
   private callableEntities: CallableEntity[];

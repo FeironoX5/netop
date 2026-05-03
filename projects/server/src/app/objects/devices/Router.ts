@@ -1,5 +1,5 @@
 import { RouterDetails } from '@netop/types';
-import { Device, DeviceType } from './device';
+import { Device, DeviceType } from './Device';
 
 const defaultDetails: RouterDetails = {
   someProperty: '',

@@ -1,6 +1,6 @@
-import { Scene } from './scene';
-import { SceneWrapper } from './scene.wrapper';
-import { CommandHandler } from './utils/commands/commandHandler';
+import { Scene } from './Scene';
+import { SceneWrapper } from './Scene.wrapper';
+import { CommandHandler } from './utils/commands/CommandHandler';
 
 export const scene = new Scene();
 

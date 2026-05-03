@@ -1,5 +1,5 @@
-import { Scene } from './scene';
-import { CallableEntity } from './utils/commands/callableEntity';
+import { Scene } from './Scene';
+import { CallableEntity } from './utils/commands/CallableEntity';
 
 export class SceneWrapper extends CallableEntity {
   scene: Scene;
@@ -12,7 +12,7 @@ export class SceneWrapper extends CallableEntity {
           'ls',
           () => {
             const devices = this.scene.getDevices();
-            if (devices.length === 0) return 'No devices in scene';
+            if (devices.length === 0) return 'No devices';
             return `Devices:\n${devices.map((d) => `- ${d.toString()}`).join('\n')}`;
           },
         ],
