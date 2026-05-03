@@ -3,7 +3,6 @@ import { commandHandler } from './app/main';
 import './db';
 import './app/main';
 import { PORT } from './config';
-import { parseCommand } from './utils/parseCommand';
 
 const parse = (raw: string | Buffer): ClientMessage | null => {
   try {
@@ -18,8 +17,7 @@ const process = (message: ClientMessage): ServerMessage => {
     case 'ping':
       return { type: 'pong' };
     case 'command':
-      const { command, args } = parseCommand(message.command);
-      const result = commandHandler.executeCommand(command, ...args);
+      const result = commandHandler.executeCommand(message.command);
       return { type: 'commandResult', result: result };
     default:
       return { type: 'error', message: 'Unknown message type' };

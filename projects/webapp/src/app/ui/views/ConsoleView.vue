@@ -4,7 +4,7 @@
       <span class="prefix">></span>
       <Textarea
         class="prompt"
-        placeholder="command..."
+        placeholder="Type :help to list commands"
         :rows="1"
         v-model="input"
         @keydown.enter.exact.prevent="submit"

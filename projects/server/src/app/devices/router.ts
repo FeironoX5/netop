@@ -1,5 +1,5 @@
 import { RouterDetails } from '@netop/types';
-import { Device } from './device';
+import { Device, DeviceType } from './device';
 
 const defaultDetails: RouterDetails = {
   someProperty: '',
@@ -8,10 +8,8 @@ const defaultDetails: RouterDetails = {
 export class Router extends Device {
   details: RouterDetails;
 
-  constructor(id: string) {
-    super();
-    this.id = id;
-    this.type = 'router';
+  constructor(id: string, name?: string) {
+    super(id, DeviceType.ROUTER, name);
     this.details = defaultDetails;
   }
 

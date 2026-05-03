@@ -1,4 +1,4 @@
-import { Device } from './devices/device';
+import { Device, DeviceType } from './devices/device';
 import { Router } from './devices/router';
 
 export class Scene {
@@ -8,9 +8,7 @@ export class Scene {
   constructor(tickInterval: number = 1000) {
     this.devices = [];
     this.timer = setInterval(() => {
-      this.devices.forEach((device) => {
-        device.tick();
-      });
+      this.devices.forEach((device) => device.tick());
     }, tickInterval);
   }
 
@@ -22,16 +20,18 @@ export class Scene {
     return id;
   }
 
-  public addDevice(type: string): Device {
+  public addDevice(type: string, name?: string): Device {
     const id = this.generateDeviceId();
     let device: Device;
     switch (type) {
       case 'router':
-        device = new Router(id);
+        device = new Router(id, name);
         this.devices.push(device);
         break;
       default:
-        throw new Error('Unknown device type');
+        throw new Error(
+          `Unknown device type ${type}, use one of: ${Object.values(DeviceType).join(', ')}`,
+        );
     }
     return device;
   }

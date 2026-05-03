@@ -31,7 +31,7 @@ const CurrentLeftPanel = computed(() => {
   return leftPanelTools[activeLeftPanelIndex.value]?.view ?? null;
 });
 
-const activeRightPanelIndex = ref<number | null>(null);
+const activeRightPanelIndex = ref<number | null>(1);
 const CurrentRightPanel = computed(() => {
   if (activeRightPanelIndex.value === null) return null;
   return rightPanelTools[activeRightPanelIndex.value]?.view ?? null;
