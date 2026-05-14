@@ -1,5 +1,9 @@
 <template>
-  <div class="sidebar" :class="[`side-${side}`, { closed: !isOpen }]" :aria-hidden="!isOpen">
+  <div
+    class="sidebar"
+    :class="[`side-${side}`, { closed: !isOpen }]"
+    :aria-hidden="!isOpen"
+  >
     <slot />
   </div>
 </template>

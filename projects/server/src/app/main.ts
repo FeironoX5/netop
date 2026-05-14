@@ -4,4 +4,6 @@ import { CommandHandler } from './utils/commands/CommandHandler';
 
 export const scene = new Scene();
 
-export const commandHandler = new CommandHandler([new SceneWrapper(scene)]);
+export const commandHandler = new CommandHandler([
+  new SceneWrapper(scene),
+]);

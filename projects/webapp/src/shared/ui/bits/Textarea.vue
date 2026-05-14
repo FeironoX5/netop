@@ -14,8 +14,11 @@ import { useTemplateRef } from 'vue';
 import { textareaProps } from './Textarea.props';
 
 const props = defineProps(textareaProps);
-const model = defineModel<string>({ default: '' });
-const textarea = useTemplateRef<HTMLTextAreaElement>('textarea');
+const model = defineModel<string>({
+  default: '',
+});
+const textarea =
+  useTemplateRef<HTMLTextAreaElement>('textarea');
 
 const onInput = () => {
   const el = textarea.value;

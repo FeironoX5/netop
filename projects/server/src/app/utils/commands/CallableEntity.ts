@@ -13,7 +13,9 @@ export abstract class CallableEntity {
     this.info = info;
   }
 
-  getCommand(s: string): ((...args: string[]) => string) | undefined {
+  getCommand(
+    s: string,
+  ): ((...args: string[]) => string) | undefined {
     return this.commands.get(s);
   }
 

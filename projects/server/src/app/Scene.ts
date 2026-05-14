@@ -1,4 +1,7 @@
-import { Device, DeviceType } from './objects/devices/Device';
+import {
+  Device,
+  DeviceType,
+} from './objects/devices/Device';
 import { Router } from './objects/devices/Router';
 
 export class Scene {
@@ -37,7 +40,9 @@ export class Scene {
   }
 
   public removeDevice(id: string) {
-    const index = this.devices.findIndex((d) => d.id === id);
+    const index = this.devices.findIndex(
+      (d) => d.id === id,
+    );
     if (index === -1) {
       throw new Error('Device not found');
     }

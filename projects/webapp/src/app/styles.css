@@ -30,7 +30,9 @@
   --c-danger-text: #ff6b6b;
   --s-spacing: 8px;
   --s-border-radius: 15px;
-  --s-border-radius-inner: calc(var(--s-border-radius) - var(--s-spacing));
+  --s-border-radius-inner: calc(
+    var(--s-border-radius) - var(--s-spacing)
+  );
   --s-border-width: 1px;
   --border: var(--s-border-width) solid var(--c-border);
   --s-font-size: 1rem;

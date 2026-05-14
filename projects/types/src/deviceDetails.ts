@@ -1,3 +1,1 @@
-export type RouterDetails = {
-  someProperty: string;
-};
+export type RouterDetails = { someProperty: string };

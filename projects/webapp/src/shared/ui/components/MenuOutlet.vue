@@ -10,14 +10,21 @@
       @click.stop
       @mouseleave="handleMouseLeave(menu, $event)"
     >
-      <div class="menu-item" v-for="item in menu.items" :key="item.name">
+      <div
+        class="menu-item"
+        v-for="item in menu.items"
+        :key="item.name"
+      >
         <Button
           class="menu-item-button"
           :icon="item.icon"
           :text="item.name"
           @click.stop="handleClick(menu, item)"
         />
-        <Icon class="menu-item-end-icon" :icon="item.endIcon" />
+        <Icon
+          class="menu-item-end-icon"
+          :icon="item.endIcon"
+        />
       </div>
     </div>
   </Teleport>
@@ -30,7 +37,10 @@ import { closeMenu, menus } from '@bits/menu';
 import type { MenuEntry, MenuItemData } from '@bits/menu';
 import { onMounted, onUnmounted } from 'vue';
 
-async function handleClick(menu: MenuEntry, item: MenuItemData) {
+async function handleClick(
+  menu: MenuEntry,
+  item: MenuItemData,
+) {
   if (!item.action) {
     closeMenu(menu);
     return;
@@ -52,13 +62,18 @@ function closeAllMenus() {
   if (rootMenu) closeMenu(rootMenu, 'dismiss');
 }
 
-function handleMouseLeave(menu: MenuEntry, event: MouseEvent) {
+function handleMouseLeave(
+  menu: MenuEntry,
+  event: MouseEvent,
+) {
   const target = event.relatedTarget;
   if (target instanceof Element) {
-    const targetMenu = target.closest<HTMLElement>('[data-menu]');
+    const targetMenu =
+      target.closest<HTMLElement>('[data-menu]');
     const currentIndex = menus.value.indexOf(menu);
     const targetIndex = menus.value.findIndex(
-      (entry) => entry.id === Number(targetMenu?.dataset.menuId),
+      (entry) =>
+        entry.id === Number(targetMenu?.dataset.menuId),
     );
 
     if (targetIndex > currentIndex) return;
@@ -67,8 +82,12 @@ function handleMouseLeave(menu: MenuEntry, event: MouseEvent) {
   closeMenu(menu, 'dismiss');
 }
 
-onMounted(() => document.addEventListener('click', closeAllMenus));
-onUnmounted(() => document.removeEventListener('click', closeAllMenus));
+onMounted(() =>
+  document.addEventListener('click', closeAllMenus),
+);
+onUnmounted(() =>
+  document.removeEventListener('click', closeAllMenus),
+);
 </script>
 
 <style scoped>

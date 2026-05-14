@@ -35,14 +35,23 @@
 import Button from '@bits/Button.vue';
 import List from '@bits/List.vue';
 import ButtonGroup from '@components/ButtonGroup.vue';
-import { leftPanelTools, rightPanelTools } from '@ui/pages/EditorPage.data';
+import {
+  leftPanelTools,
+  rightPanelTools,
+} from '@ui/pages/EditorPage.data';
 
-const activeLeftPanelIndex = defineModel<number | null>('activeLeftPanelIndex', {
-  default: null,
-});
-const activeRightPanelIndex = defineModel<number | null>('activeRightPanelIndex', {
-  default: null,
-});
+const activeLeftPanelIndex = defineModel<number | null>(
+  'activeLeftPanelIndex',
+  {
+    default: null,
+  },
+);
+const activeRightPanelIndex = defineModel<number | null>(
+  'activeRightPanelIndex',
+  {
+    default: null,
+  },
+);
 </script>
 
 <style scoped>

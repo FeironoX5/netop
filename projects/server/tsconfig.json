@@ -6,9 +6,7 @@
     "strict": true,
     "skipLibCheck": true,
     "types": ["bun-types"],
-    "paths": {
-      "@netop/types": ["../types/src/index.ts"]
-    }
+    "paths": { "@netop/types": ["../types/src/index.ts"] }
   },
   "include": ["src"]
 }

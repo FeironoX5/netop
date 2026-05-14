@@ -1,5 +1,8 @@
 <template>
-  <button :class="{ active: isActive, selectable: isSelectable }" :disabled="disabled">
+  <button
+    :class="{ active: isActive, selectable: isSelectable }"
+    :disabled="disabled"
+  >
     <Icon :icon="icon" />
     <span v-if="text">{{ text }}</span>
   </button>
@@ -16,7 +19,10 @@ defineProps(buttonProps);
 :root {
   --s-button-spacing: 0.4em;
   --s-button-font-size: 1em;
-  --max-button-height: calc(var(--s-button-spacing) * 2 + var(--s-button-font-size) * 2);
+  --max-button-height: calc(
+    var(--s-button-spacing) * 2 +
+      var(--s-button-font-size) * 2
+  );
 }
 </style>
 

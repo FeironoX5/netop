@@ -22,14 +22,24 @@
                 { name: 'Zoom Out', icon: 'zoom-out' },
               ]),
           },
-          { name: 'About', action: () => openMenu([{ name: 'Learn More', icon: 'info' }]) },
+          {
+            name: 'About',
+            action: () =>
+              openMenu([
+                { name: 'Learn More', icon: 'info' },
+              ]),
+          },
         ]"
       />
       <template #center>
         <img class="logo" src="/logo.svg" />
       </template>
       <template #end>
-        <Button class="list-item" icon="code" text="Source" />
+        <Button
+          class="list-item"
+          icon="code"
+          text="Source"
+        />
       </template>
     </List>
   </div>

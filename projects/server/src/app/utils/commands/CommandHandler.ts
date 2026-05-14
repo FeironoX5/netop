@@ -28,7 +28,10 @@ export class CommandHandler extends CallableEntity {
               `Commands for ${entity.commandPrefix || '<root>'} entity:`,
               ...entity
                 .getCommandNames()
-                .map((commandName) => `- ${entity.commandPrefix}:${commandName}`),
+                .map(
+                  (commandName) =>
+                    `- ${entity.commandPrefix}:${commandName}`,
+                ),
             ].join('\n');
           },
         ],
@@ -40,16 +43,18 @@ export class CommandHandler extends CallableEntity {
 
   private parseCommand(s: string): Command {
     const [commandLine, ...args] = s.split(' ');
-    const [prefix, command] = commandLine ? commandLine.split(':') : [];
-    return {
-      prefix,
-      command,
-      args,
-    };
+    const [prefix, command] = commandLine
+      ? commandLine.split(':')
+      : [];
+    return { prefix, command, args };
   }
 
-  private getCommandByPrefix(s: string): CallableEntity | undefined {
-    return this.callableEntities.find((e) => e.matchPrefix(s));
+  private getCommandByPrefix(
+    s: string,
+  ): CallableEntity | undefined {
+    return this.callableEntities.find((e) =>
+      e.matchPrefix(s),
+    );
   }
 
   public executeCommand(s: string): string {

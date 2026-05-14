@@ -7,7 +7,11 @@ export abstract class Device {
   type: DeviceType;
   name: string;
 
-  constructor(id: string, type: DeviceType, name: string = '') {
+  constructor(
+    id: string,
+    type: DeviceType,
+    name: string = '',
+  ) {
     if (new.target === Device) {
       throw new Error('Device is abstract');
     }
