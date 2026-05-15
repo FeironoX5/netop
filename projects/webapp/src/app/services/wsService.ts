@@ -51,6 +51,7 @@ class WsService {
     const ws = new PartyWebSocket(this.url, [], {
       connectionTimeout: 4000,
       maxEnqueuedMessages: 100,
+      maxRetries: 1,
     });
 
     ws.onopen = () => {

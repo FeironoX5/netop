@@ -75,7 +75,7 @@ import {
 import {
   wsService,
   type LogEntry,
-} from '@shared/services/wsService';
+} from '@app/services/wsService';
 import { computed, onMounted, ref } from 'vue';
 
 const filterItems = Object.values(ServerMessageType).map(

@@ -69,7 +69,7 @@ import type { MenuItemData } from '@bits/menu';
 import {
   wsService,
   WsConnectionStatus,
-} from '@shared/services/wsService';
+} from '@app/services/wsService';
 import { computed } from 'vue';
 
 const PORT_OPTIONS = [3001, 4324];

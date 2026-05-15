@@ -30,18 +30,18 @@
 import Sidebar from '@components/Sidebar.vue';
 import Header from '@ui/parts/Header.vue';
 import Toolbar from '@ui/parts/Toolbar.vue';
-import CanvasView from '@ui/views/canvas/CanvasView.vue';
 import { computed, ref } from 'vue';
 import {
-  leftPanelTools,
-  rightPanelTools,
+  LEFT_PANEL_TOOLS,
+  RIGHT_PANEL_TOOLS,
 } from './EditorPage.data';
 
 const activeLeftPanelIndex = ref<number | null>(null);
 const CurrentLeftPanel = computed(() => {
   if (activeLeftPanelIndex.value === null) return null;
   return (
-    leftPanelTools[activeLeftPanelIndex.value]?.view ?? null
+    LEFT_PANEL_TOOLS[activeLeftPanelIndex.value]?.view ??
+    null
   );
 });
 
@@ -49,7 +49,7 @@ const activeRightPanelIndex = ref<number | null>(1);
 const CurrentRightPanel = computed(() => {
   if (activeRightPanelIndex.value === null) return null;
   return (
-    rightPanelTools[activeRightPanelIndex.value]?.view ??
+    RIGHT_PANEL_TOOLS[activeRightPanelIndex.value]?.view ??
     null
   );
 });
