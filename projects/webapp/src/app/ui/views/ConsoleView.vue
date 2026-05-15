@@ -65,6 +65,10 @@
 </template>
 
 <script setup lang="ts">
+import {
+  wsService,
+  type LogEntry,
+} from '@app/services/wsService';
 import Button from '@bits/Button.vue';
 import Textarea from '@bits/Textarea.vue';
 import ButtonMultiGroup from '@components/ButtonMultiGroup.vue';
@@ -72,10 +76,6 @@ import {
   ServerMessageType,
   type ServerMessage,
 } from '@netop/types';
-import {
-  wsService,
-  type LogEntry,
-} from '@app/services/wsService';
 import { computed, onMounted, ref } from 'vue';
 
 const filterItems = Object.values(ServerMessageType).map(

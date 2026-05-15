@@ -62,14 +62,14 @@
 </template>
 
 <script setup lang="ts">
-import Button from '@bits/Button.vue';
-import ButtonSections from '@bits/ButtonSections.vue';
-import { openMenu, openSubmenu } from '@bits/menu';
-import type { MenuItemData } from '@bits/menu';
 import {
   wsService,
   WsConnectionStatus,
 } from '@app/services/wsService';
+import Button from '@bits/Button.vue';
+import ButtonSections from '@bits/ButtonSections.vue';
+import { openMenu, openSubmenu } from '@bits/menu';
+import type { MenuItemData } from '@bits/menu';
 import { computed } from 'vue';
 
 const PORT_OPTIONS = [3001, 4324];

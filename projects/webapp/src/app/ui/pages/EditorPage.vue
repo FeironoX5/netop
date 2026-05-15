@@ -8,7 +8,7 @@
       >
         <component :is="CurrentLeftPanel" />
       </Sidebar>
-      <canvas class="workspace-canvas" />
+      <CanvasView class="workspace-canvas" />
       <Sidebar
         side="right"
         :isOpen="activeRightPanelIndex !== null"
@@ -30,6 +30,7 @@
 import Sidebar from '@components/Sidebar.vue';
 import Header from '@ui/parts/Header.vue';
 import Toolbar from '@ui/parts/Toolbar.vue';
+import CanvasView from '@ui/views/canvas/CanvasView.vue';
 import { computed, ref } from 'vue';
 import {
   LEFT_PANEL_TOOLS,
