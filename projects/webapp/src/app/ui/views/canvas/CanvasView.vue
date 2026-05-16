@@ -25,7 +25,7 @@ import {
   Layer as VLayer,
   Stage as VStage,
 } from 'vue-konva';
-import type { ReqProp } from '@/shared/typeUtils';
+import type { ReqProp } from '@types/req';
 import {
   SCALE_STEP_MULTIPLIER,
   CELL_SIZE,

@@ -11,6 +11,7 @@ export default defineConfig({
       // app
       '@app': path.resolve(__dirname, './src/app'),
       '@ui': path.resolve(__dirname, './src/app/ui'),
+      '@types': path.resolve(__dirname, './src/app/types'),
       // shared
       '@shared': path.resolve(__dirname, './src/shared'),
       '@bits': path.resolve(
