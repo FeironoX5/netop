@@ -1,42 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Iosevka+Charon+Mono:wght@400;500&display=swap');
+@import './theme-vars.css';
 @import './reset.css';
 
 ::-webkit-scrollbar {
   display: none;
-}
-
-:root {
-  --f-main: 'Lato', sans-serif;
-  --f-code: 'Iosevka Charon Mono', monospace;
-  --c-accent: #4557eb;
-  --c-l0-bg: #1e1e1e;
-  --c-l1-bg: #2b2b2b;
-  --c-l2-bg: #383838;
-  --c-el-bg: transparent;
-  --c-el-bg-hovered: #363636;
-  --c-el-bg-active: var(--c-accent);
-  --c-border: #3f3f3f;
-  --c-text: #e9e9e9;
-  --c-text-disabled: #afb1b2;
-  --c-success-bg: #1f4f30;
-  --c-success-bg-hovered: #245c38;
-  --c-success-text: #2ae66c;
-  --c-warning-bg: #4d3e17;
-  --c-warning-bg-hovered: #5c4b1f;
-  --c-warning-text: #ffd166;
-  --c-danger-bg: #542423;
-  --c-danger-bg-hovered: #672b2a;
-  --c-danger-text: #ff6b6b;
-  --s-spacing: 8px;
-  --s-border-radius: 15px;
-  --s-border-radius-inner: calc(
-    var(--s-border-radius) - var(--s-spacing)
-  );
-  --s-border-width: 1px;
-  --border: var(--s-border-width) solid var(--c-border);
-  --s-font-size: 1rem;
-  --s-font-size-sm: 0.675rem;
 }
 
 body {

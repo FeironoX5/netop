@@ -1,9 +1,10 @@
 import path from 'path';
 import vue from '@vitejs/plugin-vue';
 import { defineConfig } from 'vite';
+import { themePlugin } from './src/app/App.theme.vite.plugin';
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [vue(), themePlugin()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
