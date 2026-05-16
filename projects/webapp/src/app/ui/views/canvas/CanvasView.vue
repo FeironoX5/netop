@@ -13,6 +13,7 @@
 </template>
 
 <script setup lang="ts">
+import type { ReqProp } from '@types/req';
 import { useResizeObserver } from '@vueuse/core';
 import type { Stage, StageConfig } from 'konva/lib/Stage';
 import {
@@ -25,7 +26,6 @@ import {
   Layer as VLayer,
   Stage as VStage,
 } from 'vue-konva';
-import type { ReqProp } from '@types/req';
 import {
   SCALE_STEP_MULTIPLIER,
   CELL_SIZE,

@@ -91,7 +91,7 @@ const connectionClass = computed(() => ({
   warning:
     wsService.status.value ===
     WsConnectionStatus.Connecting,
-  danger:
+  error:
     wsService.status.value ===
     WsConnectionStatus.Disconnected,
 }));

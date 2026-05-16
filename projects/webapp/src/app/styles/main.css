@@ -20,34 +20,34 @@ button {
   border: none;
 }
 
-.success.success {
+button.success {
   background-color: var(--c-success-bg);
   color: var(--c-success-text);
   border: none;
 }
 
-.success.success:hover {
+button.success:hover {
   background-color: var(--c-success-bg-hovered);
 }
 
-.warning.warning {
+button.warning {
   background-color: var(--c-warning-bg);
   color: var(--c-warning-text);
   border: none;
 }
 
-.warning.warning:hover {
+button.warning:hover {
   background-color: var(--c-warning-bg-hovered);
 }
 
-.danger.danger {
-  background-color: var(--c-danger-bg);
-  color: var(--c-danger-text);
+button.error {
+  background-color: var(--c-error-bg);
+  color: var(--c-error-text);
   border: none;
 }
 
-.danger.danger:hover {
-  background-color: var(--c-danger-bg-hovered);
+button.error:hover {
+  background-color: var(--c-error-bg-hovered);
 }
 
 .spacer {

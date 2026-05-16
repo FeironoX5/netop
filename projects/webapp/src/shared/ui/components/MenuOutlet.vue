@@ -113,13 +113,13 @@ onUnmounted(() =>
 }
 
 .menu-item:has(.menu-item-end-icon) .menu-item-button {
-  padding-right: calc(1em + var(--s-button-spacing) * 2);
+  padding-right: calc(1em + var(--s-spacing-sm) * 2);
 }
 
 .menu-item-end-icon {
   position: absolute;
   top: 50%;
-  right: var(--s-button-spacing);
+  right: var(--s-spacing-sm);
   pointer-events: none;
   transform: translateY(-50%);
 }

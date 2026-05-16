@@ -16,10 +16,8 @@ const props = defineProps(sidebarProps);
 
 <style scoped>
 .sidebar {
-  --sidebar-width: 300px;
-
-  width: var(--sidebar-width);
-  flex: 0 0 var(--sidebar-width);
+  width: var(--s-sidebar-width);
+  flex: 0 0 var(--s-sidebar-width);
   background-color: var(--c-l1-bg);
   overflow: hidden;
   visibility: visible;
@@ -45,11 +43,11 @@ const props = defineProps(sidebarProps);
   }
 
   &.side-left.closed {
-    margin-left: calc(-1 * var(--sidebar-width));
+    margin-left: calc(-1 * var(--s-sidebar-width));
   }
 
   &.side-right.closed {
-    margin-right: calc(-1 * var(--sidebar-width));
+    margin-right: calc(-1 * var(--s-sidebar-width));
   }
 }
 </style>

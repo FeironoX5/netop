@@ -15,51 +15,42 @@ import { buttonProps } from './Button.props';
 defineProps(buttonProps);
 </script>
 
-<style>
-:root {
-  --s-button-spacing: 0.4em;
-  --s-button-font-size: 1em;
-  --max-button-height: calc(
-    var(--s-button-spacing) * 2 +
-      var(--s-button-font-size) * 2
-  );
-}
-</style>
-
 <style scoped>
 button {
   display: inline-flex;
   place-items: center;
   gap: 0.3rem;
-  padding: var(--s-button-spacing);
+  padding: var(--s-spacing-sm);
   cursor: pointer;
-  font-size: var(--s-button-font-size);
+  font-size: var(--s-font-size);
   line-height: 1;
-  min-width: calc(1em + 2 * var(--s-button-spacing));
-  max-height: var(--max-button-height);
-  background: var(--c-el-bg);
+  min-width: calc(1em + 2 * var(--s-spacing-sm));
+  max-height: calc(
+    var(--s-font-size) * 2 + var(--s-spacing-sm) * 2
+  );
+  background: var(--c-element-bg);
   color: var(--c-text);
   border-radius: var(--s-border-radius-inner);
 
   &:hover {
-    background: var(--c-el-bg-hovered);
+    background: var(--c-element-hover);
   }
 
   &.active {
-    background: var(--c-el-bg-hovered);
+    background: var(--c-element-active);
   }
 
   &.selectable:active {
-    background: var(--c-el-bg-active);
+    background: var(--c-element-active);
   }
 
   &.selectable.active {
-    background: var(--c-el-bg-active);
+    background: var(--c-element-active);
   }
 
   &:disabled {
     cursor: not-allowed;
-    color: var(--c-text-disabled);
+    color: var(--c-disabled-text);
     opacity: 0.55;
   }
 }
