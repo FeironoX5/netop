@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ReqProp } from '@types/req';
+import type { ReqProp } from '@/types/req';
 import { useResizeObserver } from '@vueuse/core';
 import type { Stage, StageConfig } from 'konva/lib/Stage';
 import {

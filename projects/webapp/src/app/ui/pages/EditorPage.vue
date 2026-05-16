@@ -28,9 +28,9 @@
 </template>
 <script setup lang="ts">
 import Sidebar from '@components/Sidebar.vue';
-import Header from '@ui/parts/Header.vue';
-import Toolbar from '@ui/parts/Toolbar.vue';
-import CanvasView from '@ui/views/canvas/CanvasView.vue';
+import Header from '@/ui/parts/Header.vue';
+import Toolbar from '@/ui/parts/Toolbar.vue';
+import CanvasView from '@/ui/views/canvas/CanvasView.vue';
 import { computed, ref } from 'vue';
 import {
   LEFT_PANEL_TOOLS,

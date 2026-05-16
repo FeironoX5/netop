@@ -6,8 +6,9 @@
     // because tsConfigPaths doesn't fucking work with lsp!
     "paths": {
       "@/*": ["./src/*"],
-      "@app/*": ["./src/app/*"],
-      "@ui/*": ["./src/app/ui/*"],
+      "@/app/*": ["./src/app/*"],
+      "@/ui/*": ["./src/app/ui/*"],
+      "@/types/*": ["./src/app/types/*"],
       "@shared/*": ["./src/shared/*"],
       "@bits/*": ["./src/shared/ui/bits/*"],
       "@components/*": ["./src/shared/ui/components/*"],

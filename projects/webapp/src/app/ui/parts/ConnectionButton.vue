@@ -65,7 +65,7 @@
 import {
   wsService,
   WsConnectionStatus,
-} from '@app/services/wsService';
+} from '@/app/services/wsService';
 import Button from '@bits/Button.vue';
 import ButtonSections from '@bits/ButtonSections.vue';
 import { openMenu, openSubmenu } from '@bits/menu';

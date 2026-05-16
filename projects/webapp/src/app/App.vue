@@ -5,7 +5,7 @@
 
 <script setup lang="ts">
 import MenuOutlet from '@components/MenuOutlet.vue';
-import EditorPage from '@ui/pages/EditorPage.vue';
+import EditorPage from '@/ui/pages/EditorPage.vue';
 </script>
 
 <style>

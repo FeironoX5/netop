@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { appTheme } from '@app/App.theme';
+import { appTheme } from '@/app/App.theme';
 import Konva from 'konva';
 import type { Layer } from 'konva/lib/Layer';
 import type { Stage } from 'konva/lib/Stage';
@@ -69,7 +69,6 @@ function createPiece(cellsX: number, cellsY: number) {
     perfectDrawEnabled: false,
     shadowEnabled: false,
     strokeEnabled: true,
-    strokeHitEnabled: false,
     hitStrokeWidth: 0,
     stroke: appTheme.c.border,
     strokeWidth: 1,
