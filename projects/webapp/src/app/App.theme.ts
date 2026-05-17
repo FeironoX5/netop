@@ -34,7 +34,7 @@ export const appTheme = {
       selected: '#3e4043ff',
     },
     l0: { bg: '#0d1016ff' },
-    l1: { bg: '#1f2127ff', border: '#1b1e24ff' },
+    l1: { bg: '#1f2127ff' },
   },
   // sizes
   s: {
