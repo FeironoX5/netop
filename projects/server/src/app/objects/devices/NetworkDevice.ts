@@ -1,7 +1,12 @@
+import type { BaseNetworkDevice } from '@netop/shared/interfaces';
+import { DeviceType } from '@netop/shared/types';
 import { Cable } from '../Cable';
-import { Device, DeviceType } from './Device';
+import { Device } from './Device';
 
-export class NetworkDevice extends Device {
+export class NetworkDevice
+  extends Device
+  implements BaseNetworkDevice
+{
   outputs: Map<string, Cable | null>;
 
   constructor(id: string, type: DeviceType, name?: string) {

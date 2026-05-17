@@ -6,7 +6,14 @@
     "strict": true,
     "skipLibCheck": true,
     "types": ["bun-types"],
-    "paths": { "@netop/types": ["../types/src/index.ts"] }
+    "paths": {
+      "@netop/shared/types": [
+        "../shared/types/src/index.ts"
+      ],
+      "@netop/shared/interfaces": [
+        "../shared/interfaces/src/index.ts"
+      ]
+    }
   },
   "include": ["src"]
 }

@@ -71,7 +71,7 @@ import ButtonMultiGroup from '@components/ButtonMultiGroup.vue';
 import {
   ServerMessageType,
   type ServerMessage,
-} from '@netop/types';
+} from '@netop/shared/types';
 import { computed, onMounted, ref } from 'vue';
 import {
   wsService,

@@ -3,7 +3,7 @@ import {
   ServerMessageType,
   type ClientMessage,
   type ServerMessage,
-} from '@netop/types';
+} from '@netop/shared/types';
 import { commandHandler } from './app/main';
 import './db';
 import './app/main';

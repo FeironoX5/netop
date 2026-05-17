@@ -1,7 +1,5 @@
-import {
-  Device,
-  DeviceType,
-} from './objects/devices/Device';
+import { DeviceType } from '@netop/shared/types';
+import { Device } from './objects/devices/Device';
 import { Router } from './objects/devices/Router';
 
 export class Scene {

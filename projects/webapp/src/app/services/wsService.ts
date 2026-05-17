@@ -3,7 +3,7 @@ import {
   ServerMessageType,
   type ClientMessage,
   type ServerMessage,
-} from '@netop/types';
+} from '@netop/shared/types';
 import { WebSocket as PartyWebSocket } from 'partysocket';
 import { ref } from 'vue';
 

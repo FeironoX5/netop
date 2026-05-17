@@ -10,7 +10,8 @@
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
-    "@netop/types": "*",
+    "@netop/shared/interfaces": "workspace:*",
+    "@netop/shared/types": "workspace:*",
     "@vueuse/core": "^14.3.0",
     "konva": "^10.3.0",
     "lucide-static": "^1.11.0",

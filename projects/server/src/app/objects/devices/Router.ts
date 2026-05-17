@@ -1,14 +1,13 @@
-import { RouterDetails } from '@netop/types';
-import { Device, DeviceType } from './Device';
+import type { BaseRouter } from '@netop/shared/interfaces';
+import { DeviceType } from '@netop/shared/types';
+import { Device } from './Device';
 
-const defaultDetails: RouterDetails = { someProperty: '' };
-
-export class Router extends Device {
-  details: RouterDetails;
+export class Router extends Device implements BaseRouter {
+  details: BaseRouter['details'];
 
   constructor(id: string, name?: string) {
     super(id, DeviceType.ROUTER, name);
-    this.details = defaultDetails;
+    this.details = { someProperty: '' };
   }
 
   tick(): void {

@@ -1,8 +1,7 @@
-export enum DeviceType {
-  ROUTER = 'router',
-}
+import type { BaseDevice } from '@netop/shared/interfaces';
+import type { DeviceType } from '@netop/shared/types';
 
-export abstract class Device {
+export abstract class Device implements BaseDevice {
   id: string;
   type: DeviceType;
   name: string;

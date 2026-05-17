@@ -12,7 +12,12 @@
       "@shared/*": ["./src/shared/*"],
       "@bits/*": ["./src/shared/ui/bits/*"],
       "@components/*": ["./src/shared/ui/components/*"],
-      "@netop/types": ["../types/src/index.ts"]
+      "@netop/shared/types": [
+        "../shared/types/src/index.ts"
+      ],
+      "@netop/shared/interfaces": [
+        "../shared/interfaces/src/index.ts"
+      ]
     }
   }
 }
