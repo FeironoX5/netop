@@ -6,27 +6,23 @@
       @wheel="handlers.wheel"
       @dragmove="handlers.stageChange"
     >
-      <CanvasViewGrid ref="gridRef" />
+      <CanvasGrid ref="gridRef" />
       <VLayer> </VLayer>
     </VStage>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { ReqProp } from '@/types/req';
 import { useResizeObserver } from '@vueuse/core';
 import type { Stage, StageConfig } from 'konva/lib/Stage';
-import CanvasViewGrid from './CanvasView.Grid.vue';
-import {
-  ref,
-  useTemplateRef,
-  onMounted,
-} from 'vue';
+import { ref, useTemplateRef, onMounted } from 'vue';
 import {
   Layer as VLayer,
   Stage as VStage,
 } from 'vue-konva';
+import type { ReqProp } from '@/types/req';
 import { useHandlers } from './CanvasView.comps';
+import CanvasGrid from './components/CanvasGrid.vue';
 
 const stageContainerRef = useTemplateRef(
   'stageContainerRef',
@@ -34,9 +30,9 @@ const stageContainerRef = useTemplateRef(
 const stageRef = useTemplateRef<{ getStage(): Stage }>(
   'stageRef',
 );
-const gridRef = useTemplateRef<{ update(stage: Stage): void }>(
-  'gridRef',
-);
+const gridRef = useTemplateRef<{
+  update(stage: Stage): void;
+}>('gridRef');
 
 const stageConfig = ref<
   ReqProp<StageConfig, 'width' | 'height' | 'draggable'>

@@ -3,19 +3,23 @@
 </template>
 
 <script setup lang="ts">
-import { appTheme } from '@/app/App.theme';
 import Konva from 'konva';
 import type { Layer } from 'konva/lib/Layer';
 import type { Stage } from 'konva/lib/Stage';
 import { useTemplateRef, onBeforeUnmount } from 'vue';
 import { Layer as VLayer } from 'vue-konva';
-import { canvasViewGridProps } from './CanvasView.Grid.props';
+import { appTheme } from '@/app/App.theme';
+import {
+  CELL_HEIGHT,
+  CELL_WIDTH,
+  PIECE_MAX_CELLS,
+  ZOOM_THRESHOLD,
+} from './CanvasGrid.consts';
 import {
   getViewportBounds,
   getBlockAxisLayout,
-} from './CanvasView.utils';
-
-const props = defineProps(canvasViewGridProps);
+  drawCell,
+} from './CanvasGrid.utils';
 
 const layerRef = useTemplateRef<{ getNode(): Layer }>(
   'layerRef',
@@ -42,25 +46,21 @@ function computeMetrics(
   viewH: number,
   scale: number,
 ) {
-  const rawX = Math.ceil(
-    viewW / scale / props.cellSize.width,
-  );
-  const rawY = Math.ceil(
-    viewH / scale / props.cellSize.height,
-  );
-  const cx = Math.min(rawX, props.maxCellsPerPiece);
-  const cy = Math.min(rawY, props.maxCellsPerPiece);
+  const rawX = Math.ceil(viewW / scale / CELL_WIDTH);
+  const rawY = Math.ceil(viewH / scale / CELL_HEIGHT);
+  const cx = Math.min(rawX, PIECE_MAX_CELLS);
+  const cy = Math.min(rawY, PIECE_MAX_CELLS);
   return {
     cellsX: cx,
     cellsY: cy,
-    width: cx * props.cellSize.width,
-    height: cy * props.cellSize.height,
+    width: cx * CELL_WIDTH,
+    height: cy * CELL_HEIGHT,
   };
 }
 
 function createPiece(cellsX: number, cellsY: number) {
-  const pw = cellsX * props.cellSize.width;
-  const ph = cellsY * props.cellSize.height;
+  const pw = cellsX * CELL_WIDTH;
+  const ph = cellsY * CELL_HEIGHT;
 
   const shape = new Konva.Shape({
     width: pw,
@@ -76,15 +76,9 @@ function createPiece(cellsX: number, cellsY: number) {
       const w = shape.width();
       const h = shape.height();
       ctx.beginPath();
-      for (let x = 0; x < w; x += props.cellSize.width) {
-        for (let y = 0; y < h; y += props.cellSize.height) {
-          props.drawCell(
-            ctx,
-            x,
-            y,
-            props.cellSize.width,
-            props.cellSize.height,
-          );
+      for (let x = 0; x < w; x += CELL_WIDTH) {
+        for (let y = 0; y < h; y += CELL_HEIGHT) {
+          drawCell(ctx, x, y);
         }
       }
       ctx.strokeShape(shape);
@@ -113,8 +107,8 @@ function resolvePiece(
   }
 
   if (
-    scale > activeScale * props.zoomThreshold ||
-    scale < activeScale / props.zoomThreshold
+    scale > activeScale * ZOOM_THRESHOLD ||
+    scale < activeScale / ZOOM_THRESHOLD
   ) {
     const m = computeMetrics(viewW, viewH, scale);
     return {
