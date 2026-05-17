@@ -1,6 +1,5 @@
 import type { Context } from 'konva/lib/Context';
 import type { PropType } from 'vue';
-import { CELL_SIZE } from './CanvasView.data';
 import { drawDiamondCell } from './CanvasView.utils';
 
 export const canvasViewGridProps = {
@@ -9,7 +8,7 @@ export const canvasViewGridProps = {
       width: number;
       height: number;
     }>,
-    default: () => CELL_SIZE,
+    default: () => ({ width: 40, height: 40}),
   },
   zoomThreshold: { type: Number, default: 2 },
   maxCellsPerPiece: { type: Number, default: 30 },

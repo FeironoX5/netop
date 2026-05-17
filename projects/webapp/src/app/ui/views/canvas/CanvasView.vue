@@ -6,7 +6,7 @@
       @wheel="handlers.wheel"
       @dragmove="handlers.stageChange"
     >
-      <CanvasViewGrid ref="gridRef" :cellSize="CELL_SIZE" />
+      <CanvasViewGrid ref="gridRef" />
       <VLayer> </VLayer>
     </VStage>
   </div>
@@ -16,95 +16,46 @@
 import type { ReqProp } from '@/types/req';
 import { useResizeObserver } from '@vueuse/core';
 import type { Stage, StageConfig } from 'konva/lib/Stage';
+import CanvasViewGrid from './CanvasView.Grid.vue';
 import {
   ref,
   useTemplateRef,
   onMounted,
-  nextTick,
 } from 'vue';
 import {
   Layer as VLayer,
   Stage as VStage,
 } from 'vue-konva';
-import {
-  SCALE_STEP_MULTIPLIER,
-  CELL_SIZE,
-  SCALE_LIMITS,
-} from './CanvasView.data';
-import CanvasViewGrid from './CanvasView.Grid.vue';
+import { useHandlers } from './CanvasView.comps';
 
-const container = useTemplateRef('stageContainerRef');
+const stageContainerRef = useTemplateRef(
+  'stageContainerRef',
+);
 const stageRef = useTemplateRef<{ getStage(): Stage }>(
   'stageRef',
 );
-const gridRef = useTemplateRef<{
-  update(stage: Stage): void;
-}>('gridRef');
+const gridRef = useTemplateRef<{ update(stage: Stage): void }>(
+  'gridRef',
+);
 
 const stageConfig = ref<
-  ReqProp<StageConfig, 'width' | 'height'>
+  ReqProp<StageConfig, 'width' | 'height' | 'draggable'>
 >({
   width: 0,
   height: 0,
   draggable: true,
 });
 
-let rafId: number | null = null;
-
-function scheduleUpdate() {
-  if (rafId !== null) return;
-  rafId = requestAnimationFrame(() => {
-    rafId = null;
-    const stage = stageRef.value?.getStage();
-    if (stage) gridRef.value?.update(stage);
-  });
-}
-
-const handlers = {
-  mount: () => scheduleUpdate(),
-  resize: (e: ResizeObserverEntry) => {
-    stageConfig.value.width = e.contentRect.width;
-    stageConfig.value.height = e.contentRect.height;
-    nextTick(scheduleUpdate);
+const handlers = useHandlers(
+  () => stageRef.value?.getStage(),
+  (stage) => gridRef.value?.update(stage),
+  (width, height) => {
+    stageConfig.value.width = width;
+    stageConfig.value.height = height;
   },
-  wheel: (e: any) => {
-    if (!stageRef.value) return;
-    e.evt.preventDefault();
+);
 
-    const stage = stageRef.value.getStage();
-    const oldScale = stage.scaleX();
-    const pointer = stage.getPointerPosition()!;
-
-    const mousePointTo = {
-      x: (pointer.x - stage.x()) / oldScale,
-      y: (pointer.y - stage.y()) / oldScale,
-    };
-
-    let direction = e.evt.deltaY > 0 ? -1 : 1;
-    if (e.evt.ctrlKey) direction = -direction;
-
-    const newScale =
-      direction > 0
-        ? oldScale * SCALE_STEP_MULTIPLIER
-        : oldScale / SCALE_STEP_MULTIPLIER;
-
-    const clampedScale = Math.max(
-      SCALE_LIMITS.min,
-      Math.min(SCALE_LIMITS.max, newScale),
-    );
-
-    stage.scale({ x: clampedScale, y: clampedScale });
-    stage.position({
-      x: pointer.x - mousePointTo.x * clampedScale,
-      y: pointer.y - mousePointTo.y * clampedScale,
-    });
-
-    scheduleUpdate();
-  },
-  stageChange: () => scheduleUpdate(),
-};
-
-useResizeObserver(container, ([entry]) => {
+useResizeObserver(stageContainerRef, ([entry]) => {
   if (!entry) return;
   handlers.resize(entry);
 });

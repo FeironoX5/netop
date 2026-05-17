@@ -38,7 +38,7 @@ import ButtonGroup from '@components/ButtonGroup.vue';
 import {
   LEFT_PANEL_TOOLS,
   RIGHT_PANEL_TOOLS,
-} from '@/ui/pages/EditorPage.data';
+} from '@/ui/pages/EditorPage.consts';
 
 const activeLeftPanelIndex = defineModel<number | null>(
   'activeLeftPanelIndex',
