@@ -1,6 +1,3 @@
 export const iconProps = {
-  icon: {
-    type: String,
-    default: '',
-  },
+  icon: { type: String, default: '' },
 } as const;

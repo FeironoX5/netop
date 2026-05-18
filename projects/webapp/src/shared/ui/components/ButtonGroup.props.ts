@@ -6,8 +6,5 @@ export const buttonGroupProps = {
     type: Array as PropType<readonly ButtonGroupItemData[]>,
     required: true,
   },
-  isSelectable: {
-    type: Boolean,
-    default: false,
-  },
+  isSelectable: { type: Boolean, default: false },
 } as const;

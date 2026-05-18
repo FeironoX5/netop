@@ -1,11 +1,17 @@
 <template>
   <div
     class="list inline-container"
-    :class="{ row: direction === 'row', column: direction === 'column' }"
+    :class="{
+      row: direction === 'row',
+      column: direction === 'column',
+    }"
   >
     <slot name="start" />
     <slot />
-    <span v-if="$slots.center || $slots.end" class="spacer" />
+    <span
+      v-if="$slots.center || $slots.end"
+      class="spacer"
+    />
     <span v-if="$slots.center" class="center">
       <slot name="center" />
     </span>

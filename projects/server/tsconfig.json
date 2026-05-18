@@ -11,7 +11,10 @@
       "@app/*": ["./src/app/*"],
       "@simulation/*": ["./src/app/simulation/*"],
       "@commands/*": ["./src/app/commands/*"],
-      "@netop/types": ["../types/src/index.ts"]
+      "@netop/types": ["../shared/types/src/index.ts"],
+      "@netop/interfaces": [
+        "../shared/interfaces/src/index.ts"
+      ]
     }
   },
   "include": ["src"]

@@ -16,13 +16,18 @@ import Button from '@bits/Button.vue';
 import { buttonGroupProps } from './ButtonGroup.props';
 
 const props = defineProps(buttonGroupProps);
-const modelValue = defineModel<number[]>('activeItemIndexes', {
-  default: [],
-});
+const modelValue = defineModel<number[]>(
+  'activeItemIndexes',
+  {
+    default: [],
+  },
+);
 
 async function handleClick(index: number) {
   if (modelValue.value.includes(index)) {
-    modelValue.value = modelValue.value.filter((i) => i !== index);
+    modelValue.value = modelValue.value.filter(
+      (i) => i !== index,
+    );
   } else {
     modelValue.value = [...modelValue.value, index];
   }

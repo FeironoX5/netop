@@ -2,39 +2,57 @@
   <div class="fullscreen-view">
     <Header />
     <div class="content-area">
-      <Sidebar side="left" :isOpen="activeLeftPanelIndex !== null">
+      <Sidebar
+        side="left"
+        :isOpen="activeLeftPanelIndex !== null"
+      >
         <component :is="CurrentLeftPanel" />
       </Sidebar>
-      <canvas class="workspace-canvas" />
-      <Sidebar side="right" :isOpen="activeRightPanelIndex !== null">
+      <CanvasView class="workspace-canvas" />
+      <Sidebar
+        side="right"
+        :isOpen="activeRightPanelIndex !== null"
+      >
         <component :is="CurrentRightPanel" />
       </Sidebar>
     </div>
     <div class="toolbar-area">
       <Toolbar
         v-model:activeLeftPanelIndex="activeLeftPanelIndex"
-        v-model:activeRightPanelIndex="activeRightPanelIndex"
+        v-model:activeRightPanelIndex="
+          activeRightPanelIndex
+        "
       />
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import Sidebar from '@components/Sidebar.vue';
-import Header from '@ui/parts/Header.vue';
-import Toolbar from '@ui/parts/Toolbar.vue';
 import { computed, ref } from 'vue';
-import { leftPanelTools, rightPanelTools } from './EditorPage.data';
+import Header from '@/ui/parts/Header.vue';
+import Toolbar from '@/ui/parts/Toolbar.vue';
+import CanvasView from '@/ui/views/canvas/CanvasView.vue';
+import {
+  LEFT_PANEL_TOOLS,
+  RIGHT_PANEL_TOOLS,
+} from './EditorPage.consts';
 
 const activeLeftPanelIndex = ref<number | null>(null);
 const CurrentLeftPanel = computed(() => {
   if (activeLeftPanelIndex.value === null) return null;
-  return leftPanelTools[activeLeftPanelIndex.value]?.view ?? null;
+  return (
+    LEFT_PANEL_TOOLS[activeLeftPanelIndex.value]?.view ??
+    null
+  );
 });
 
 const activeRightPanelIndex = ref<number | null>(1);
 const CurrentRightPanel = computed(() => {
   if (activeRightPanelIndex.value === null) return null;
-  return rightPanelTools[activeRightPanelIndex.value]?.view ?? null;
+  return (
+    RIGHT_PANEL_TOOLS[activeRightPanelIndex.value]?.view ??
+    null
+  );
 });
 </script>
 

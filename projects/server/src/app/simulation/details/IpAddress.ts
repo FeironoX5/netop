@@ -5,7 +5,9 @@ export namespace IpAddress {
   export type type = Uint8Array;
 
   export function toString(ip: type): string {
-    return [...ip].map((byte) => byte.toString(10)).join('.');
+    return [...ip]
+      .map((byte) => byte.toString(10))
+      .join('.');
   }
 
   export function generate(): type {

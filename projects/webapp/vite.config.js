@@ -1,21 +1,70 @@
 import path from 'path';
 import vue from '@vitejs/plugin-vue';
 import { defineConfig } from 'vite';
+import { themePlugin } from './src/app/App.theme.vite.plugin';
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [vue(), themePlugin()],
   resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-      // app
-      '@app': path.resolve(__dirname, './src/app'),
-      '@ui': path.resolve(__dirname, './src/app/ui'),
-      // shared
-      '@shared': path.resolve(__dirname, './src/shared'),
-      '@bits': path.resolve(__dirname, './src/shared/ui/bits'),
-      '@components': path.resolve(__dirname, './src/shared/ui/components'),
-      '@netop/types': path.resolve(__dirname, '../types/src/index.ts'),
-    },
+    alias: [
+      {
+        find: '@/app',
+        replacement: path.resolve(__dirname, './src/app'),
+      },
+      {
+        find: '@/ui',
+        replacement: path.resolve(
+          __dirname,
+          './src/app/ui',
+        ),
+      },
+      {
+        find: '@/types',
+        replacement: path.resolve(
+          __dirname,
+          './src/app/types',
+        ),
+      },
+      {
+        find: '@',
+        replacement: path.resolve(__dirname, './src'),
+      },
+      {
+        find: '@shared',
+        replacement: path.resolve(
+          __dirname,
+          './src/shared',
+        ),
+      },
+      {
+        find: '@bits',
+        replacement: path.resolve(
+          __dirname,
+          './src/shared/ui/bits',
+        ),
+      },
+      {
+        find: '@components',
+        replacement: path.resolve(
+          __dirname,
+          './src/shared/ui/components',
+        ),
+      },
+      {
+        find: '@netop/types',
+        replacement: path.resolve(
+          __dirname,
+          '../shared/types/src/index.ts',
+        ),
+      },
+      {
+        find: '@netop/interfaces',
+        replacement: path.resolve(
+          __dirname,
+          '../shared/interfaces/src/index.ts',
+        ),
+      },
+    ],
     tsConfigPaths: true,
   },
 });

@@ -2,7 +2,7 @@
   <List class="toolbar" direction="row">
     <div class="toolbar-section">
       <ButtonGroup
-        :items="leftPanelTools"
+        :items="LEFT_PANEL_TOOLS"
         :isSelectable="true"
         v-model:activeItemIndex="activeLeftPanelIndex"
       />
@@ -23,7 +23,7 @@
     </div>
     <div class="toolbar-section">
       <ButtonGroup
-        :items="rightPanelTools"
+        :items="RIGHT_PANEL_TOOLS"
         :isSelectable="true"
         v-model:activeItemIndex="activeRightPanelIndex"
       />
@@ -35,14 +35,23 @@
 import Button from '@bits/Button.vue';
 import List from '@bits/List.vue';
 import ButtonGroup from '@components/ButtonGroup.vue';
-import { leftPanelTools, rightPanelTools } from '@ui/pages/EditorPage.data';
+import {
+  LEFT_PANEL_TOOLS,
+  RIGHT_PANEL_TOOLS,
+} from '@/ui/pages/EditorPage.consts';
 
-const activeLeftPanelIndex = defineModel<number | null>('activeLeftPanelIndex', {
-  default: null,
-});
-const activeRightPanelIndex = defineModel<number | null>('activeRightPanelIndex', {
-  default: null,
-});
+const activeLeftPanelIndex = defineModel<number | null>(
+  'activeLeftPanelIndex',
+  {
+    default: null,
+  },
+);
+const activeRightPanelIndex = defineModel<number | null>(
+  'activeRightPanelIndex',
+  {
+    default: null,
+  },
+);
 </script>
 
 <style scoped>

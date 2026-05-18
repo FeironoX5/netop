@@ -1,5 +1,5 @@
+import { DeviceType } from '@netop/types';
 import { SimulationEntity } from '@simulation/interfaces/SimulationEntity';
-import { DeviceType } from '@simulation/types/Device.types';
 
 export interface DeviceInit {
   id: string;

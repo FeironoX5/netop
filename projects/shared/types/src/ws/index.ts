@@ -12,10 +12,17 @@ export enum ServerMessageType {
 
 export type ClientMessage =
   | { type: ClientMessageType.Ping }
-  | { type: ClientMessageType.Command; command: string; args: string[] };
+  | {
+      type: ClientMessageType.Command;
+      command: string;
+      args: string[];
+    };
 
 export type ServerMessage =
   | { type: ServerMessageType.Connected }
   | { type: ServerMessageType.Pong }
-  | { type: ServerMessageType.CommandResult; result: string }
+  | {
+      type: ServerMessageType.CommandResult;
+      result: string;
+    }
   | { type: ServerMessageType.Error; message: string };
