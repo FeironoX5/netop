@@ -9,7 +9,8 @@ export const ComputerWrapper: EntityWrapper<Computer> = {
       {
         info: 'Add a new network interface',
         args: ['name?'],
-        fn: (_computer, _name?: string) => 'Not implemented',
+        fn: (_computer, _name?: string) =>
+          'Not implemented',
       },
     ],
   ]),

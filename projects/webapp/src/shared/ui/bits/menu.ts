@@ -7,7 +7,9 @@ export interface MenuItemData {
   name: string;
   icon?: string;
   endIcon?: string;
-  action?: () => MenuActionResult | Promise<MenuActionResult>;
+  action?: () =>
+    | MenuActionResult
+    | Promise<MenuActionResult>;
 }
 
 export interface MenuEntry {
@@ -22,23 +24,39 @@ export const menus = shallowRef<MenuEntry[]>([]);
 
 let id = 0;
 
-export function openMenu(items: readonly MenuItemData[]): Promise<MenuCloseReason> {
+export function openMenu(
+  items: readonly MenuItemData[],
+): Promise<MenuCloseReason> {
   const anchor = getAnchorRect();
   const rootMenu = menus.value[0];
   if (rootMenu) closeMenu(rootMenu, 'dismiss');
 
-  return pushMenu(items, anchor?.left ?? 0, anchor?.bottom ?? 0);
+  return pushMenu(
+    items,
+    anchor?.left ?? 0,
+    anchor?.bottom ?? 0,
+  );
 }
 
-export function openSubmenu(items: readonly MenuItemData[]): Promise<MenuCloseReason> {
-  const anchorElement = document.activeElement as HTMLElement | null;
+export function openSubmenu(
+  items: readonly MenuItemData[],
+): Promise<MenuCloseReason> {
+  const anchorElement =
+    document.activeElement as HTMLElement | null;
   const anchor = anchorElement?.getBoundingClientRect();
-  const parentElement = anchorElement?.closest<HTMLElement>('[data-menu]');
+  const parentElement =
+    anchorElement?.closest<HTMLElement>('[data-menu]');
   const parentIndex = menus.value.findIndex(
-    (entry) => entry.id === Number(parentElement?.dataset.menuId),
+    (entry) =>
+      entry.id === Number(parentElement?.dataset.menuId),
   );
-  const parent = parentIndex === -1 ? menus.value.at(-1) : menus.value[parentIndex];
-  const parentRect = parentElement?.getBoundingClientRect() ?? getMenuRect(parent);
+  const parent =
+    parentIndex === -1
+      ? menus.value.at(-1)
+      : menus.value[parentIndex];
+  const parentRect =
+    parentElement?.getBoundingClientRect() ??
+    getMenuRect(parent);
 
   if (parentIndex !== -1) {
     const child = menus.value[parentIndex + 1];
@@ -52,13 +70,23 @@ export function openSubmenu(items: readonly MenuItemData[]): Promise<MenuCloseRe
   );
 }
 
-function pushMenu(items: readonly MenuItemData[], x: number, y: number): Promise<MenuCloseReason> {
+function pushMenu(
+  items: readonly MenuItemData[],
+  x: number,
+  y: number,
+): Promise<MenuCloseReason> {
   return new Promise((resolve) => {
-    menus.value = [...menus.value, { id: id++, items, x, y, resolve }];
+    menus.value = [
+      ...menus.value,
+      { id: id++, items, x, y, resolve },
+    ];
   });
 }
 
-export function closeMenu(entry: MenuEntry, reason: MenuCloseReason = 'select') {
+export function closeMenu(
+  entry: MenuEntry,
+  reason: MenuCloseReason = 'select',
+) {
   const idx = menus.value.indexOf(entry);
   if (idx === -1) return;
 
@@ -68,12 +96,18 @@ export function closeMenu(entry: MenuEntry, reason: MenuCloseReason = 'select') 
 }
 
 function getAnchorRect(): DOMRect | undefined {
-  return (document.activeElement as HTMLElement | null)?.getBoundingClientRect();
+  return (
+    document.activeElement as HTMLElement | null
+  )?.getBoundingClientRect();
 }
 
-function getMenuRect(entry: MenuEntry | undefined): DOMRect | undefined {
+function getMenuRect(
+  entry: MenuEntry | undefined,
+): DOMRect | undefined {
   if (!entry) return;
   return document
-    .querySelector<HTMLElement>(`[data-menu-id="${entry.id}"]`)
+    .querySelector<HTMLElement>(
+      `[data-menu-id="${entry.id}"]`,
+    )
     ?.getBoundingClientRect();
 }

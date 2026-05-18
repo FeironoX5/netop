@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Iosevka+Charon+Mono:wght@400;500&display=swap');
+@import './theme-vars.css';
+@import './reset.css';
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  font-family: var(--f-main);
+  font-size: var(--s-font-size);
+  color: var(--c-text);
+  background-color: var(--c-l0-bg);
+  user-select: none;
+}
+
+button {
+  outline: none;
+  border: none;
+}
+
+button.success {
+  background-color: var(--c-success-bg);
+  color: var(--c-success-text);
+  border: none;
+}
+
+button.success:hover {
+  background-color: var(--c-success-bg-hovered);
+}
+
+button.warning {
+  background-color: var(--c-warning-bg);
+  color: var(--c-warning-text);
+  border: none;
+}
+
+button.warning:hover {
+  background-color: var(--c-warning-bg-hovered);
+}
+
+button.error {
+  background-color: var(--c-error-bg);
+  color: var(--c-error-text);
+  border: none;
+}
+
+button.error:hover {
+  background-color: var(--c-error-bg-hovered);
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.inline-container {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: stretch;
+
+  &.row {
+    flex-direction: row;
+  }
+
+  &.column {
+    flex-direction: column;
+  }
+
+  &.full {
+    &.row {
+      width: 100%;
+    }
+
+    &.column {
+      height: 100%;
+    }
+  }
+}

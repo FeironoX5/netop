@@ -2,7 +2,10 @@
   "name": "netop",
   "private": true,
   "workspaces": [
-    "projects/*"
+    "projects/server",
+    "projects/webapp",
+    "projects/shared/types",
+    "projects/shared/interfaces"
   ],
   "type": "module",
   "scripts": {

@@ -19,4 +19,6 @@ export type Resolved = {
   wrapper: EntityWrapper<unknown>;
 };
 
-export type Resolver = (path: PathSegment[]) => Resolved | undefined;
+export type Resolver = (
+  path: PathSegment[],
+) => Resolved | undefined;

@@ -8,7 +8,9 @@ import {
 import { PORT } from '@/config';
 import '@/db';
 
-const parse = (raw: string | Buffer): ClientMessage | null => {
+const parse = (
+  raw: string | Buffer,
+): ClientMessage | null => {
   try {
     return JSON.parse(String(raw)) as ClientMessage;
   } catch {
@@ -21,24 +23,31 @@ const process = (message: ClientMessage): ServerMessage => {
     case ClientMessageType.Ping:
       return { type: ServerMessageType.Pong };
     case ClientMessageType.Command:
-      const result = commandHandler.executeCommand(message.command);
-      return { type: ServerMessageType.CommandResult, result: result };
+      const result = commandHandler.executeCommand(
+        message.command,
+      );
+      return {
+        type: ServerMessageType.CommandResult,
+        result: result,
+      };
     default:
-      return { type: ServerMessageType.Error, message: 'Unknown message type' };
+      return {
+        type: ServerMessageType.Error,
+        message: 'Unknown message type',
+      };
   }
 };
 
-const send = (ws: Bun.ServerWebSocket, message: ServerMessage) => {
+const send = (
+  ws: Bun.ServerWebSocket,
+  message: ServerMessage,
+) => {
   ws.send(JSON.stringify(message));
 };
 
 const server = Bun.serve({
   port: PORT,
-  routes: {
-    '/scene': {
-      GET: () => new Response('OK'),
-    },
-  },
+  routes: { '/scene': { GET: () => new Response('OK') } },
   websocket: {
     open(ws) {
       send(ws, { type: ServerMessageType.Connected });

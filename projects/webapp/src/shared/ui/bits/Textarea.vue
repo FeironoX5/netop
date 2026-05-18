@@ -14,8 +14,11 @@ import { useTemplateRef } from 'vue';
 import { textareaProps } from './Textarea.props';
 
 const props = defineProps(textareaProps);
-const model = defineModel<string>({ default: '' });
-const textarea = useTemplateRef<HTMLTextAreaElement>('textarea');
+const model = defineModel<string>({
+  default: '',
+});
+const textarea =
+  useTemplateRef<HTMLTextAreaElement>('textarea');
 
 const onInput = () => {
   const el = textarea.value;
@@ -36,10 +39,10 @@ textarea {
   padding: 0;
 }
 textarea::placeholder {
-  color: var(--c-border);
+  color: var(--c-placeholder-text);
 }
 textarea:disabled {
   cursor: wait;
-  color: var(--c-text-disabled);
+  color: var(--c-disabled-text);
 }
 </style>

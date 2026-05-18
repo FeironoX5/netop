@@ -5,10 +5,14 @@ export namespace MacAddress {
   export type type = Uint8Array;
 
   export function toString(mac: type): string {
-    return [...mac].map((byte) => byte.toString(16).padStart(2, '0')).join(':');
+    return [...mac]
+      .map((byte) => byte.toString(16).padStart(2, '0'))
+      .join(':');
   }
 
   export function generate(): type {
-    return Uint8Array.from({ length: 6 }, () => Math.floor(Math.random() * 256));
+    return Uint8Array.from({ length: 6 }, () =>
+      Math.floor(Math.random() * 256),
+    );
   }
 }

@@ -15,7 +15,10 @@
         @keydown.enter.exact.prevent="submit"
       />
     </div>
-    <div class="filter-area inline-container row full" :class="{ collapsed: filterCollapsed }">
+    <div
+      class="filter-area inline-container row full"
+      :class="{ collapsed: filterCollapsed }"
+    >
       <div class="filter-content">
         <ButtonMultiGroup
           :items="filterItems"
@@ -25,16 +28,34 @@
       </div>
       <Button
         class="filter-toggle"
-        :icon="filterCollapsed ? 'chevrons-up-down' : 'chevrons-down-up'"
+        :icon="
+          filterCollapsed
+            ? 'chevrons-up-down'
+            : 'chevrons-down-up'
+        "
         @click="filterCollapsed = !filterCollapsed"
       />
     </div>
     <div class="output-area">
-      <div class="output-item inline-container column" v-for="entry in filteredLog" :key="entry.id">
-        <span class="output-item-content">{{ entryText(entry.message) }}</span>
-        <div class="output-item-actions inline-container row">
-          <span class="output-item-type" :class="entry.message.type">{{ entry.message.type }}</span>
-          <span class="timestamp">{{ formatTime(entry.timestamp) }}</span>
+      <div
+        class="output-item inline-container column"
+        v-for="entry in filteredLog"
+        :key="entry.id"
+      >
+        <span class="output-item-content">{{
+          entryText(entry.message)
+        }}</span>
+        <div
+          class="output-item-actions inline-container row"
+        >
+          <span
+            class="output-item-type"
+            :class="entry.message.type"
+            >{{ entry.message.type }}</span
+          >
+          <span class="timestamp">{{
+            formatTime(entry.timestamp)
+          }}</span>
           <span class="spacer" />
           <Button icon="copy" @click="copy(entry)" />
         </div>
@@ -47,11 +68,21 @@
 import Button from '@bits/Button.vue';
 import Textarea from '@bits/Textarea.vue';
 import ButtonMultiGroup from '@components/ButtonMultiGroup.vue';
-import { ServerMessageType, type ServerMessage } from '@netop/types';
-import { wsService, type LogEntry } from '@shared/services/wsService';
+import {
+  ServerMessageType,
+  type ServerMessage,
+} from '@netop/types';
 import { computed, onMounted, ref } from 'vue';
+import {
+  wsService,
+  type LogEntry,
+} from '@/app/services/wsService';
 
-const filterItems = Object.values(ServerMessageType).map((t) => ({ name: t }));
+const filterItems = Object.values(ServerMessageType).map(
+  (t) => ({
+    name: t,
+  }),
+);
 
 const filterCollapsed = ref<boolean>(true);
 
@@ -63,13 +94,19 @@ onMounted(() => wsService.connect());
 const activeTypes = computed<ServerMessage['type'][]>(() =>
   activeItemIndexes.value.length === 0
     ? Object.values(ServerMessageType)
-    : activeItemIndexes.value.map((i) => Object.values(ServerMessageType)[i]!),
+    : activeItemIndexes.value.map(
+        (i) => Object.values(ServerMessageType)[i]!,
+      ),
 );
 
 const filteredLog = computed(() =>
-  wsService.log.value.filter((e) => activeTypes.value.includes(e.message.type)),
+  wsService.log.value.filter((e) =>
+    activeTypes.value.includes(e.message.type),
+  ),
 );
-const isSendingCommand = computed(() => wsService.commandPending.value);
+const isSendingCommand = computed(
+  () => wsService.commandPending.value,
+);
 
 function submit() {
   const cmd = input.value.trim();
@@ -90,7 +127,11 @@ function entryText(msg: ServerMessage): string {
 }
 
 function formatTime(date: Date): string {
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  return date.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
 }
 
 function copy(entry: LogEntry) {

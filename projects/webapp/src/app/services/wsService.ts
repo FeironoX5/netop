@@ -51,6 +51,7 @@ class WsService {
     const ws = new PartyWebSocket(this.url, [], {
       connectionTimeout: 4000,
       maxEnqueuedMessages: 100,
+      maxRetries: 1,
     });
 
     ws.onopen = () => {
@@ -68,10 +69,17 @@ class WsService {
 
     ws.onmessage = (event: MessageEvent<string>) => {
       try {
-        const message = JSON.parse(event.data) as ServerMessage;
-        this.log.value.push({ id: counter++, timestamp: new Date(), message });
+        const message = JSON.parse(
+          event.data,
+        ) as ServerMessage;
+        this.log.value.push({
+          id: counter++,
+          timestamp: new Date(),
+          message,
+        });
         if (
-          message.type === ServerMessageType.CommandResult ||
+          message.type ===
+            ServerMessageType.CommandResult ||
           message.type === ServerMessageType.Error
         ) {
           this.commandPending.value = false;
@@ -108,7 +116,11 @@ class WsService {
     this.commandPending.value = true;
 
     try {
-      this.send({ type: ClientMessageType.Command, command, args: [] });
+      this.send({
+        type: ClientMessageType.Command,
+        command,
+        args: [],
+      });
     } catch (error) {
       this.commandPending.value = false;
       throw error;

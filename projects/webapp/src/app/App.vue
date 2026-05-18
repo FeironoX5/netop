@@ -5,10 +5,10 @@
 
 <script setup lang="ts">
 import MenuOutlet from '@components/MenuOutlet.vue';
-import EditorPage from '@ui/pages/EditorPage.vue';
+import EditorPage from '@/ui/pages/EditorPage.vue';
 </script>
 
 <style>
-@import './styles.css';
+@import 'styles/main.css';
 @import 'lucide-static/font/lucide.css';
 </style>

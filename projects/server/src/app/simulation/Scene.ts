@@ -32,7 +32,12 @@ export class Scene implements SimulationEntity {
     let device: Device;
     switch (type) {
       case 'router':
-        device = new Router({ id, type: DeviceType.ROUTER, name, portsCount: 4 });
+        device = new Router({
+          id,
+          type: DeviceType.ROUTER,
+          name,
+          portsCount: 4,
+        });
         this.devices.push(device);
         break;
       default:
@@ -44,7 +49,9 @@ export class Scene implements SimulationEntity {
   }
 
   public removeDevice(id: string) {
-    const index = this.devices.findIndex((d) => d.id === id);
+    const index = this.devices.findIndex(
+      (d) => d.id === id,
+    );
     if (index === -1) {
       throw new Error('Device not found');
     }
