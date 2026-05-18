@@ -1,13 +1,12 @@
+import { commandHandler } from '@app/main';
 import {
   ClientMessageType,
   ServerMessageType,
   type ClientMessage,
   type ServerMessage,
 } from '@netop/types';
-import { commandHandler } from './app/main';
-import './db';
-import './app/main';
-import { PORT } from './config';
+import { PORT } from '@/config';
+import '@/db';
 
 const parse = (raw: string | Buffer): ClientMessage | null => {
   try {

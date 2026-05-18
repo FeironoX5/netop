@@ -1,7 +1,11 @@
-import { Scene } from './Scene';
-import { SceneWrapper } from './Scene.wrapper';
-import { CommandHandler } from './utils/commands/CommandHandler';
+import { CommandHandler } from '@commands/CommandHandler';
+import { simulationResolver } from '@commands/resolvers/simulation';
+import { CommandHandlerWrapper } from '@commands/wrappers/CommandHandler.wrapper';
+import { Scene } from './simulation/Scene';
 
 export const scene = new Scene();
 
-export const commandHandler = new CommandHandler([new SceneWrapper(scene)]);
+export const commandHandler = new CommandHandler(
+  [simulationResolver([scene])],
+  CommandHandlerWrapper,
+);

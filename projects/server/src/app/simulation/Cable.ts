@@ -1,4 +1,4 @@
-import { Device } from './devices/Device';
+import { Device } from '@simulation/devices/Device';
 
 export class Cable {
   constructor(

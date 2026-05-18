@@ -1,7 +1,14 @@
-import { Device, DeviceType } from './objects/devices/Device';
-import { Router } from './objects/devices/Router';
+import { Device } from '@simulation/devices/Device';
+import { Router } from '@simulation/devices/Router';
+import { DeviceType } from '@simulation/types/Device.types';
+import { SimulationEntity } from './interfaces/SimulationEntity';
 
-export class Scene {
+export class Scene implements SimulationEntity {
+  readonly id = 'sc';
+  readonly name = 'scene';
+  readonly type = 'scene';
+  readonly allowedChildrenTypes = [Router];
+
   timer: NodeJS.Timeout;
   devices: Device[];
 
@@ -25,7 +32,7 @@ export class Scene {
     let device: Device;
     switch (type) {
       case 'router':
-        device = new Router(id, name);
+        device = new Router({ id, type: DeviceType.ROUTER, name, portsCount: 4 });
         this.devices.push(device);
         break;
       default:
@@ -45,6 +52,10 @@ export class Scene {
   }
 
   public getDevices(): Device[] {
+    return this.devices;
+  }
+
+  public getChildren(): Device[] {
     return this.devices;
   }
 }
