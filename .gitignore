@@ -39,5 +39,7 @@ logs/
 
 # ── Project-specific ──────────────────────────────────────────────────────────
 todo*.md
+todo*.txt
+.todo*.bak
 netemul_sources/
 .codex
