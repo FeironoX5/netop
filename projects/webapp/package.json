@@ -12,6 +12,7 @@
   "dependencies": {
     "@netop/interfaces": "*",
     "@netop/types": "*",
+    "@netop/utils": "*",
     "@vueuse/core": "^14.3.0",
     "konva": "^10.3.0",
     "lucide-static": "^1.11.0",

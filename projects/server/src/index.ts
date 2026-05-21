@@ -1,4 +1,4 @@
-import { commandHandler } from '@app/main';
+import { actionHandler } from '@app/main';
 import {
   ClientMessageType,
   ServerMessageType,
@@ -22,24 +22,36 @@ const process = (message: ClientMessage): ServerMessage => {
   switch (message.type) {
     case ClientMessageType.Ping:
       return { type: ServerMessageType.Pong };
-    case ClientMessageType.Command:
-      const result = commandHandler.executeCommand(
-        message.command,
-      );
-      return {
-        type: ServerMessageType.CommandResult,
-        result: result,
-      };
+    case ClientMessageType.Console: {
+      try {
+        const result = actionHandler.execute(message.body);
+        return {
+          type: ServerMessageType.ConsoleResponse,
+          status: 'success',
+          result,
+          requestId: message.requestId,
+        };
+      } catch (e) {
+        return {
+          type: ServerMessageType.ConsoleResponse,
+          status: 'fail',
+          result:
+            e instanceof Error ? e.message : String(e),
+          requestId: message.requestId,
+        };
+      }
+    }
     default:
       return {
         type: ServerMessageType.Error,
         message: 'Unknown message type',
+        requestId: (message as any).requestId,
       };
   }
 };
 
 const send = (
-  ws: Bun.ServerWebSocket,
+  ws: Bun.ServerWebSocket<unknown>,
   message: ServerMessage,
 ) => {
   ws.send(JSON.stringify(message));
@@ -49,9 +61,7 @@ const server = Bun.serve({
   port: PORT,
   routes: { '/scene': { GET: () => new Response('OK') } },
   websocket: {
-    open(ws) {
-      send(ws, { type: ServerMessageType.Connected });
-    },
+    open() {},
     message: (ws, raw) => {
       console.log(`Received ${raw}`);
 

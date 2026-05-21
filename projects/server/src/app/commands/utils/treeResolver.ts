@@ -1,5 +1,11 @@
-import { EntityWrapper } from './interfaces/EntityWrapper';
-import { Resolver } from './types/UserCommand';
+import type { PathSegment } from '@netop/types';
+import { EntityWrapper } from '../interfaces/EntityWrapper';
+
+export type Resolver = (
+  path: PathSegment[],
+) =>
+  | { entity: unknown; wrapper: EntityWrapper<unknown> }
+  | undefined;
 
 export const treeResolver = (
   roots: unknown[],

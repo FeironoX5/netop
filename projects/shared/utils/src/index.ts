@@ -9,7 +9,7 @@ export class ActionCodec {
     return {
       path:
         segments.length > 1 ? segments.slice(0, -1) : [],
-      command: segments[segments.length - 1] ?? '',
+      commandName: segments[segments.length - 1] ?? '',
       args,
     };
   }
@@ -24,6 +24,6 @@ export class ActionCodec {
       action.args.length > 0
         ? ' ' + action.args.join(' ')
         : '';
-    return `${prefix}${action.command}${args}`;
+    return `${prefix}${action.commandName}${args}`;
   }
 }

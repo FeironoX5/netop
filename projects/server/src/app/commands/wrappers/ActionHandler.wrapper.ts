@@ -1,9 +1,10 @@
-import { CommandHandler } from '@commands/CommandHandler';
 import {
   EntityWrapper,
   EntityWrapperCommand,
 } from '@commands/interfaces/EntityWrapper';
 import { StringUtils } from '@commands/utils/StringUtils';
+import { ActionCodec } from '@netop/utils';
+import { ActionHandler } from '../ActionHandler';
 
 const buildHelpPage = (
   path: string[],
@@ -18,7 +19,8 @@ const buildHelpPage = (
   });
   return StringUtils.buildPage([
     {
-      title: path.join(':') || 'root',
+      title:
+        path.join(ActionCodec.PATH_DELIMITER) || 'root',
       text: wrapper.info ?? 'no info available',
     },
     {
@@ -28,52 +30,26 @@ const buildHelpPage = (
   ]);
 };
 
-export const CommandHandlerWrapper: EntityWrapper<CommandHandler> =
+export const CommandHandlerWrapper: EntityWrapper<ActionHandler> =
   {
     info: 'Used to manage commands',
     commands: new Map<
       string,
-      EntityWrapperCommand<CommandHandler>
+      EntityWrapperCommand<ActionHandler>
     >([
       [
         'help',
         {
-          info: 'Show help for an entity or a specific command. Usage: help [path][:command]',
+          info: 'Show help for an entity or a specific command. Usage: help [path][command]',
           args: ['path?'],
-          fn: (commandHandler, pathStr) => {
-            const segments = pathStr
-              ? pathStr.split(':')
+          fn: (actionHandler, pathStr) => {
+            const path = pathStr
+              ? pathStr.split(ActionCodec.PATH_DELIMITER)
               : [];
-
-            // 1. Try full path as an entity path
-            const resolved =
-              commandHandler.resolve(segments);
+            const resolved = actionHandler.resolve(path);
             if (resolved) {
-              return buildHelpPage(
-                segments,
-                resolved.wrapper,
-              );
+              return buildHelpPage(path, resolved.wrapper);
             }
-
-            // 2. Try parent as entity path, last segment as command name
-            if (segments.length > 1) {
-              const parentPath = segments.slice(0, -1);
-              const commandName =
-                segments[segments.length - 1];
-              const parentResolved =
-                commandHandler.resolve(parentPath);
-              if (parentResolved) {
-                const command =
-                  parentResolved.wrapper.commands.get(
-                    commandName,
-                  );
-                if (command)
-                  return (
-                    command.info ?? 'no info available'
-                  );
-              }
-            }
-
             throw new Error('no entity found');
           },
         },
@@ -82,7 +58,7 @@ export const CommandHandlerWrapper: EntityWrapper<CommandHandler> =
         'tips',
         {
           info: 'Show tips on using the command system efficiently',
-          fn: (_commandHandler) =>
+          fn: (_actionHandler) =>
             StringUtils.buildPage([
               {
                 title: 'Partial paths',
@@ -98,7 +74,7 @@ export const CommandHandlerWrapper: EntityWrapper<CommandHandler> =
               },
               {
                 title: 'Command syntax',
-                text: 'Commands are written as [path:]name [args...]\nPath segments are separated by ":".\nArguments are separated by spaces.',
+                text: `Commands are written as [path${ActionCodec.PATH_DELIMITER}]name [args...]\nPath segments are separated by "${ActionCodec.PATH_DELIMITER}".\nArguments are separated by spaces.`,
               },
             ]),
         },

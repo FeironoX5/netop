@@ -21,12 +21,8 @@ export const SceneWrapper: EntityWrapper<Scene> = {
         info: 'Add a new device',
         args: ['type', 'name?'],
         fn: (scene, type: string, name?: string) => {
-          try {
-            const d = scene.addDevice(type, name);
-            return `Device added:\n- ${d.toString()}`;
-          } catch (e) {
-            return `Error when creating device:\n${e}`;
-          }
+          const d = scene.addDevice(type, name);
+          return `Device added:\n- ${d.toString()}`;
         },
       },
     ],
@@ -36,12 +32,8 @@ export const SceneWrapper: EntityWrapper<Scene> = {
         info: 'Remove a device by id',
         args: ['id'],
         fn: (scene, id: string) => {
-          try {
-            scene.removeDevice(id);
-            return `Device removed:\n- ${id}`;
-          } catch (e) {
-            return `Error when removing device:\n${e}`;
-          }
+          scene.removeDevice(id);
+          return `Device removed:\n- ${id}`;
         },
       },
     ],

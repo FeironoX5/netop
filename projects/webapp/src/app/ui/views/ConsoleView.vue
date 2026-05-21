@@ -50,7 +50,13 @@
         >
           <span
             class="output-item-type"
-            :class="entry.message.type"
+            :class="[
+              entry.message.type,
+              entry.message.type ===
+              ServerMessageType.ConsoleResponse
+                ? entry.message.status
+                : '',
+            ]"
             >{{ entry.message.type }}</span
           >
           <span class="timestamp">{{
@@ -117,7 +123,7 @@ function submit() {
 
 function entryText(msg: ServerMessage): string {
   switch (msg.type) {
-    case ServerMessageType.CommandResult:
+    case ServerMessageType.ConsoleResponse:
       return msg.result;
     case ServerMessageType.Error:
       return msg.message;
@@ -223,13 +229,16 @@ function copy(entry: LogEntry) {
   color: var(--c-border);
 
   &.error {
-    color: color-mix(in srgb, red 70%, var(--c-text));
+    color: var(--c-error-text);
+    background: var(--c-error-bg);
   }
-  &.commandResult {
-    color: color-mix(in srgb, lime 50%, var(--c-text));
+  &.console-response.success {
+    color: var(--c-success-text);
+    background: var(--c-success-bg);
   }
-  &.connected {
-    color: color-mix(in srgb, cyan 50%, var(--c-text));
+  &.console-response.fail {
+    color: var(--c-error-text);
+    background: var(--c-error-bg);
   }
 }
 .output-item-content {

@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "@netop/interfaces": "*",
-    "@netop/types": "*"
+    "@netop/types": "*",
+    "@netop/utils": "*"
   },
   "devDependencies": {
     "@types/bun": "^1.3.13"

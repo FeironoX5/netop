@@ -15,7 +15,8 @@
       "@netop/types": ["../shared/types/src/index.ts"],
       "@netop/interfaces": [
         "../shared/interfaces/src/index.ts"
-      ]
+      ],
+      "@netop/utils": ["../shared/utils/src/index.ts"]
     }
   }
 }

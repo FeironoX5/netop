@@ -1,10 +1,10 @@
 import { EntityWrapper } from '@commands/interfaces/EntityWrapper';
-import { treeResolver } from '@commands/treeResolver';
 import { ComputerWrapper } from '@commands/wrappers/simulation/Computer.wrapper';
 import { SceneWrapper } from '@commands/wrappers/simulation/Scene.wrapper';
 import { DeviceType } from '@netop/types';
 import { SimulationEntity } from '@/app/simulation/interfaces/SimulationEntity';
 import { SceneType } from '@/app/simulation/types/Scene.types';
+import { treeResolver } from '../utils/treeResolver';
 
 const wrappers = new Map<
   string,
