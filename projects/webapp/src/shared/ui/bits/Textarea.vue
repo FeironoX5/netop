@@ -1,32 +1,32 @@
 <template>
   <textarea
     ref="textarea"
+    v-model="model"
     :placeholder="props.placeholder"
     :rows="props.rows"
     :disabled="props.disabled"
-    :value="model"
-    @input="onInput"
   ></textarea>
 </template>
 
 <script setup lang="ts">
+import { useTextareaAutosize } from '@vueuse/core';
 import { useTemplateRef } from 'vue';
 import { textareaProps } from './Textarea.props';
 
 const props = defineProps(textareaProps);
-const model = defineModel<string>({
-  default: '',
-});
-const textarea =
+const model = defineModel<string>({ default: '' });
+const textareaEl =
   useTemplateRef<HTMLTextAreaElement>('textarea');
 
-const onInput = () => {
-  const el = textarea.value;
-  if (!el) return;
-  model.value = el.value;
-  el.style.height = 'auto';
-  el.style.height = el.scrollHeight + 'px';
-};
+useTextareaAutosize({
+  element: textareaEl,
+  input: model,
+});
+
+defineExpose({
+  focus: (options?: FocusOptions) =>
+    textareaEl.value?.focus(options),
+});
 </script>
 
 <style scoped>

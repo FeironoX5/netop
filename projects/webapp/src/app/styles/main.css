@@ -62,10 +62,20 @@ button.error:hover {
 
   &.row {
     flex-direction: row;
+
+    &.reversed {
+      justify-content: flex-end;
+      flex-direction: row-reverse;
+    }
   }
 
   &.column {
     flex-direction: column;
+
+    &.reversed {
+      justify-content: flex-end;
+      flex-direction: column-reverse;
+    }
   }
 
   &.full {

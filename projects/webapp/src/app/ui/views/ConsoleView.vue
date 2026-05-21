@@ -1,18 +1,14 @@
 <template>
-  <div
-    class="console-view inline-container column full"
-    :class="{ sending: isSendingCommand }"
-    :aria-busy="isSendingCommand"
-  >
+  <div class="console-view inline-container column full">
     <div class="input-area inline-container row full">
       <span class="prefix">></span>
       <Textarea
+        ref="promptTextarea"
         class="prompt"
-        placeholder="Type :help to list commands"
+        placeholder="Type help to list commands"
         :rows="1"
-        :disabled="isSendingCommand"
         v-model="input"
-        @keydown.enter.exact.prevent="submit"
+        @keydown.enter.exact.prevent="handlers.submit()"
       />
     </div>
     <div
@@ -21,7 +17,7 @@
     >
       <div class="filter-content">
         <ButtonMultiGroup
-          :items="filterItems"
+          :items="FILTER_ITEMS"
           :isSelectable="true"
           v-model:activeItemIndexes="activeItemIndexes"
         />
@@ -36,34 +32,53 @@
         @click="filterCollapsed = !filterCollapsed"
       />
     </div>
-    <div class="output-area">
-      <div
-        class="output-item inline-container column"
-        v-for="entry in filteredLog"
-        :key="entry.id"
-      >
-        <span class="output-item-content">{{
-          entryText(entry.message)
-        }}</span>
+    <div class="action-area">
+      <Button
+        icon="trash"
+        text="Clear"
+        @click="wsService.log.value = []"
+      />
+    </div>
+    <div class="output-area" ref="outputArea">
+      <div class="inline-container column reversed">
         <div
-          class="output-item-actions inline-container row"
+          class="inline-container column output-item"
+          v-for="entry in filteredLog"
+          :key="entry.id"
         >
-          <span
-            class="output-item-type"
-            :class="[
-              entry.message.type,
-              entry.message.type ===
-              ServerMessageType.ConsoleResponse
-                ? entry.message.status
-                : '',
-            ]"
-            >{{ entry.message.type }}</span
+          <span class="output-item-content">
+            {{ getEntryText(entry.message) }}
+          </span>
+          <div
+            class="inline-container row output-item-footer"
           >
-          <span class="timestamp">{{
-            formatTime(entry.timestamp)
-          }}</span>
-          <span class="spacer" />
-          <Button icon="copy" @click="copy(entry)" />
+            <Button
+              :text="formatMessageType(entry.message.type)"
+              :class="[
+                entry.message.type ===
+                  ServerMessageType.ConsoleResponse &&
+                entry.message.status === 'success'
+                  ? 'success'
+                  : 'error',
+                entry.message.type ===
+                  ServerMessageType.Error && 'error',
+              ]"
+              @click="
+                activeItemIndexes = [
+                  getFilterItemIndex(entry.message.type),
+                ]
+              "
+            />
+            <span class="timestamp">
+              {{ formatTime(entry.timestamp) }}
+            </span>
+            <span class="spacer" />
+            <Button
+              class="output-item-action"
+              icon="copy"
+              @click="copy(getEntryText(entry.message))"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -78,24 +93,55 @@ import {
   ServerMessageType,
   type ServerMessage,
 } from '@netop/types';
-import { computed, onMounted, ref } from 'vue';
+import {
+  useClipboard,
+  useFocus,
+  useScroll,
+} from '@vueuse/core';
+import {
+  computed,
+  onMounted,
+  ref,
+  useTemplateRef,
+  watch,
+} from 'vue';
 import {
   wsService,
   type LogEntry,
 } from '@/app/services/wsService';
+import { useHandlers } from './ConsoleView.comps';
+import { FILTER_ITEMS } from './ConsoleView.consts';
+import {
+  formatMessageType,
+  formatTime,
+  getEntryText,
+  getFilterItemIndex,
+} from './ConsoleView.utils';
 
-const filterItems = Object.values(ServerMessageType).map(
-  (t) => ({
-    name: t,
-  }),
+const promptTextarea = useTemplateRef<InstanceType<
+  typeof Textarea
+> | null>('promptTextarea');
+const outputArea = useTemplateRef<HTMLElement | null>(
+  'outputArea',
 );
 
-const filterCollapsed = ref<boolean>(true);
-
 const input = ref('');
+const filterCollapsed = ref<boolean>(true);
 const activeItemIndexes = ref<number[]>([]);
 
-onMounted(() => wsService.connect());
+const { copy } = useClipboard();
+const { focused } = useFocus(promptTextarea as any, {
+  initialValue: true,
+});
+const { y: scrollY } = useScroll(outputArea, {
+  behavior: 'smooth',
+});
+const handlers = useHandlers(
+  input,
+  focused,
+  outputArea,
+  scrollY,
+);
 
 const activeTypes = computed<ServerMessage['type'][]>(() =>
   activeItemIndexes.value.length === 0
@@ -110,39 +156,12 @@ const filteredLog = computed(() =>
     activeTypes.value.includes(e.message.type),
   ),
 );
-const isSendingCommand = computed(
-  () => wsService.commandPending.value,
-);
 
-function submit() {
-  const cmd = input.value.trim();
-  if (!cmd || isSendingCommand.value) return;
-  wsService.sendCommand(cmd);
-  input.value = '';
-}
+onMounted(handlers.mount);
 
-function entryText(msg: ServerMessage): string {
-  switch (msg.type) {
-    case ServerMessageType.ConsoleResponse:
-      return msg.result;
-    case ServerMessageType.Error:
-      return msg.message;
-    default:
-      return '—';
-  }
-}
-
-function formatTime(date: Date): string {
-  return date.toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
-}
-
-function copy(entry: LogEntry) {
-  navigator.clipboard.writeText(entryText(entry.message));
-}
+watch(() => filteredLog.value.length, handlers.logChange, {
+  flush: 'post',
+});
 </script>
 
 <style scoped>
@@ -157,27 +176,14 @@ function copy(entry: LogEntry) {
   font-family: var(--f-code);
   line-height: 1;
   padding: var(--s-spacing);
-  gap: 5px;
-}
-
-.console-view.sending .input-area {
-  opacity: 0.65;
-}
-
-.console-view.sending .input-area::after {
-  content: '';
-  align-self: center;
-  width: 0.8em;
-  height: 0.8em;
-  border: 2px solid var(--c-border);
-  border-top-color: var(--c-accent);
-  border-radius: 50%;
-  animation: console-pending-spin 0.8s linear infinite;
+  gap: var(--s-gap);
+  border-bottom: var(--border);
 }
 
 .prompt {
   flex: 1;
 }
+
 .prefix {
   color: var(--c-border);
 }
@@ -192,7 +198,7 @@ function copy(entry: LogEntry) {
     min-width: 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: var(--s-gap);
 
     :deep(.button-group-item) {
       flex-shrink: 0;
@@ -212,6 +218,17 @@ function copy(entry: LogEntry) {
     }
   }
 }
+
+.action-area {
+  flex-direction: row;
+  display: flex;
+  justify-content: end;
+  gap: var(--s-gap);
+  padding: var(--s-spacing);
+  padding-top: 0;
+  border-bottom: var(--border);
+}
+
 .output-area {
   background: var(--c-l0-bg);
   flex: 1 1 auto;
@@ -219,41 +236,30 @@ function copy(entry: LogEntry) {
   overflow-y: auto;
   padding-bottom: 30vh;
 }
-.output-item {
-  display: block;
-  border-bottom: 1px solid var(--c-border);
-  padding: var(--s-spacing);
-}
-.output-item-type {
-  font-size: var(--s-font-size-sm);
-  color: var(--c-border);
 
-  &.error {
-    color: var(--c-error-text);
-    background: var(--c-error-bg);
-  }
-  &.console-response.success {
-    color: var(--c-success-text);
-    background: var(--c-success-bg);
-  }
-  &.console-response.fail {
-    color: var(--c-error-text);
-    background: var(--c-error-bg);
-  }
+.output-item {
+  border-bottom: var(--border);
+  padding: var(--s-spacing);
+  gap: var(--s-gap);
 }
+
+.output-item .output-item-action {
+  display: none;
+}
+
+.output-item:hover .output-item-action {
+  display: inline-flex;
+}
+
 .output-item-content {
   font-family: var(--f-code);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
-.output-item-actions {
-  gap: 5px;
-  font-size: var(--s-font-size-sm);
-}
 
-@keyframes console-pending-spin {
-  to {
-    transform: rotate(360deg);
-  }
+.output-item-footer {
+  align-items: center;
+  gap: var(--s-gap);
+  font-size: var(--s-font-size-sm);
 }
 </style>
