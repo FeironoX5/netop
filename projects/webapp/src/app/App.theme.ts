@@ -38,6 +38,7 @@ export const appTheme = {
   },
   // sizes
   s: {
+    gap: '5px',
     spacing: '8px',
     'spacing-sm': '0.4em',
     'border-radius': '15px',
