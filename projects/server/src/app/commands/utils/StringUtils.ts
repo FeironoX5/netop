@@ -25,7 +25,7 @@ export namespace StringUtils {
     level: number = 1,
   ): string {
     return items
-      .map((item) => buildIndented(`-${item}`, level))
+      .map((item) => buildIndented(`- ${item}`, level))
       .join('\n');
   }
 }

@@ -15,7 +15,8 @@ const buildHelpPage = (
     const params = cmd.args?.length
       ? `(${cmd.args.join(', ')})`
       : '';
-    return `${cmdName}${params}`;
+    const info = cmd.info ? ` - ${cmd.info}` : '';
+    return `${cmdName}${params}${info}`;
   });
   return StringUtils.buildPage([
     {
