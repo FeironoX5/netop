@@ -83,14 +83,26 @@ const CurrentRightPanel = computed(() => {
   bottom: 0;
   left: 0;
   right: 0;
+  pointer-events: none;
   display: flex;
   justify-content: center;
   align-items: end;
   height: 20dvh;
 
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: var(--s-sidebar-width);
+    right: var(--s-sidebar-width);
+    bottom: 0;
+    pointer-events: auto;
+  }
+
   & .toolbar {
     margin-bottom: -20px;
     transition: margin-bottom 0.15s ease-out;
+    pointer-events: auto;
   }
 
   &:hover .toolbar {
