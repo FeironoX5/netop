@@ -1,12 +1,21 @@
-import { actionHandler } from '@app/main';
+import {
+  actionHandler,
+  scene,
+  simulationBus,
+} from '@app/main';
+import { TreeUtils } from '@app/utils/TreeUtils';
+import '@/db';
 import {
   ClientMessageType,
   ServerMessageType,
+  SimulationEntity,
   type ClientMessage,
   type ServerMessage,
 } from '@netop/types';
+import { ActionCodec } from '@netop/utils';
 import { PORT } from '@/config';
-import '@/db';
+
+const connections: Set<Bun.ServerWebSocket> = new Set();
 
 const parse = (
   raw: string | Buffer,
@@ -19,34 +28,26 @@ const parse = (
 };
 
 const process = (message: ClientMessage): ServerMessage => {
-  switch (message.type) {
-    case ClientMessageType.Ping:
-      return { type: ServerMessageType.Pong };
-    case ClientMessageType.Console: {
-      try {
-        const result = actionHandler.execute(message.body);
+  try {
+    switch (message.type) {
+      case ClientMessageType.Action:
         return {
-          type: ServerMessageType.ConsoleResponse,
+          type: ServerMessageType.ActionResponse,
           status: 'success',
-          result,
-          requestId: message.requestId,
+          result: actionHandler.execute(message.body),
         };
-      } catch (e) {
+      default:
         return {
-          type: ServerMessageType.ConsoleResponse,
-          status: 'fail',
-          result:
-            e instanceof Error ? e.message : String(e),
-          requestId: message.requestId,
+          type: ServerMessageType.Error,
+          message: 'Unknown message type',
         };
-      }
     }
-    default:
-      return {
-        type: ServerMessageType.Error,
-        message: 'Unknown message type',
-        requestId: (message as any).requestId,
-      };
+  } catch (e) {
+    return {
+      type: ServerMessageType.ActionResponse,
+      status: 'fail',
+      result: e instanceof Error ? e.message : String(e),
+    };
   }
 };
 
@@ -59,9 +60,26 @@ const send = (
 
 const server = Bun.serve({
   port: PORT,
-  routes: { '/scene': { GET: () => new Response('OK') } },
+  routes: {
+    '/scene': {
+      GET: () => {
+        const flatScene =
+          TreeUtils.flatten<SimulationEntity>(scene, {
+            extract: (e) => e.id,
+            join: (s) => s.join(ActionCodec.PATH_DELIMITER),
+            children: (e) => e.children ?? [],
+          });
+        return Response.json(flatScene);
+      },
+    },
+  },
   websocket: {
-    open() {},
+    open(ws) {
+      connections.add(ws);
+    },
+    close(ws) {
+      connections.delete(ws);
+    },
     message: (ws, raw) => {
       console.log(`Received ${raw}`);
 
@@ -85,3 +103,33 @@ const server = Bun.serve({
 });
 
 console.log(`runs on ${server.port} port`);
+
+simulationBus.subscribe((event) => {
+  let serverMessage: ServerMessage;
+  switch (event.type) {
+    case 'create':
+      serverMessage = {
+        type: ServerMessageType.EntityCreate,
+        entity: event.entity,
+      };
+      break;
+    case 'update':
+      serverMessage = {
+        type: ServerMessageType.EntityUpdate,
+        entity: event.entity,
+      };
+      break;
+    case 'delete':
+      serverMessage = {
+        type: ServerMessageType.EntityDelete,
+        path: event.path,
+        id: event.id,
+      };
+      break;
+    default:
+      return;
+  }
+  for (const ws of connections) {
+    send(ws, serverMessage);
+  }
+});

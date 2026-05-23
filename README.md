@@ -93,3 +93,89 @@ The path therefore does not need to be fully qualified. Resolution starts from t
 * Entities remain decoupled from the CLI layer.
 * The user still types minimal input.
 * No duplication between aliases and entity names.
+
+## Undo/Redo Webapp <> Server Problem
+
+The undo/redo strategy determines how the webapp and server interact. When the user presses Ctrl+Z, changes are undone in reverse order of execution across three categories:
+
+1. **Canvas state changes** (e.g. moving a canvas object) — handled by Konva.
+2. **Queued, unsent actions** — removed directly from the socket queue.
+3. **Sent actions** — requires a server round-trip.
+
+Each action is atomic and invertible and produces an event. Given an action and the result of its execution, a new inverse action can be derived.
+
+---
+
+### Approach 1. Undo by Action
+
+When action `A` is sent:
+1. Add `actionMessage(A)` to the socket queue.
+2. Remove from the queue once sent.
+3. Add `A` to the local change history.
+
+When undoing:
+1. Take `A` from the change history.
+2. Add `undoActionMessage(A)` to the socket queue.
+
+**Advantages:**
+- Instant Ctrl+Z — no need to wait for a server response. If the action resulted in an error, the server simply ignores the `undoAction`.
+- Server manages only its own state — the client holds the action history.
+
+**Disadvantages:**
+- Actions like `help` that don't mutate state are still added to history. Since the webapp shouldn't know whether an action is stateful, the only option is to add to history asynchronously (after a server response).
+- Lookup by value is ambiguous: `undoActionMessage('sc:new router name arg0 arg1')` — what if the user omitted `name`? `undoActionMessage('sc:new router')` won't match. The server would need to store the full action list to resolve this.
+
+---
+
+### Approach 2. Undo by Result
+
+**Advantages:**
+- If the action resulted in an error, it won't be undone.
+
+**Disadvantages:**
+- Network packet arrivals are also delivered as `entity.create` events. Since `entity.create` is broadcast, the undo history becomes shared across all users — including simulation events no user directly initiated.
+- Unintuitive Ctrl+Z for user A if user B's `entity.create` arrived before the `entity.create` that was the result of user A's action.
+
+---
+
+### Approach 3 (Final). Undo by Event ID
+
+There is no dedicated "undo action" entity — undo is simply an action represented as `!:<event-id>`.
+
+**Flow:**
+1. User adds an action to the WebSocket queue.
+2. The server responds with an `action response` containing either an `eventId` (`status: ok`) or nothing (`status: failed`).
+3. On success, the client signals the socket to process the next action and pushes the `eventId` onto the undo/redo stack.
+
+**Advantages over previous approaches:**
+- Non-stateful actions (e.g. `help`) are never added to the stack — only actions whose response contains an `eventId` are recorded. Resolves Approach 1's `help` problem.
+- Undo lookup is by `eventId`, not by value — `!:219` is unambiguous regardless of how the original action was typed. Resolves Approach 1's lookup problem.
+- If an action fails (`status: failed`), the server emits no event and nothing is added to the stack. Preserves Approach 2's error-safety advantage.
+- Server stores events (natural state), not a per-session action buffer (extra burden).
+
+The undo/redo stack is ordered by send timestamp and contains entries of three kinds:
+
+- Canvas state changes (Konva)
+- Unsent queued actions
+- `eventId` entries from sent action responses — once the corresponding event arrives via broadcast, the entry is enriched with its details.
+
+Each user operates on their own undo/redo stack. To undo another user's action, the `!:<event-id>` command is entered directly in the console.
+
+**Example** *(illustrative, not actual output):*
+
+```
+User A — undo/redo stack:
+  !:219        → #222 en.delete
+  move A at (2, 3)
+  sc:new router name1  → #219 en.create
+
+User B — undo/redo stack:
+  sc:new router somename1  → #221 en.create
+  sc:new router somename2  → #220 en.create
+
+User A — console output:
+  !:219        → #222 en.delete
+  #221 en.create
+  #220 en.create
+  sc:new router name1  → #219 en.create
+```

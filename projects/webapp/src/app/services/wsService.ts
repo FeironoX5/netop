@@ -79,7 +79,7 @@ class WsService {
         });
         if (
           message.type ===
-            ServerMessageType.ConsoleResponse ||
+            ServerMessageType.ActionResponse ||
           message.type === ServerMessageType.Error
         ) {
           this.commandPending.value = false;
@@ -117,7 +117,7 @@ class WsService {
 
     try {
       this.send({
-        type: ClientMessageType.Console,
+        type: ClientMessageType.Action,
         body: command,
       });
     } catch (error) {

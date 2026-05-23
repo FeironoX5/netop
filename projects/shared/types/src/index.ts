@@ -1,4 +1,5 @@
 export * from './action';
-export * from './entities';
-export * from './devices/device-type';
+export * from './simulation/entities';
+export * from './simulation/device-type';
+export * from './simulation/scene-type';
 export * from './ws';

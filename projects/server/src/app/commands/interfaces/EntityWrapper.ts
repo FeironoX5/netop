@@ -1,6 +1,5 @@
 export interface EntityWrapperCommand<T> {
   fn: (entity: T, ...args: string[]) => string;
-  fnRevert?: (entity: T, ...args: string[]) => string;
   info?: string;
   args?: string[];
 }

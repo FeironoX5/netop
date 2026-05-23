@@ -10,6 +10,7 @@
       "@/*": ["./src/*"],
       "@app/*": ["./src/app/*"],
       "@simulation/*": ["./src/app/simulation/*"],
+      "@events/*": ["./src/app/simulation/events/*"],
       "@commands/*": ["./src/app/commands/*"],
       "@netop/types": ["../shared/types/src/index.ts"],
       "@netop/interfaces": [

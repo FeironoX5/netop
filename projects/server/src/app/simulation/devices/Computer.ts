@@ -1,27 +1,17 @@
 import { DeviceType } from '@netop/types';
-import { Device } from '@simulation/devices/Device';
+import {
+  Device,
+  DeviceInit,
+} from '@simulation/devices/Device';
 import { NetworkCard } from '@simulation/devices/NetworkCard';
-import { SimulationEntity } from '../interfaces/SimulationEntity';
 
-export class Computer
-  extends Device
-  implements SimulationEntity
-{
+export class Computer extends Device {
   readonly allowedChildrenTypes = [NetworkCard];
 
   children: NetworkCard[] = [];
 
-  constructor({
-    id,
-    name,
-    interfaces,
-  }: {
-    id: string;
-    name: string;
-    interfaces: NetworkCard[];
-  }) {
+  constructor({ id, name }: DeviceInit) {
     super({ id, type: DeviceType.COMPUTER, name });
-    this.children = interfaces;
   }
 
   linkInterface(networkCard: NetworkCard) {

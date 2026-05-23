@@ -1,7 +1,8 @@
-import { DeviceType } from '@netop/types';
+import { simulationBus } from '@events/SimulationBus';
+import { DeviceType, SimulationEntity } from '@netop/types';
 import { Device } from '@simulation/devices/Device';
 import { Router } from '@simulation/devices/Router';
-import { SimulationEntity } from './interfaces/SimulationEntity';
+import { Computer } from './devices/Computer';
 
 export class Scene implements SimulationEntity {
   readonly id = 'sc';
@@ -10,18 +11,18 @@ export class Scene implements SimulationEntity {
   readonly allowedChildrenTypes = [Router];
 
   timer: NodeJS.Timeout;
-  devices: Device[];
+  children: Device[];
 
   constructor(tickInterval: number = 1000) {
-    this.devices = [];
+    this.children = [];
     this.timer = setInterval(() => {
-      this.devices.forEach((device) => device.tick());
+      this.children.forEach((d) => d.tick());
     }, tickInterval);
   }
 
   private generateDeviceId(): string {
     const id = crypto.randomUUID();
-    if (this.devices.find((d) => d.id === id)) {
+    if (this.children.find((d) => d.id === id)) {
       return this.generateDeviceId();
     }
     return id;
@@ -38,31 +39,45 @@ export class Scene implements SimulationEntity {
           name,
           portsCount: 4,
         });
-        this.devices.push(device);
+        break;
+      case 'computer':
+        device = new Computer({
+          id,
+          type: DeviceType.COMPUTER,
+          name,
+        });
         break;
       default:
         throw new Error(
           `Unknown device type ${type}, use one of: ${Object.values(DeviceType).join(', ')}`,
         );
     }
+    this.children.push(device);
+    simulationBus.publish({
+      type: 'create',
+      entity: {
+        id: device.id,
+        name: device.name,
+        type: device.type,
+        path: ['sc'],
+      },
+    });
     return device;
   }
 
-  public removeDevice(id: string) {
-    const index = this.devices.findIndex(
+  public removeDevice(id: string): Device {
+    const index = this.children.findIndex(
       (d) => d.id === id,
     );
     if (index === -1) {
       throw new Error('Device not found');
     }
-    this.devices.splice(index, 1);
-  }
-
-  public getDevices(): Device[] {
-    return this.devices;
-  }
-
-  public getChildren(): Device[] {
-    return this.devices;
+    const [device] = this.children.splice(index, 1);
+    simulationBus.publish({
+      type: 'delete',
+      path: ['sc'],
+      id: device.id,
+    });
+    return device;
   }
 }

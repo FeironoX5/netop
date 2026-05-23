@@ -56,7 +56,7 @@
               :text="formatMessageType(entry.message.type)"
               :class="[
                 entry.message.type ===
-                  ServerMessageType.ConsoleResponse &&
+                  ServerMessageType.ActionResponse &&
                 entry.message.status === 'success'
                   ? 'success'
                   : 'error',

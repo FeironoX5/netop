@@ -1,38 +1,44 @@
-import type { PathSegment } from '@netop/types';
+import { EntityWrapper } from '@commands/interfaces/EntityWrapper';
+import type { Action, PathSegment } from '@netop/types';
 import { ActionCodec } from '@netop/utils';
-import { EntityWrapper } from './interfaces/EntityWrapper';
-import { Resolver } from './utils/treeResolver';
+import {
+  Resolver,
+  ResolverFactory,
+} from './resolvers/types';
 
 export class ActionHandler {
-  private resolvers: Resolver[];
-  private selfWrapper: EntityWrapper<ActionHandler>;
+  private factories;
+  private selfWrapper;
 
   constructor(
-    resolvers: Resolver[],
+    factories: ResolverFactory<any>[],
     selfWrapper: EntityWrapper<ActionHandler>,
   ) {
-    this.resolvers = resolvers;
+    this.factories = factories;
     this.selfWrapper = selfWrapper;
   }
 
   public execute(s: string): string {
-    const { path, commandName, args } =
-      ActionCodec.parse(s);
-    if (path.length === 0) {
+    const action = ActionCodec.parse(s);
+    return this.executeAction(action);
+  }
+
+  public executeAction(action: Action): string {
+    if (action.path.length === 0) {
       return this.run(
         this,
         this.selfWrapper,
-        commandName,
-        args,
+        action.commandName,
+        action.args,
       );
     }
-    const resolved = this.resolve(path);
+    const resolved = this.resolve(action.path);
     if (!resolved) throw new Error('no entity found');
     return this.run(
       resolved.entity,
       resolved.wrapper,
-      commandName,
-      args,
+      action.commandName,
+      action.args,
     );
   }
 
@@ -49,17 +55,18 @@ export class ActionHandler {
 
   public resolve(
     path: PathSegment[],
-  ): ReturnType<Resolver> {
+  ): ReturnType<Resolver<any>> {
     if (path.length === 0) {
-      return {
-        entity: this,
-        wrapper: this.selfWrapper as EntityWrapper<unknown>,
-      };
+      return { entity: this, wrapper: this.selfWrapper };
     }
-    for (const resolver of this.resolvers) {
-      const result = resolver(path);
+    for (const factory of this.factories) {
+      const result = factory.resolver(path);
       if (result) return result;
     }
     return undefined;
+  }
+
+  public getFactories(): ResolverFactory<any>[] {
+    return this.factories;
   }
 }

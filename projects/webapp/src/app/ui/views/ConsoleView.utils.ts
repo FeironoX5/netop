@@ -6,7 +6,7 @@ import { FILTER_ITEMS } from './ConsoleView.consts';
 
 export function getEntryText(msg: ServerMessage): string {
   switch (msg.type) {
-    case ServerMessageType.ConsoleResponse:
+    case ServerMessageType.ActionResponse:
       return msg.result;
     case ServerMessageType.Error:
       return msg.message;

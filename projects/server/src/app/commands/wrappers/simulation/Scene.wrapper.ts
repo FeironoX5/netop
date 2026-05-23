@@ -1,4 +1,4 @@
-import { type EntityWrapper } from '@commands/interfaces/EntityWrapper';
+import { EntityWrapper } from '@commands/interfaces/EntityWrapper';
 import { Scene } from '@simulation/Scene';
 
 export const SceneWrapper: EntityWrapper<Scene> = {
@@ -9,7 +9,7 @@ export const SceneWrapper: EntityWrapper<Scene> = {
       {
         info: 'List all devices in the scene',
         fn: (scene) => {
-          const devices = scene.getDevices();
+          const devices = scene.children;
           if (devices.length === 0) return 'No devices';
           return `Devices:\n${devices.map((d) => `- ${d.toString()}`).join('\n')}`;
         },

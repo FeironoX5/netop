@@ -1,7 +1,7 @@
 export type PathSegment = string;
 
-export interface Action {
+export type Action = {
   path: PathSegment[];
   commandName: string;
   args: string[];
-}
+};

@@ -1,36 +1,39 @@
+import { ActionHandler } from '@commands/ActionHandler';
 import {
   EntityWrapper,
   EntityWrapperCommand,
 } from '@commands/interfaces/EntityWrapper';
-import { StringUtils } from '@commands/utils/StringUtils';
 import { ActionCodec } from '@netop/utils';
-import { ActionHandler } from '../ActionHandler';
+import { StringUtils } from '@/app/utils/StringUtils';
+import { ResolverFactory } from '../resolvers/types';
 
-const buildHelpPage = (
-  path: string[],
-  wrapper: EntityWrapper<unknown>,
-): string => {
-  const entries = Array.from(wrapper.commands.entries());
-  const commandList = entries.map(([cmdName, cmd]) => {
-    const params = cmd.args?.length
-      ? `(${cmd.args.join(', ')})`
-      : '';
-    const info = cmd.info ? ` - ${cmd.info}` : '';
-    return `${cmdName}${params}${info}`;
-  });
-  return StringUtils.buildPage([
-    {
-      title:
-        path.join(ActionCodec.PATH_DELIMITER) || 'root',
-      text: wrapper.info ?? 'no info available',
-    },
-    {
-      title: 'Commands',
-      text: StringUtils.buildList(commandList),
-    },
-  ]);
-};
+function findWrapper(
+  factories: ResolverFactory<any>[],
+  wrapperKey: string,
+): EntityWrapper<any> {
+  const factory = factories.find((factory) =>
+    factory.wrappers.has(wrapperKey),
+  );
+  if (!factory) {
+    throw new Error('no wrapper with such key');
+  }
+  return factory.wrappers.get(wrapperKey)!;
+}
 
+function buildCommandList(
+  wrapper: EntityWrapper<any>,
+): string {
+  const entries = [...wrapper.commands.entries()];
+  return StringUtils.buildList(
+    entries.map(([cmdName, cmd]) => {
+      const params = cmd.args?.length
+        ? `(${cmd.args.join(', ')})`
+        : '';
+      const info = cmd.info ? ` ${cmd.info}` : '';
+      return `${cmdName}${params}${info}`;
+    }),
+  );
+}
 export const CommandHandlerWrapper: EntityWrapper<ActionHandler> =
   {
     info: 'Used to manage commands',
@@ -41,17 +44,39 @@ export const CommandHandlerWrapper: EntityWrapper<ActionHandler> =
       [
         'help',
         {
-          info: 'Show help for an entity or a specific command. Usage: help [path][command]',
-          args: ['path?'],
-          fn: (actionHandler, pathStr) => {
-            const path = pathStr
-              ? pathStr.split(ActionCodec.PATH_DELIMITER)
-              : [];
-            const resolved = actionHandler.resolve(path);
-            if (resolved) {
-              return buildHelpPage(path, resolved.wrapper);
-            }
-            throw new Error('no entity found');
+          info: 'Show help for an entity or a specific command.',
+          args: ['wrapperKey?'],
+          fn: (actionHandler, wrapperKey?: string) => {
+            const wrapper = wrapperKey
+              ? findWrapper(
+                  actionHandler.getFactories(),
+                  wrapperKey,
+                )
+              : CommandHandlerWrapper;
+            return StringUtils.buildPage([
+              {
+                title: wrapperKey ?? 'Command Handler',
+                text: wrapper.info ?? 'no info provided',
+              },
+              {
+                title: 'Commands',
+                text: buildCommandList(wrapper),
+              },
+              ...(!wrapperKey
+                ? [
+                    {
+                      title: 'Wrapper keys',
+                      text: StringUtils.buildList(
+                        actionHandler
+                          .getFactories()
+                          .flatMap((f) =>
+                            Array.from(f.wrappers.keys()),
+                          ),
+                      ),
+                    },
+                  ]
+                : []),
+            ]);
           },
         },
       ],
@@ -63,7 +88,7 @@ export const CommandHandlerWrapper: EntityWrapper<ActionHandler> =
             StringUtils.buildPage([
               {
                 title: 'Partial paths',
-                text: 'Paths do not need to be fully qualified. The system finds the first entity whose ID or name matches each segment, then continues from there.\n\nExample: "eth0:iface" may resolve to "sc:pc0:eth0:iface" if that is the first matching subtree.',
+                text: 'Paths do not need to be fully qualified. The system finds the first entity whose ID or name matches each segment, then continues from there.\n\nExample: "eth0:child1" may resolve to "sc:pc0:eth0:child1" if that is the first matching subtree.',
               },
               {
                 title: 'Matching',

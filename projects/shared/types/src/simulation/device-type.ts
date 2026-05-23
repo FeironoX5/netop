@@ -3,4 +3,5 @@ export enum DeviceType {
   SWITCH = 'switch',
   HUB = 'hub',
   COMPUTER = 'computer',
+  NETWORK_CARD = 'network_card',
 }

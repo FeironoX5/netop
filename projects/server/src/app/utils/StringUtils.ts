@@ -1,16 +1,16 @@
-export namespace StringUtils {
-  export function buildPage(
+export class StringUtils {
+  static buildPage(
     sections: { title: string; text: string }[],
   ): string {
     return sections
       .map(
         (section) =>
-          `${section.title.toUpperCase()}\n${buildIndented(section.text)}`,
+          `${section.title.toUpperCase()}\n${StringUtils.buildIndented(section.text)}`,
       )
       .join('\n\n');
   }
 
-  export function buildIndented(
+  static buildIndented(
     s: string,
     level: number = 1,
   ): string {
@@ -20,12 +20,14 @@ export namespace StringUtils {
       .join('\n');
   }
 
-  export function buildList(
+  static buildList(
     items: string[],
     level: number = 1,
   ): string {
     return items
-      .map((item) => buildIndented(`- ${item}`, level))
+      .map((item) =>
+        StringUtils.buildIndented(`- ${item}`, level),
+      )
       .join('\n');
   }
 }
