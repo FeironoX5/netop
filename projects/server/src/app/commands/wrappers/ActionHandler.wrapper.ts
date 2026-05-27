@@ -84,7 +84,7 @@ export const CommandHandlerWrapper: EntityWrapper<ActionHandler> =
         'tips',
         {
           info: 'Show tips on using the command system efficiently',
-          fn: (_actionHandler) =>
+          fn: () =>
             StringUtils.buildPage([
               {
                 title: 'Partial paths',

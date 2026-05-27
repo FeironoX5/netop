@@ -17,7 +17,7 @@ const wrappers: EntityWrapperMap = new Map([
   ],
 ]);
 
-export const getSimulationFactory = (
+export const getSimulationEntityFactory = (
   root: SimulationEntity,
 ): ResolverFactory<SimulationEntity> => {
   const resolver = TreeUtils.resolve(root, {

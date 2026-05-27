@@ -1,27 +1,22 @@
 import { SimulationEntityEvent } from '@netop/types';
 
 export class SimulationBus {
-  protected _subscribers = new Set<
+  private subscribers = new Set<
     (event: SimulationEntityEvent) => void
   >();
 
   subscribe(
     f: (event: SimulationEntityEvent) => void,
-  ): void {
-    this._subscribers.add(f);
-  }
-
-  unsubscribe(
-    f: (event: SimulationEntityEvent) => void,
-  ): void {
-    this._subscribers.delete(f);
+  ): () => void {
+    this.subscribers.add(f);
+    return () => {
+      this.subscribers.delete(f);
+    };
   }
 
   publish(event: SimulationEntityEvent): void {
-    for (const f of this._subscribers) {
+    for (const f of this.subscribers) {
       f(event);
     }
   }
 }
-
-export const simulationBus = new SimulationBus();

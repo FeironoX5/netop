@@ -23,7 +23,7 @@ export class ActionHandler {
     return this.executeAction(action);
   }
 
-  public executeAction(action: Action): string {
+  private executeAction(action: Action): string {
     if (action.path.length === 0) {
       return this.run(
         this,
@@ -53,7 +53,7 @@ export class ActionHandler {
     return cmd.fn(entity, ...args);
   }
 
-  public resolve(
+  private resolve(
     path: PathSegment[],
   ): ReturnType<Resolver<any>> {
     if (path.length === 0) {

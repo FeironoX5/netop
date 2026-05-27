@@ -1,7 +1,7 @@
-import { simulationBus } from '@events/SimulationBus';
 import { DeviceType, SimulationEntity } from '@netop/types';
 import { Device } from '@simulation/devices/Device';
 import { Router } from '@simulation/devices/Router';
+import { simulationBus } from '../main';
 import { Computer } from './devices/Computer';
 
 export class Scene implements SimulationEntity {
