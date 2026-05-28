@@ -14,7 +14,7 @@ export class SimulationUndoHandler {
     });
   }
 
-  undo(eventId: string) {
+  undo(eventId: string): void {
     const event = this.history.get(eventId);
     if (!event) throw new Error('event not found');
     this.handleUndo(event);

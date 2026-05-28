@@ -1,5 +1,5 @@
+import { SimulationUndoHandler } from '@events/SimulationUndoHandler';
 import { simulationUndoHandler } from '@/app/main';
-import { SimulationUndoHandler } from '@/app/simulation/events/SimulationUndoHandler';
 import { SimulationUndoHandlerWrapper } from '../wrappers/simulation/SimulationUndoHandler.wrapper';
 import { ResolverFactory } from './types';
 

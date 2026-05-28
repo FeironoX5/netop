@@ -1,5 +1,5 @@
 import { EntityWrapper } from '@commands/interfaces/EntityWrapper';
-import { SimulationUndoHandler } from '@/app/simulation/events/SimulationUndoHandler';
+import { SimulationUndoHandler } from '@events/SimulationUndoHandler';
 
 export const SimulationUndoHandlerWrapper: EntityWrapper<SimulationUndoHandler> =
   {
