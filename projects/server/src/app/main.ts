@@ -1,5 +1,4 @@
 import { ActionHandler } from '@commands/ActionHandler';
-import { CommandHandlerWrapper } from '@commands/wrappers/ActionHandler.wrapper';
 import { SimulationBus } from '@events/SimulationBus';
 import { SimulationUndoHandler } from '@events/SimulationUndoHandler';
 import { Scene } from '@simulation/Scene';
@@ -13,10 +12,7 @@ export const simulationBus = new SimulationBus();
 export const simulationUndoHandler =
   new SimulationUndoHandler();
 
-export const actionHandler = new ActionHandler(
-  [
-    getSimulationEntityFactory(scene),
-    getSimulationEventFactory(),
-  ],
-  CommandHandlerWrapper,
-);
+export const actionHandler = new ActionHandler([
+  getSimulationEntityFactory(scene),
+  getSimulationEventFactory(),
+]);

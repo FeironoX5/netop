@@ -5,18 +5,13 @@ import {
   Resolver,
   ResolverFactory,
 } from './resolvers/types';
+import { ActionHandlerWrapper } from './wrappers/ActionHandler.wrapper';
 
 export class ActionHandler {
-  private factories;
-  private selfWrapper;
-
   constructor(
-    factories: ResolverFactory<any>[],
-    selfWrapper: EntityWrapper<ActionHandler>,
-  ) {
-    this.factories = factories;
-    this.selfWrapper = selfWrapper;
-  }
+    private factories: ResolverFactory<any>[],
+    private selfWrapper: EntityWrapper<ActionHandler> = ActionHandlerWrapper,
+  ) {}
 
   public execute(s: string): string {
     const action = ActionCodec.parse(s);

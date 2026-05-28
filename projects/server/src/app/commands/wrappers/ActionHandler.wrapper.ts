@@ -34,7 +34,7 @@ function buildCommandList(
     }),
   );
 }
-export const CommandHandlerWrapper: EntityWrapper<ActionHandler> =
+export const ActionHandlerWrapper: EntityWrapper<ActionHandler> =
   {
     info: 'Used to manage commands',
     commands: new Map<
@@ -52,7 +52,7 @@ export const CommandHandlerWrapper: EntityWrapper<ActionHandler> =
                   actionHandler.getFactories(),
                   wrapperKey,
                 )
-              : CommandHandlerWrapper;
+              : ActionHandlerWrapper;
             return StringUtils.buildPage([
               {
                 title: wrapperKey ?? 'Command Handler',
