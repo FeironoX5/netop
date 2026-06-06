@@ -1,6 +1,6 @@
 import {
   actionHandler,
-  scene,
+  simulation,
   simulationBus,
 } from '@app/main';
 import { TreeUtils } from '@app/utils/TreeUtils';
@@ -8,7 +8,7 @@ import '@/db';
 import {
   ClientMessageType,
   ServerMessageType,
-  SimulationEntity,
+  Simulation,
   type ClientMessage,
   type ServerMessage,
 } from '@netop/types';
@@ -63,12 +63,17 @@ const server = Bun.serve({
   routes: {
     '/scene': {
       GET: () => {
+        // todo change
         const flatScene =
-          TreeUtils.flatten<SimulationEntity>(scene, {
-            extract: (e) => e.id,
-            join: (s) => s.join(ActionCodec.PATH_DELIMITER),
-            children: (e) => e.children ?? [],
-          });
+          TreeUtils.flatten<Simulation.Entity>(
+            simulation.root,
+            {
+              extract: (e) => e.id,
+              join: (s) =>
+                s.join(ActionCodec.PATH_DELIMITER),
+              children: (e) => e.children ?? [],
+            },
+          );
         return Response.json(flatScene);
       },
     },
@@ -110,20 +115,20 @@ simulationBus.subscribe((event) => {
     case 'create':
       serverMessage = {
         type: ServerMessageType.EntityCreate,
-        entity: event.entity,
+        entity: event.data,
       };
       break;
     case 'update':
       serverMessage = {
         type: ServerMessageType.EntityUpdate,
-        entity: event.entity,
+        entity: event.data,
       };
       break;
     case 'delete':
       serverMessage = {
         type: ServerMessageType.EntityDelete,
-        path: event.path,
-        id: event.id,
+        path: event.parentPath,
+        id: event.oldData.id,
       };
       break;
     default:

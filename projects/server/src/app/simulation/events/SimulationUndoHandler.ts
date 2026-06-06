@@ -1,12 +1,9 @@
-import { SimulationEntityEvent } from '@netop/types';
+import type { Simulation } from '@netop/types';
 import { simulationBus } from '@/app/main';
 
 export class SimulationUndoHandler {
   private eventCounter = 0;
-  private history = new Map<
-    string,
-    SimulationEntityEvent
-  >();
+  private history = new Map<string, Simulation.Event>();
 
   constructor() {
     simulationBus.subscribe((event) => {
@@ -20,14 +17,9 @@ export class SimulationUndoHandler {
     this.handleUndo(event);
   }
 
-  private handleUndo(event: SimulationEntityEvent): void {
+  private handleUndo(event: Simulation.Event): void {
     switch (event.type) {
       case 'create':
-        simulationBus.publish({
-          type: 'delete',
-          path: event.entity.path,
-          id: event.entity.id,
-        });
         break;
       case 'delete':
         break;

@@ -1,4 +1,4 @@
-export enum DeviceType {
+export enum DeviceCategory {
   ROUTER = 'router',
   SWITCH = 'switch',
   HUB = 'hub',

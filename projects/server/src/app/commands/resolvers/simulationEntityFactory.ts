@@ -2,17 +2,18 @@ import { EntityWrapper } from '@commands/interfaces/EntityWrapper';
 import { ComputerWrapper } from '@commands/wrappers/simulation/Computer.wrapper';
 import { SceneWrapper } from '@commands/wrappers/simulation/Scene.wrapper';
 import {
-  DeviceType,
-  SceneType,
-  SimulationEntity,
+  DeviceCategory,
+  SceneCategory,
 } from '@netop/types';
+import { SimulationEntity } from '@simulation/SimulationEntity';
+import { SimulationRegistry } from '@simulation/SimulationRegistry';
 import { TreeUtils } from '@/app/utils/TreeUtils';
 import { EntityWrapperMap, ResolverFactory } from './types';
 
 const wrappers: EntityWrapperMap = new Map([
-  [DeviceType.COMPUTER, ComputerWrapper],
+  [DeviceCategory.COMPUTER, ComputerWrapper],
   [
-    SceneType,
+    SceneCategory,
     SceneWrapper as EntityWrapper<SimulationEntity>,
   ],
 ]);
@@ -22,11 +23,14 @@ export const getSimulationEntityFactory = (
 ): ResolverFactory<SimulationEntity> => {
   const resolver = TreeUtils.resolve(root, {
     match: (s, e) => e.id === s || e.name === s,
-    children: (e) => e.children ?? [],
+    children: (e) =>
+      e.children.map((c) =>
+        SimulationRegistry.getManager(c.category).from(c),
+      ),
     wrap: (e) => {
-      const wrapper = wrappers.get(e.type);
+      const wrapper = wrappers.get(e.category);
       if (!wrapper)
-        throw new Error(`No wrapper for ${e.type}`);
+        throw new Error(`No wrapper for ${e.category}`);
       return wrapper;
     },
   });

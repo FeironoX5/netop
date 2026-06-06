@@ -1,5 +1,7 @@
 import { EntityWrapper } from '@commands/interfaces/EntityWrapper';
+import { Simulation } from '@netop/types';
 import { Scene } from '@simulation/Scene';
+import { SimulationRegistry } from '@simulation/SimulationRegistry';
 
 export const SceneWrapper: EntityWrapper<Scene> = {
   info: 'Used to manage the scene',
@@ -11,7 +13,7 @@ export const SceneWrapper: EntityWrapper<Scene> = {
         fn: (scene) => {
           const devices = scene.children;
           if (devices.length === 0) return 'No devices';
-          return `Devices:\n${devices.map((d) => `- ${d.toString()}`).join('\n')}`;
+          return `Devices:\n${devices.map((d) => `- ${d.name || d.id} (${d.category})`).join('\n')}`;
         },
       },
     ],
@@ -21,8 +23,12 @@ export const SceneWrapper: EntityWrapper<Scene> = {
         info: 'Add a new device',
         args: ['type', 'name?'],
         fn: (scene, type: string, name?: string) => {
-          const d = scene.addDevice(type, name);
-          return `Device added:\n- ${d.toString()}`;
+          const entry = SimulationRegistry.getManager(
+            type as Simulation.Category,
+          );
+          const entity = entry.build(name || '');
+          scene.addChild(entity);
+          return `Device added:\n- ${entity.name || entity.id} (${entity.category})`;
         },
       },
     ],
@@ -32,8 +38,9 @@ export const SceneWrapper: EntityWrapper<Scene> = {
         info: 'Remove a device by id',
         args: ['id'],
         fn: (scene, id: string) => {
-          scene.removeDevice(id);
-          return `Device removed:\n- ${id}`;
+          const removed = scene.removeChild(id);
+          if (!removed) throw new Error('Device not found');
+          return `Device removed:\n- ${removed.id}`;
         },
       },
     ],

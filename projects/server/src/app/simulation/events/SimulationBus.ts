@@ -1,12 +1,12 @@
-import { SimulationEntityEvent } from '@netop/types';
+import type { Simulation } from '@netop/types';
 
 export class SimulationBus {
   private subscribers = new Set<
-    (event: SimulationEntityEvent) => void
+    (event: Simulation.Event) => void
   >();
 
   subscribe(
-    f: (event: SimulationEntityEvent) => void,
+    f: (event: Simulation.Event) => void,
   ): () => void {
     this.subscribers.add(f);
     return () => {
@@ -14,7 +14,7 @@ export class SimulationBus {
     };
   }
 
-  publish(event: SimulationEntityEvent): void {
+  publish(event: Simulation.Event): void {
     for (const f of this.subscribers) {
       f(event);
     }

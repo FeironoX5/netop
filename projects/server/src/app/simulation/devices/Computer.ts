@@ -1,20 +1,26 @@
-import { DeviceType } from '@netop/types';
-import {
-  Device,
-  DeviceInit,
-} from '@simulation/devices/Device';
-import { NetworkCard } from '@simulation/devices/NetworkCard';
+import { DeviceCategory, Simulation } from '@netop/types';
+import { SimulationEntity } from '../SimulationEntity';
+import { SimulationRegistry } from '../SimulationRegistry';
 
-export class Computer extends Device {
-  readonly allowedChildrenTypes = [NetworkCard];
+export class Computer extends SimulationEntity<{
+  networkCards?: Simulation.Entity[];
+}> {
+  static override ALLOWED_CHILD_CATEGORIES: Simulation.Category[] =
+    [DeviceCategory.NETWORK_CARD];
 
-  children: NetworkCard[] = [];
-
-  constructor({ id, name }: DeviceInit) {
-    super({ id, type: DeviceType.COMPUTER, name });
-  }
-
-  linkInterface(networkCard: NetworkCard) {
-    this.children.push(networkCard);
+  static {
+    SimulationRegistry.managers[DeviceCategory.COMPUTER] = {
+      build: (id: string, ...args: string[]) => ({
+        id,
+        category: DeviceCategory.COMPUTER,
+        name: args[0],
+        children: [],
+        details: {},
+      }),
+      from: (e: Simulation.Entity) => new Computer(e),
+      tick(e: Simulation.Entity) {
+        SimulationRegistry.behaviours.entity(e);
+      },
+    };
   }
 }

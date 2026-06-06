@@ -1,83 +1,22 @@
-import { DeviceType, SimulationEntity } from '@netop/types';
-import { Device } from '@simulation/devices/Device';
-import { Router } from '@simulation/devices/Router';
-import { simulationBus } from '../main';
-import { Computer } from './devices/Computer';
+import { SceneCategory, Simulation } from '@netop/types';
+import { SimulationEntity } from './SimulationEntity';
+import { SimulationRegistry } from './SimulationRegistry';
 
-export class Scene implements SimulationEntity {
-  readonly id = 'sc';
-  readonly name = 'scene';
-  readonly type = 'scene';
-  readonly allowedChildrenTypes = [Router];
+export class Scene extends SimulationEntity {
+  static override ALLOWED_CHILD_CATEGORIES = null;
 
-  timer: NodeJS.Timeout;
-  children: Device[];
-
-  constructor(tickInterval: number = 1000) {
-    this.children = [];
-    this.timer = setInterval(() => {
-      this.children.forEach((d) => d.tick());
-    }, tickInterval);
-  }
-
-  private generateDeviceId(): string {
-    const id = crypto.randomUUID();
-    if (this.children.find((d) => d.id === id)) {
-      return this.generateDeviceId();
-    }
-    return id;
-  }
-
-  public addDevice(type: string, name?: string): Device {
-    const id = this.generateDeviceId();
-    let device: Device;
-    switch (type) {
-      case 'router':
-        device = new Router({
-          id,
-          type: DeviceType.ROUTER,
-          name,
-          portsCount: 4,
-        });
-        break;
-      case 'computer':
-        device = new Computer({
-          id,
-          type: DeviceType.COMPUTER,
-          name,
-        });
-        break;
-      default:
-        throw new Error(
-          `Unknown device type ${type}, use one of: ${Object.values(DeviceType).join(', ')}`,
-        );
-    }
-    this.children.push(device);
-    simulationBus.publish({
-      type: 'create',
-      entity: {
-        id: device.id,
-        name: device.name,
-        type: device.type,
-        path: ['sc'],
+  static {
+    SimulationRegistry.managers[SceneCategory] = {
+      build: (id: Simulation.Entity['id']) => ({
+        id,
+        category: SceneCategory,
+        name: 'scene',
+        children: [],
+      }),
+      from: (e) => new Scene(e),
+      tick(e) {
+        SimulationRegistry.behaviours.entity(e);
       },
-    });
-    return device;
-  }
-
-  public removeDevice(id: string): Device {
-    const index = this.children.findIndex(
-      (d) => d.id === id,
-    );
-    if (index === -1) {
-      throw new Error('Device not found');
-    }
-    const [device] = this.children.splice(index, 1);
-    simulationBus.publish({
-      type: 'delete',
-      path: ['sc'],
-      id: device.id,
-    });
-    return device;
+    };
   }
 }

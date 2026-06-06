@@ -1,4 +1,5 @@
-import type { FlatSimulationEntity } from '../simulation/entities';
+import type { PathSegment } from '../action';
+import type { Simulation } from '../simulation';
 
 export enum ClientMessageType {
   Action = 'action',
@@ -26,14 +27,14 @@ export type ServerMessage =
   | { type: ServerMessageType.Error; message: string }
   | {
       type: ServerMessageType.EntityCreate;
-      entity: FlatSimulationEntity;
+      entity: Simulation.Entity;
     }
   | {
       type: ServerMessageType.EntityUpdate;
-      entity: FlatSimulationEntity;
+      entity: Simulation.Entity;
     }
   | {
       type: ServerMessageType.EntityDelete;
-      path: string[];
+      path: PathSegment[];
       id: string;
     };
