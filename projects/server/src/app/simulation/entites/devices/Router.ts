@@ -16,7 +16,6 @@ export class Router extends SimulationEntity<{
         id,
         category: DeviceCategory.ROUTER,
         name,
-        children: [],
         details: {
           portsCount: 4,
           macAddress: Array.from(MacAddress.generate()),

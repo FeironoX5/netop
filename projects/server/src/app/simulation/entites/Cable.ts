@@ -1,4 +1,4 @@
-import { SceneCategory, Simulation } from '@netop/types';
+import { CableCategory, Simulation } from '@netop/types';
 import { SimulationRegistry } from '@simulation/SimulationRegistry';
 import { SimulationEntity } from './SimulationEntity';
 
@@ -19,13 +19,11 @@ export class Cable extends SimulationEntity<{
   rightOutput?: 0 | 1;
 }> {
   static {
-    SimulationRegistry.setManager(SceneCategory, {
+    SimulationRegistry.setManager(CableCategory, {
       build(id) {
         return {
           id,
-          category: 'scene',
-          name: 'scene',
-          children: [],
+          category: CableCategory,
           details: {
             delay: 1,
             currentTick: 0,

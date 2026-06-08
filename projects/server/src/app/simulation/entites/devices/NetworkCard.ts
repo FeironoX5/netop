@@ -18,7 +18,6 @@ export class NetworkCard extends SimulationEntity<{
           id,
           category: DeviceCategory.NETWORK_CARD,
           name,
-          children: [],
           details: {
             portsCount: 1,
             macAddress: Array.from(MacAddress.generate()),

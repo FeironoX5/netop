@@ -44,7 +44,7 @@ export class SimulationRegistry {
     const entry = SimulationRegistry.managers[category];
     if (!entry)
       throw new Error(
-        `Entity category ${category} not registered`,
+        `Entity category ${category} not registered. Use one of ${Object.keys(SimulationRegistry.managers).join(', ')}.`,
       );
     return entry;
   }

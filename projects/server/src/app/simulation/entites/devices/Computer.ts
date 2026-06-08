@@ -13,7 +13,6 @@ export class Computer extends SimulationEntity {
         id,
         category: DeviceCategory.COMPUTER,
         name,
-        children: [],
       }),
       from: (e) => new Computer(e),
       tick(e) {

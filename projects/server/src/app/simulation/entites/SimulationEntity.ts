@@ -32,7 +32,7 @@ export abstract class SimulationEntity<DetailsType = {}> {
   }
 
   toString(): string {
-    return `${this.category}:${this.id}${this.name ? `:${this.name}` : ''}`;
+    return `${this.id}${this.name ? `:${this.name}` : ''} (${this.category})`;
   }
 
   generateChildId(): string {
@@ -52,13 +52,13 @@ export abstract class SimulationEntity<DetailsType = {}> {
       !categories.includes(child.category)
     ) {
       throw new Error(
-        `Child category ${child.category} not allowed`,
+        `Child category ${child.category} not allowed. ${this.category} only allows ${categories ? categories.join(', ') : 'any category'} as child categories.`,
       );
     }
     this.e.children = this.children.concat(child);
   }
 
-  removeChild(id: string): Simulation.Entity | undefined {
+  removeChild(id: string): Simulation.Entity {
     const index = this.children.findIndex(
       (c) => c.id === id,
     );

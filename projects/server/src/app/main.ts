@@ -12,7 +12,7 @@ const rootManager =
   SimulationRegistry.getManager(SceneCategory);
 
 export const simulation = new Simulation(
-  rootManager.build('scene'),
+  rootManager.build('sc'),
 );
 
 export const simulationBus = new SimulationBus();

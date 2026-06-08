@@ -16,7 +16,6 @@ export class Switch extends SimulationEntity<{
         id,
         category: DeviceCategory.SWITCH,
         name,
-        children: [],
         details: {
           portsCount: 2,
           macAddress: Array.from(MacAddress.generate()),

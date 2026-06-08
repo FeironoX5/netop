@@ -16,7 +16,6 @@ export class Hub extends SimulationEntity<{
         id,
         category: DeviceCategory.HUB,
         name,
-        children: [],
         details: {
           portsCount: 4,
           macAddress: Array.from(MacAddress.generate()),
