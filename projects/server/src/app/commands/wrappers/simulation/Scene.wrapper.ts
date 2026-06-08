@@ -1,6 +1,6 @@
 import { EntityWrapper } from '@commands/interfaces/EntityWrapper';
+import { Scene } from '@entites/Scene';
 import { Simulation } from '@netop/types';
-import { Scene } from '@simulation/Scene';
 import { SimulationRegistry } from '@simulation/SimulationRegistry';
 
 export const SceneWrapper: EntityWrapper<Scene> = {

@@ -1,11 +1,11 @@
 import { EntityWrapper } from '@commands/interfaces/EntityWrapper';
 import { ComputerWrapper } from '@commands/wrappers/simulation/Computer.wrapper';
 import { SceneWrapper } from '@commands/wrappers/simulation/Scene.wrapper';
+import { SimulationEntity } from '@entites/SimulationEntity';
 import {
   DeviceCategory,
   SceneCategory,
 } from '@netop/types';
-import { SimulationEntity } from '@simulation/SimulationEntity';
 import { SimulationRegistry } from '@simulation/SimulationRegistry';
 import { TreeUtils } from '@/app/utils/TreeUtils';
 import { EntityWrapperMap, ResolverFactory } from './types';

@@ -1,6 +1,6 @@
 import { DeviceCategory, Simulation } from '@netop/types';
+import { SimulationRegistry } from '@simulation/SimulationRegistry';
 import { SimulationEntity } from '../SimulationEntity';
-import { SimulationRegistry } from '../SimulationRegistry';
 
 export class Computer extends SimulationEntity<{
   networkCards?: Simulation.Entity[];

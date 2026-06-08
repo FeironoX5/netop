@@ -1,8 +1,8 @@
 import { DeviceCategory, Simulation } from '@netop/types';
-import { IpAddress } from '../details/IpAddress';
-import { MacAddress } from '../details/MacAddress';
+import { IpAddress } from '@simulation/details/IpAddress';
+import { MacAddress } from '@simulation/details/MacAddress';
+import { SimulationRegistry } from '@simulation/SimulationRegistry';
 import { SimulationEntity } from '../SimulationEntity';
-import { SimulationRegistry } from '../SimulationRegistry';
 
 export class Switch extends SimulationEntity<{
   portsCount?: number;

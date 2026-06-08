@@ -1,6 +1,6 @@
 import { SceneCategory, Simulation } from '@netop/types';
+import { SimulationRegistry } from '@simulation/SimulationRegistry';
 import { SimulationEntity } from './SimulationEntity';
-import { SimulationRegistry } from './SimulationRegistry';
 
 export class Scene extends SimulationEntity {
   static override ALLOWED_CHILD_CATEGORIES = null;

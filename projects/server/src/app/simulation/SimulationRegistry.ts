@@ -1,5 +1,5 @@
+import { SimulationEntity } from '@entites/SimulationEntity';
 import { Simulation } from '@netop/types';
-import { SimulationEntity } from './SimulationEntity';
 
 export class SimulationRegistry {
   static behaviours: Record<

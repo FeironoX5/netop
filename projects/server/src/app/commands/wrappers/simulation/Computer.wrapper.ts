@@ -1,6 +1,6 @@
 import { EntityWrapper } from '@commands/interfaces/EntityWrapper';
+import { Computer } from '@entites/devices/Computer';
 import { DeviceCategory } from '@netop/types';
-import { Computer } from '@simulation/devices/Computer';
 import { SimulationRegistry } from '@simulation/SimulationRegistry';
 
 export const ComputerWrapper: EntityWrapper<Computer> = {
