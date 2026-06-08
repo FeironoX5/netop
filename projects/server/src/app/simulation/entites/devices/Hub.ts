@@ -1,23 +1,21 @@
-import { DeviceCategory, Simulation } from '@netop/types';
+import { DeviceCategory } from '@netop/types';
 import { IpAddress } from '@simulation/details/IpAddress';
 import { MacAddress } from '@simulation/details/MacAddress';
 import { SimulationRegistry } from '@simulation/SimulationRegistry';
 import { SimulationEntity } from '../SimulationEntity';
 
 export class Hub extends SimulationEntity<{
-  portsCount?: number;
-  macAddress?: number[];
-  ipAddress?: number[];
-  ports?: (unknown | null)[];
+  portsCount: number;
+  macAddress: number[];
+  ipAddress: number[];
+  ports: (unknown | null)[];
 }> {
-  static override ALLOWED_CHILD_CATEGORIES = null;
-
   static {
-    SimulationRegistry.managers[DeviceCategory.HUB] = {
-      build: (id: string, ...args: string[]) => ({
+    SimulationRegistry.setManager(DeviceCategory.HUB, {
+      build: (id, name) => ({
         id,
         category: DeviceCategory.HUB,
-        name: args[0],
+        name,
         children: [],
         details: {
           portsCount: 4,
@@ -26,10 +24,10 @@ export class Hub extends SimulationEntity<{
           ports: Array.from({ length: 4 }, () => null),
         },
       }),
-      from: (e: Simulation.Entity) => new Hub(e),
-      tick(e: Simulation.Entity) {
+      from: (e) => new Hub(e),
+      tick(e) {
         SimulationRegistry.behaviours.entity(e);
       },
-    };
+    });
   }
 }

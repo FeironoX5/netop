@@ -1,4 +1,4 @@
-import { SceneCategory, Simulation } from '@netop/types';
+import { SceneCategory } from '@netop/types';
 import { SimulationRegistry } from '@simulation/SimulationRegistry';
 import { SimulationEntity } from './SimulationEntity';
 
@@ -6,8 +6,8 @@ export class Scene extends SimulationEntity {
   static override ALLOWED_CHILD_CATEGORIES = null;
 
   static {
-    SimulationRegistry.managers[SceneCategory] = {
-      build: (id: Simulation.Entity['id']) => ({
+    SimulationRegistry.setManager(SceneCategory, {
+      build: (id) => ({
         id,
         category: SceneCategory,
         name: 'scene',
@@ -17,6 +17,6 @@ export class Scene extends SimulationEntity {
       tick(e) {
         SimulationRegistry.behaviours.entity(e);
       },
-    };
+    });
   }
 }

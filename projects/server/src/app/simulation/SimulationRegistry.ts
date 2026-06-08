@@ -1,32 +1,44 @@
 import { SimulationEntity } from '@entites/SimulationEntity';
 import { Simulation } from '@netop/types';
 
+type DetailsOf<T extends SimulationEntity> =
+  T extends SimulationEntity<infer D> ? D : never;
+
+type EntityManager<
+  T extends SimulationEntity = SimulationEntity,
+> = {
+  from: (e: Simulation.Entity) => T;
+  tick: (
+    e: Simulation.Entity & { details?: DetailsOf<T> },
+  ) => void;
+  build: (
+    id: Simulation.Entity['id'],
+    ...args: string[]
+  ) => Simulation.Entity & { details?: DetailsOf<T> };
+};
+
 export class SimulationRegistry {
   static behaviours: Record<
     string,
     (e: Simulation.Entity) => void
   > = {
-    entity: (e) =>
+    entity(e) {
       e.children?.forEach((c) =>
         SimulationRegistry.getManager(c.category).tick(c),
-      ),
+      );
+    },
   };
 
-  static managers: Partial<
-    Record<
-      Simulation.Category,
-      {
-        tick: (e: Simulation.Entity) => void;
-        build: (
-          id: Simulation.Entity['id'],
-          ...args: string[]
-        ) => Simulation.Entity;
-        from: (
-          e: Simulation.Entity,
-        ) => SimulationEntity<any>;
-      }
-    >
+  private static managers: Partial<
+    Record<Simulation.Category, EntityManager>
   > = {};
+
+  static setManager<T extends SimulationEntity>(
+    category: Simulation.Category,
+    manager: EntityManager<T>,
+  ) {
+    this.managers[category] = manager;
+  }
 
   static getManager(category: Simulation.Category) {
     const entry = SimulationRegistry.managers[category];

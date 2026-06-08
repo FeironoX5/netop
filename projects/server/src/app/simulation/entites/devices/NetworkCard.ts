@@ -1,4 +1,4 @@
-import { DeviceCategory, Simulation } from '@netop/types';
+import { DeviceCategory } from '@netop/types';
 import { IpAddress } from '@simulation/details/IpAddress';
 import { MacAddress } from '@simulation/details/MacAddress';
 import { SimulationRegistry } from '@simulation/SimulationRegistry';
@@ -10,28 +10,27 @@ export class NetworkCard extends SimulationEntity<{
   ipAddress?: number[];
   ports?: (unknown | null)[];
 }> {
-  static override ALLOWED_CHILD_CATEGORIES = null;
-
   static {
-    SimulationRegistry.managers[
-      DeviceCategory.NETWORK_CARD
-    ] = {
-      build: (id: string, ...args: string[]) => ({
-        id,
-        category: DeviceCategory.NETWORK_CARD,
-        name: args[0],
-        children: [],
-        details: {
-          portsCount: 1,
-          macAddress: Array.from(MacAddress.generate()),
-          ipAddress: Array.from(IpAddress.generate()),
-          ports: [null],
+    SimulationRegistry.setManager(
+      DeviceCategory.NETWORK_CARD,
+      {
+        build: (id, name) => ({
+          id,
+          category: DeviceCategory.NETWORK_CARD,
+          name,
+          children: [],
+          details: {
+            portsCount: 1,
+            macAddress: Array.from(MacAddress.generate()),
+            ipAddress: Array.from(IpAddress.generate()),
+            ports: [null],
+          },
+        }),
+        from: (e) => new NetworkCard(e),
+        tick(e) {
+          SimulationRegistry.behaviours.entity(e);
         },
-      }),
-      from: (e: Simulation.Entity) => new NetworkCard(e),
-      tick(e: Simulation.Entity) {
-        SimulationRegistry.behaviours.entity(e);
       },
-    };
+    );
   }
 }
