@@ -1,13 +1,16 @@
 import type { PathSegment } from '../action';
+import { CableCategory } from './cable';
 import { DeviceCategory } from './device';
 import { SceneCategory } from './scene';
 
 export * from './device';
 export * from './scene';
+export * from './cable';
 
 export namespace Simulation {
   export type Category =
     | DeviceCategory
+    | typeof CableCategory
     | typeof SceneCategory;
 
   export type Entity = {
