@@ -8,11 +8,8 @@ import { getSimulationEntityFactory } from './commands/resolvers/simulationEntit
 import { getSimulationEventFactory } from './commands/resolvers/simulationEventFactory';
 import '@entites';
 
-const rootManager =
-  SimulationRegistry.getManager(SceneCategory);
-
 export const simulation = new Simulation(
-  rootManager.build('sc'),
+  SimulationRegistry.getManager(SceneCategory).build('sc'),
 );
 
 export const simulationBus = new SimulationBus();
@@ -21,7 +18,7 @@ export const simulationUndoHandler =
 
 export const actionHandler = new ActionHandler([
   getSimulationEntityFactory(
-    rootManager.from(simulation.root),
+    SimulationRegistry.getEntity(simulation.root),
   ),
   getSimulationEventFactory(),
 ]);

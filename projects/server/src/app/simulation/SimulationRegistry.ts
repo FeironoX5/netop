@@ -7,6 +7,7 @@ type DetailsOf<T extends SimulationEntity> =
 type EntityManager<
   T extends SimulationEntity = SimulationEntity,
 > = {
+  // use only if you don't want result to be cached
   from: (e: Simulation.Entity) => T;
   tick: (
     e: Simulation.Entity & { details?: DetailsOf<T> },
@@ -33,6 +34,11 @@ export class SimulationRegistry {
     Record<Simulation.Category, EntityManager>
   > = {};
 
+  private static entities = new WeakMap<
+    Simulation.Entity,
+    SimulationEntity
+  >();
+
   static setManager<T extends SimulationEntity>(
     category: Simulation.Category,
     manager: EntityManager<T>,
@@ -47,5 +53,18 @@ export class SimulationRegistry {
         `Entity category ${category} not registered. Use one of ${Object.keys(SimulationRegistry.managers).join(', ')}.`,
       );
     return entry;
+  }
+
+  static getEntity<
+    T extends SimulationEntity = SimulationEntity,
+  >(e: Simulation.Entity): T {
+    let entity = SimulationRegistry.entities.get(e) as
+      | T
+      | undefined;
+    if (!entity) {
+      entity = this.getManager(e.category).from(e) as T;
+      SimulationRegistry.entities.set(e, entity);
+    }
+    return entity;
   }
 }
