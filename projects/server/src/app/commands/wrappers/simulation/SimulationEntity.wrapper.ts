@@ -1,8 +1,8 @@
 import { EntityWrapper } from '@commands/interfaces/EntityWrapper';
 import { SimulationEntity } from '@entites/SimulationEntity';
 import { Simulation } from '@netop/types';
+import { StringUtils } from '@netop/utils';
 import { SimulationRegistry } from '@simulation/SimulationRegistry';
-import { StringUtils } from '@/app/utils/StringUtils';
 
 export const SimulationEntityWrapper = <
   T extends SimulationEntity,

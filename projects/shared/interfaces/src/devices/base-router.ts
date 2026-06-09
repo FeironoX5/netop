@@ -1,7 +1,7 @@
-import type { DeviceType } from '@netop/types';
+import type { DeviceCategory } from '@netop/types';
 import type { BaseDevice } from './base-device';
 
 export interface BaseRouter extends BaseDevice {
-  type: DeviceType.ROUTER;
+  type: DeviceCategory.ROUTER;
   details: { someProperty: string };
 }

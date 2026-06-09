@@ -6,8 +6,9 @@ import {
   DeviceCategory,
   SceneCategory,
 } from '@netop/types';
-import { SimulationRegistry } from '@simulation/SimulationRegistry';
-import { TreeUtils } from '@/app/utils/TreeUtils';
+import { TreeUtils } from '@netop/utils';
+import { simulationTreeWalker } from '@/app/simulation/helpers/simulationTreeWalker';
+import { SimulationRegistry } from '@/app/simulation/SimulationRegistry';
 import { EntityWrapperMap, ResolverFactory } from './types';
 
 const wrappers: EntityWrapperMap = new Map([
@@ -21,19 +22,24 @@ const wrappers: EntityWrapperMap = new Map([
 export const getSimulationEntityFactory = (
   root: SimulationEntity,
 ): ResolverFactory<SimulationEntity> => {
-  const resolver = TreeUtils.resolve(root, {
-    match: (s, e) => e.id === s || e.name === s,
-    children: (e) =>
-      e.children.map((c) =>
-        SimulationRegistry.getManager(c.category).from(c),
-      ),
-    wrap: (e) => {
-      const wrapper = wrappers.get(e.category);
-      if (!wrapper)
-        throw new Error(`No wrapper for ${e.category}`);
-      return wrapper;
-    },
+  const entityResolver = TreeUtils.resolve({
+    root: root,
+    walker: simulationTreeWalker,
   });
 
-  return { resolver, wrappers };
+  return {
+    resolver: (p) => {
+      const entity = entityResolver(p);
+      if (!entity) return undefined;
+      const wrapper = wrappers.get(entity.category);
+      if (!wrapper) return undefined;
+      return {
+        entity: SimulationRegistry.getManager(
+          entity.category,
+        ).from(entity),
+        wrapper: wrapper,
+      };
+    },
+    wrappers,
+  };
 };

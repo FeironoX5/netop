@@ -1,7 +1,7 @@
-import type { DeviceType } from '@netop/types';
+import type { DeviceCategory } from '@netop/types';
 
 export interface BaseDevice {
   id: string;
-  type: DeviceType;
+  type: DeviceCategory;
   name: string;
 }

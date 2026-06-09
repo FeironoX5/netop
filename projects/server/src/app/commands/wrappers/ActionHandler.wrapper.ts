@@ -3,8 +3,7 @@ import {
   EntityWrapper,
   EntityWrapperCommand,
 } from '@commands/interfaces/EntityWrapper';
-import { ActionCodec } from '@netop/utils';
-import { StringUtils } from '@/app/utils/StringUtils';
+import { ActionCodec, StringUtils } from '@netop/utils';
 import { ResolverFactory } from '../resolvers/types';
 
 function findWrapper(
@@ -100,7 +99,7 @@ export const ActionHandlerWrapper: EntityWrapper<ActionHandler> =
               },
               {
                 title: 'Command syntax',
-                text: `Commands are written as [path${ActionCodec.PATH_DELIMITER}]name [args...]\nPath segments are separated by "${ActionCodec.PATH_DELIMITER}".\nArguments are separated by spaces.`,
+                text: `Commands are written as [path${ActionCodec.DELIMITER}]name [args...]\nPath segments are separated by "${ActionCodec.DELIMITER}".\nArguments are separated by spaces.`,
               },
             ]),
         },

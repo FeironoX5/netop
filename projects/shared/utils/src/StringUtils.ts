@@ -1,5 +1,5 @@
-export class StringUtils {
-  static buildPage(
+export namespace StringUtils {
+  export function buildPage(
     sections: { title: string; text: string }[],
   ): string {
     return sections
@@ -10,7 +10,7 @@ export class StringUtils {
       .join('\n\n');
   }
 
-  static buildIndented(
+  export function buildIndented(
     s: string,
     level: number = 1,
   ): string {
@@ -20,7 +20,7 @@ export class StringUtils {
       .join('\n');
   }
 
-  static buildList(
+  export function buildList(
     items: string[],
     level: number = 1,
   ): string {

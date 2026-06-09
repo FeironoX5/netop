@@ -3,17 +3,16 @@ import {
   simulation,
   simulationBus,
 } from '@app/main';
-import { TreeUtils } from '@app/utils/TreeUtils';
-import '@/db';
 import {
   ClientMessageType,
   ServerMessageType,
-  Simulation,
   type ClientMessage,
   type ServerMessage,
 } from '@netop/types';
-import { ActionCodec } from '@netop/utils';
+import '@/db';
+import { TreeUtils } from '@netop/utils';
 import { PORT } from '@/config';
+import { simulationTreeWalker } from './app/simulation/helpers/simulationTreeWalker';
 
 const connections: Set<Bun.ServerWebSocket> = new Set();
 
@@ -64,16 +63,10 @@ const server = Bun.serve({
     '/scene': {
       GET: () => {
         // todo change
-        const flatScene =
-          TreeUtils.flatten<Simulation.Entity>(
-            simulation.root,
-            {
-              extract: (e) => e.id,
-              join: (s) =>
-                s.join(ActionCodec.PATH_DELIMITER),
-              children: (e) => e.children ?? [],
-            },
-          );
+        const flatScene = TreeUtils.flatten({
+          root: simulation.root,
+          walker: simulationTreeWalker,
+        });
         return Response.json(flatScene);
       },
     },
