@@ -13,7 +13,7 @@ export class Scene extends SimulationEntity {
         name: 'scene',
         children: [],
       }),
-      from: (e) => new Scene(e),
+      from: Scene,
       tick(e) {
         SimulationRegistry.behaviours.entity(e);
       },

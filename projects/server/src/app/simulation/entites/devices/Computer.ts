@@ -14,7 +14,7 @@ export class Computer extends SimulationEntity {
         category: DeviceCategory.COMPUTER,
         name,
       }),
-      from: (e) => new Computer(e),
+      from: Computer,
       tick(e) {
         SimulationRegistry.behaviours.entity(e);
       },

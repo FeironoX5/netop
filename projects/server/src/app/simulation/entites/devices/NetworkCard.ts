@@ -25,7 +25,7 @@ export class NetworkCard extends SimulationEntity<{
             ports: [null],
           },
         }),
-        from: (e) => new NetworkCard(e),
+        from: NetworkCard,
         tick(e) {
           SimulationRegistry.behaviours.entity(e);
         },

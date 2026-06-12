@@ -23,7 +23,7 @@ export class Switch extends SimulationEntity<{
           ports: Array.from({ length: 4 }, () => null),
         },
       }),
-      from: (e) => new Switch(e),
+      from: Switch,
       tick(e) {
         console.log(e.details!.portsCount);
         SimulationRegistry.behaviours.entity(e);

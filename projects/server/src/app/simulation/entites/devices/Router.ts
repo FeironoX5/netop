@@ -23,7 +23,7 @@ export class Router extends SimulationEntity<{
           ports: Array.from({ length: 4 }, () => null),
         },
       }),
-      from: (e) => new Router(e),
+      from: Router,
       tick(e) {
         SimulationRegistry.behaviours.entity(e);
       },

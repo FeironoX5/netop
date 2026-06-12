@@ -12,6 +12,8 @@ export const simulation = new Simulation(
   SimulationRegistry.getManager(SceneCategory).build('sc'),
 );
 
+SimulationRegistry.setRoot(simulation.root);
+
 export const simulationBus = new SimulationBus();
 export const simulationUndoHandler =
   new SimulationUndoHandler();

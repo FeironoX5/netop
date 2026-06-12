@@ -29,14 +29,13 @@ export const getSimulationEntityFactory = (
 
   return {
     resolver: (p) => {
-      const entity = entityResolver(p);
-      if (!entity) return undefined;
+      const resolved = entityResolver(p);
+      if (!resolved) return undefined;
+      const { entity, path } = resolved;
       const wrapper = wrappers.get(entity.category);
       if (!wrapper) return undefined;
       return {
-        entity: SimulationRegistry.getManager(
-          entity.category,
-        ).from(entity),
+        entity: SimulationRegistry.getEntity(entity, path),
         wrapper: wrapper,
       };
     },

@@ -32,9 +32,9 @@ export class Cable extends SimulationEntity<{
           },
         };
       },
-      from: (e) => new Cable(e),
+      from: Cable,
       tick(e) {
-        const cable = this.from(e);
+        const cable = new this.from(e);
         const d = cable.details;
 
         d.currentTick += 1;
@@ -79,8 +79,8 @@ export class Cable extends SimulationEntity<{
     });
   }
 
-  constructor(e: Simulation.Entity) {
-    super(e);
+  constructor(e: Simulation.Entity, p?: Simulation.Entity) {
+    super(e, p);
     if (typeof this.details.delay !== 'number') {
       throw new Error('Cable must have delay');
     }

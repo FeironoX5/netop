@@ -1,11 +1,15 @@
-import { Simulation } from '@netop/types';
+import { PathSegment, Simulation } from '@netop/types';
+import { SimulationRegistry } from '../SimulationRegistry';
 
 export abstract class SimulationEntity<DetailsType = {}> {
   static ALLOWED_CHILD_CATEGORIES:
     | Simulation.Category[]
     | null = [];
 
-  constructor(private readonly e: Simulation.Entity) {}
+  constructor(
+    private e: Simulation.Entity,
+    private p: Simulation.Entity = e,
+  ) {}
 
   get id() {
     return this.e.id;
@@ -29,6 +33,19 @@ export abstract class SimulationEntity<DetailsType = {}> {
 
   get entity(): Simulation.Entity {
     return this.e;
+  }
+
+  get parent() {
+    return this.p === this.e ? null : this.p;
+  }
+
+  get path(): PathSegment[] {
+    return this.parent
+      ? [
+          ...SimulationRegistry.getEntity(this.parent).path,
+          this.id,
+        ]
+      : [this.id];
   }
 
   toString(): string {

@@ -23,7 +23,7 @@ export class Hub extends SimulationEntity<{
           ports: Array.from({ length: 4 }, () => null),
         },
       }),
-      from: (e) => new Hub(e),
+      from: Hub,
       tick(e) {
         SimulationRegistry.behaviours.entity(e);
       },

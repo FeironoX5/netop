@@ -7,6 +7,17 @@ export type treeWalker<T> = {
   children: (e: T) => T[];
 };
 
+export type ResolvedTreeNode<T> = {
+  entity: T;
+  path: PathSegment[];
+};
+
+export type TreeChainNode<T> = {
+  node: T;
+  parent: T | undefined;
+  segment: PathSegment;
+};
+
 type tree<T> = { root: T; walker: treeWalker<T> };
 
 export namespace TreeUtils {
@@ -28,21 +39,63 @@ export namespace TreeUtils {
   }
 
   export function resolve<T>({ root, walker }: tree<T>) {
+    const chainResolver = resolveChain({ root, walker });
+
+    return (path: PathSegment[]) => {
+      const chain = chainResolver(path);
+      if (!chain) return undefined;
+      return {
+        entity: chain[chain.length - 1].node,
+        path: chain.map((n) => n.segment),
+      };
+    };
+  }
+
+  export function resolveChain<T>({
+    root,
+    walker,
+  }: tree<T>) {
     return (path: PathSegment[]) => {
       const rootMatches = new Set<number>([0]);
       if (walker.match(path[0], root)) rootMatches.add(1);
-      if (rootMatches.has(path.length)) return root;
+      if (rootMatches.has(path.length)) {
+        return [
+          {
+            node: root,
+            parent: undefined,
+            segment: walker.extract(root),
+          },
+        ];
+      }
 
       const queue: Array<{
         node: T;
         matches: Set<number>;
-      }> = [{ node: root, matches: rootMatches }];
+        chain: TreeChainNode<T>[];
+      }> = [
+        {
+          node: root,
+          matches: rootMatches,
+          chain: [
+            {
+              node: root,
+              parent: undefined,
+              segment: walker.extract(root),
+            },
+          ],
+        },
+      ];
 
       while (queue.length > 0) {
-        const { node, matches } = queue.shift()!;
+        const { node, matches, chain } = queue.shift()!;
 
         for (const child of walker.children(node)) {
           const childMatches = new Set<number>([0]);
+          const segment = walker.extract(child);
+          const childChain = [
+            ...chain,
+            { node: child, parent: node, segment },
+          ];
 
           for (const matched of matches) {
             if (matched > 0 && matched < path.length) {
@@ -57,12 +110,13 @@ export namespace TreeUtils {
           }
 
           if (childMatches.has(path.length)) {
-            return child;
+            return childChain;
           }
 
           queue.push({
             node: child,
             matches: childMatches,
+            chain: childChain,
           });
         }
       }
