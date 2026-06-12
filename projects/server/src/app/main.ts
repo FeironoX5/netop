@@ -1,5 +1,4 @@
 import { ActionHandler } from '@commands/ActionHandler';
-import { SimulationBus } from '@events/SimulationBus';
 import { SimulationUndoHandler } from '@events/SimulationUndoHandler';
 import { SceneCategory } from '@netop/types';
 import { Simulation } from '@simulation/Simulation';
@@ -14,13 +13,13 @@ export const simulation = new Simulation(
 
 SimulationRegistry.setRoot(simulation.root);
 
-export const simulationBus = new SimulationBus();
+export const simulationRoot = SimulationRegistry.getEntity(
+  simulation.root,
+);
 export const simulationUndoHandler =
   new SimulationUndoHandler();
 
 export const actionHandler = new ActionHandler([
-  getSimulationEntityFactory(
-    SimulationRegistry.getEntity(simulation.root),
-  ),
+  getSimulationEntityFactory(simulationRoot),
   getSimulationEventFactory(),
 ]);

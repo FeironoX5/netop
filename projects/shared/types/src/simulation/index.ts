@@ -22,20 +22,16 @@ export namespace Simulation {
   };
 
   export type Event =
-    | {
-        type: 'create';
-        parentPath: PathSegment[];
-        data: Entity;
-      }
+    | { type: 'create'; path: PathSegment[]; data: Entity }
     | {
         type: 'update';
-        parentPath: PathSegment[];
+        path: PathSegment[];
         data: Entity;
         oldData: Entity;
       }
     | {
         type: 'delete';
-        parentPath: PathSegment[];
+        path: PathSegment[];
         oldData: Entity;
       };
 }

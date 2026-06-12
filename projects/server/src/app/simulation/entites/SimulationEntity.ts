@@ -1,7 +1,10 @@
 import { PathSegment, Simulation } from '@netop/types';
+import { EventTarget } from '@netop/utils';
 import { SimulationRegistry } from '../SimulationRegistry';
 
-export abstract class SimulationEntity<DetailsType = {}> {
+export abstract class SimulationEntity<
+  DetailsType = {},
+> extends EventTarget<Simulation.Event> {
   static ALLOWED_CHILD_CATEGORIES:
     | Simulation.Category[]
     | null = [];
@@ -9,7 +12,9 @@ export abstract class SimulationEntity<DetailsType = {}> {
   constructor(
     private e: Simulation.Entity,
     private p: Simulation.Entity = e,
-  ) {}
+  ) {
+    super();
+  }
 
   get id() {
     return this.e.id;
@@ -83,5 +88,17 @@ export abstract class SimulationEntity<DetailsType = {}> {
       throw new Error(`Child not found: ${id}`);
     const [removed] = this.e.children!.splice(index, 1);
     return removed;
+  }
+
+  protected override call(event: Simulation.Event): void {
+    super.call(event);
+
+    const parent = this.parent;
+    if (!parent) return;
+
+    SimulationRegistry.getEntity(parent).call({
+      ...event,
+      path: [this.id, ...event.path],
+    });
   }
 }

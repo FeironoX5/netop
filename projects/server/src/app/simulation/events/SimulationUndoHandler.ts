@@ -1,12 +1,12 @@
 import type { Simulation } from '@netop/types';
-import { simulationBus } from '@/app/main';
+import { simulationRoot } from '@/app/main';
 
 export class SimulationUndoHandler {
   private eventCounter = 0;
   private history = new Map<string, Simulation.Event>();
 
   constructor() {
-    simulationBus.subscribe((event) => {
+    simulationRoot.subscribe((event) => {
       this.history.set(String(this.eventCounter++), event);
     });
   }

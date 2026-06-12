@@ -1,7 +1,7 @@
 import {
   actionHandler,
   simulation,
-  simulationBus,
+  simulationRoot,
 } from '@app/main';
 import {
   ClientMessageType,
@@ -102,7 +102,7 @@ const server = Bun.serve({
 
 console.log(`runs on ${server.port} port`);
 
-simulationBus.subscribe((event) => {
+simulationRoot.subscribe((event) => {
   let serverMessage: ServerMessage;
   switch (event.type) {
     case 'create':
@@ -120,7 +120,7 @@ simulationBus.subscribe((event) => {
     case 'delete':
       serverMessage = {
         type: ServerMessageType.EntityDelete,
-        path: event.parentPath,
+        path: event.path,
         id: event.oldData.id,
       };
       break;
