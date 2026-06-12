@@ -7,19 +7,19 @@ import { getSimulationEntityFactory } from './commands/resolvers/simulationEntit
 import { getSimulationEventFactory } from './commands/resolvers/simulationEventFactory';
 import '@entites';
 
-export const simulation = new Simulation(
-  SimulationRegistry.getManager(SceneCategory).build('sc'),
+const rootManager =
+  SimulationRegistry.getManager(SceneCategory);
+
+SimulationRegistry.set(
+  new Simulation(rootManager.build('sc')),
 );
 
-SimulationRegistry.setRoot(simulation.root);
-
-export const simulationRoot = SimulationRegistry.getEntity(
-  simulation.root,
-);
 export const simulationUndoHandler =
   new SimulationUndoHandler();
 
 export const actionHandler = new ActionHandler([
-  getSimulationEntityFactory(simulationRoot),
+  getSimulationEntityFactory(
+    SimulationRegistry.getRootEntity(),
+  ),
   getSimulationEventFactory(),
 ]);

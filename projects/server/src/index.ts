@@ -1,8 +1,4 @@
-import {
-  actionHandler,
-  simulation,
-  simulationRoot,
-} from '@app/main';
+import { actionHandler } from '@app/main';
 import {
   ClientMessageType,
   ServerMessageType,
@@ -13,6 +9,7 @@ import '@/db';
 import { TreeUtils } from '@netop/utils';
 import { PORT } from '@/config';
 import { simulationTreeWalker } from './app/simulation/helpers/simulationTreeWalker';
+import { SimulationRegistry } from './app/simulation/SimulationRegistry';
 
 const connections: Set<Bun.ServerWebSocket> = new Set();
 
@@ -64,7 +61,7 @@ const server = Bun.serve({
       GET: () => {
         // todo change
         const flatScene = TreeUtils.flatten({
-          root: simulation.root,
+          root: SimulationRegistry.get().root,
           walker: simulationTreeWalker,
         });
         return Response.json(flatScene);
@@ -102,7 +99,7 @@ const server = Bun.serve({
 
 console.log(`runs on ${server.port} port`);
 
-simulationRoot.subscribe((event) => {
+SimulationRegistry.getRootEntity().subscribe((event) => {
   let serverMessage: ServerMessage;
   switch (event.type) {
     case 'create':

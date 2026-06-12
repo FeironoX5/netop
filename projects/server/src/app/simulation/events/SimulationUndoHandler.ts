@@ -1,14 +1,19 @@
 import type { Simulation } from '@netop/types';
-import { simulationRoot } from '@/app/main';
+import { SimulationRegistry } from '@/app/simulation/SimulationRegistry';
 
 export class SimulationUndoHandler {
   private eventCounter = 0;
   private history = new Map<string, Simulation.Event>();
 
   constructor() {
-    simulationRoot.subscribe((event) => {
-      this.history.set(String(this.eventCounter++), event);
-    });
+    SimulationRegistry.getRootEntity().subscribe(
+      (event) => {
+        this.history.set(
+          String(this.eventCounter++),
+          event,
+        );
+      },
+    );
   }
 
   undo(eventId: string): void {

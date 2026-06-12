@@ -1,7 +1,11 @@
 import { SimulationEntity } from '@entites/SimulationEntity';
-import { PathSegment, Simulation } from '@netop/types';
+import {
+  PathSegment,
+  Simulation as SimulationTypes,
+} from '@netop/types';
 import { TreeUtils } from '@netop/utils';
 import { simulationTreeWalker } from '@simulation/helpers/simulationTreeWalker';
+import { Simulation } from './Simulation';
 
 type DetailsOf<T extends SimulationEntity> =
   T extends SimulationEntity<infer D> ? D : never;
@@ -11,22 +15,22 @@ type EntityManager<
 > = {
   // use only if you don't want result to be cached
   from: new (
-    e: Simulation.Entity,
-    p?: Simulation.Entity,
+    e: SimulationTypes.Entity,
+    p?: SimulationTypes.Entity,
   ) => T;
   tick: (
-    e: Simulation.Entity & { details?: DetailsOf<T> },
+    e: SimulationTypes.Entity & { details?: DetailsOf<T> },
   ) => void;
   build: (
-    id: Simulation.Entity['id'],
+    id: SimulationTypes.Entity['id'],
     ...args: string[]
-  ) => Simulation.Entity & { details?: DetailsOf<T> };
+  ) => SimulationTypes.Entity & { details?: DetailsOf<T> };
 };
 
 export class SimulationRegistry {
   static behaviours: Record<
     string,
-    (e: Simulation.Entity) => void
+    (e: SimulationTypes.Entity) => void
   > = {
     entity(e) {
       e.children?.forEach((c) =>
@@ -36,24 +40,24 @@ export class SimulationRegistry {
   };
 
   private static managers: Partial<
-    Record<Simulation.Category, EntityManager>
+    Record<SimulationTypes.Category, EntityManager>
   > = {};
 
   private static entities = new WeakMap<
-    Simulation.Entity,
+    SimulationTypes.Entity,
     SimulationEntity
   >();
 
-  private static root?: Simulation.Entity;
+  private static simulation?: Simulation;
 
   static setManager<T extends SimulationEntity>(
-    category: Simulation.Category,
+    category: SimulationTypes.Category,
     manager: EntityManager<T>,
   ) {
     this.managers[category] = manager;
   }
 
-  static getManager(category: Simulation.Category) {
+  static getManager(category: SimulationTypes.Category) {
     const entry = SimulationRegistry.managers[category];
     if (!entry)
       throw new Error(
@@ -62,13 +66,23 @@ export class SimulationRegistry {
     return entry;
   }
 
-  static setRoot(root: Simulation.Entity) {
-    this.root = root;
+  static set(simulation: Simulation) {
+    this.simulation = simulation;
+  }
+
+  static get() {
+    if (!this.simulation)
+      throw new Error('No simulation set');
+    return this.simulation;
+  }
+
+  static getRootEntity() {
+    return this.getEntity(this.get().root);
   }
 
   static getEntity<
     T extends SimulationEntity = SimulationEntity,
-  >(e: Simulation.Entity, path?: PathSegment[]): T {
+  >(e: SimulationTypes.Entity, path?: PathSegment[]): T {
     const cached = SimulationRegistry.entities.get(e) as
       | T
       | undefined;
@@ -79,7 +93,7 @@ export class SimulationRegistry {
     }
 
     const chain = TreeUtils.resolveChain({
-      root: this.root!,
+      root: this.get().root,
       walker: simulationTreeWalker,
     })(path);
 
@@ -99,8 +113,8 @@ export class SimulationRegistry {
   }
 
   private static createEntity(
-    e: Simulation.Entity,
-    parent: Simulation.Entity,
+    e: SimulationTypes.Entity,
+    parent: SimulationTypes.Entity,
   ): SimulationEntity {
     const Ctor = this.getManager(e.category).from;
     const entity = new Ctor(e, parent);
