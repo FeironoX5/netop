@@ -1,5 +1,5 @@
 import { PathSegment, Simulation } from '@netop/types';
-import { EventTarget } from '@netop/utils';
+import { ActionCodec, EventTarget } from '@netop/utils';
 
 export abstract class SimulationEntity<
   DetailsType = {},
@@ -50,7 +50,7 @@ export abstract class SimulationEntity<
   }
 
   toString(): string {
-    return `${this.id}${this.name ? `:${this.name}` : ''} (${this.category})`;
+    return `${ActionCodec.join(this.path)}${this.name ? ` - ${this.name}` : ''} (${this.category})`;
   }
 
   generateChildId(): string {
