@@ -99,7 +99,7 @@ const server = Bun.serve({
 
 console.log(`runs on ${server.port} port`);
 
-SimulationRegistry.root().subscribe((event) => {
+SimulationRegistry.get().rootEntity.subscribe((event) => {
   let serverMessage: ServerMessage;
   if (event.scope === 'connection') return;
   switch (event.operation) {

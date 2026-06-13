@@ -1,5 +1,6 @@
 export class Timer {
-  private timer: number | null = null;
+  private timer: ReturnType<typeof setTimeout> | null =
+    null;
 
   constructor(private tick: () => void) {}
 

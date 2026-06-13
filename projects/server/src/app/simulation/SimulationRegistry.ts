@@ -77,10 +77,6 @@ export class SimulationRegistry {
     return this.simulation;
   }
 
-  static root() {
-    return this.get().rootEntity;
-  }
-
   static fromChain<
     T extends SimulationEntity = SimulationEntity,
   >(
