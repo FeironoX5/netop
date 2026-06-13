@@ -6,7 +6,7 @@ export class EventTarget<TEvent> {
     this.subscribers.add(f);
   }
 
-  protected call(event: TEvent): void {
+  call(event: TEvent): void {
     for (const f of this.subscribers) {
       f(event);
     }

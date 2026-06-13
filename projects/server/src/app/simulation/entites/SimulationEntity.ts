@@ -87,9 +87,7 @@ export abstract class SimulationEntity<
     return removed;
   }
 
-  protected override call(
-    event: SimulationEvent.type,
-  ): void {
+  override call(event: SimulationEvent.type): void {
     super.call(event);
 
     const parent = this.parent;

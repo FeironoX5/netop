@@ -1,40 +1,22 @@
-import { SimulationRegistry } from '@/app/simulation/SimulationRegistry';
+import { EventTarget } from '@netop/utils';
 import { SimulationEvent } from './types';
 
-type ScopeManager = (event: SimulationEvent.type) => void;
+type ScopeApplier = (event: SimulationEvent.type) => void;
 
 export class SimulationUndoHandler {
-  private static scopes: Partial<
-    Record<SimulationEvent.type['scope'], ScopeManager>
-  > = {};
-
-  static setManager(
-    scope: SimulationEvent.type['scope'],
-    manager: ScopeManager,
-  ): void {
-    SimulationUndoHandler.scopes[scope] = manager;
-  }
-
-  static getManager(
-    scope: SimulationEvent.type['scope'],
-  ): ScopeManager {
-    return (
-      SimulationUndoHandler.scopes[scope] ?? (() => {})
-    );
-  }
-
   private eventCounter = 0;
   private history = new Map<string, SimulationEvent.type>();
 
-  constructor() {
-    SimulationRegistry.get().rootEntity.subscribe(
-      (event) => {
-        this.history.set(
-          String(this.eventCounter++),
-          event,
-        );
-      },
-    );
+  constructor(
+    private eventSource: EventTarget<SimulationEvent.type>,
+    private scopes: Record<
+      SimulationEvent.type['scope'],
+      ScopeApplier
+    >,
+  ) {
+    this.eventSource.subscribe((e) => {
+      this.history.set(String(this.eventCounter++), e);
+    });
   }
 
   undo(eventId: string): void {

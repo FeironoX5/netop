@@ -1,4 +1,7 @@
-import { actionHandler } from '@app/main';
+import {
+  actionHandler,
+  simulationEventSource,
+} from '@app/main';
 import {
   ClientMessageType,
   ServerMessageType,
@@ -99,7 +102,7 @@ const server = Bun.serve({
 
 console.log(`runs on ${server.port} port`);
 
-SimulationRegistry.get().rootEntity.subscribe((event) => {
+simulationEventSource.subscribe((event) => {
   let serverMessage: ServerMessage;
   if (event.scope === 'connection') return;
   switch (event.operation) {
