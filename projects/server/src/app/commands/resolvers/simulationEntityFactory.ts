@@ -6,8 +6,6 @@ import {
   DeviceCategory,
   SceneCategory,
 } from '@netop/types';
-import { TreeUtils } from '@netop/utils';
-import { simulationTreeWalker } from '@/app/simulation/helpers/simulationTreeWalker';
 import { SimulationRegistry } from '@/app/simulation/SimulationRegistry';
 import { EntityWrapperMap, ResolverFactory } from './types';
 
@@ -19,26 +17,20 @@ const wrappers: EntityWrapperMap = new Map([
   ],
 ]);
 
-export const getSimulationEntityFactory = (
-  root: SimulationEntity,
-): ResolverFactory<SimulationEntity> => {
-  const entityResolver = TreeUtils.resolve({
-    root: root,
-    walker: simulationTreeWalker,
-  });
+export const getSimulationEntityFactory =
+  (): ResolverFactory<SimulationEntity> => {
+    const simulation = SimulationRegistry.get();
 
-  return {
-    resolver: (p) => {
-      const resolved = entityResolver(p);
-      if (!resolved) return undefined;
-      const { entity, path } = resolved;
-      const wrapper = wrappers.get(entity.category);
-      if (!wrapper) return undefined;
-      return {
-        entity: SimulationRegistry.getEntity(entity, path),
-        wrapper: wrapper,
-      };
-    },
-    wrappers,
+    return {
+      resolver: (p) => {
+        const resolved = simulation.resolve(p);
+        if (!resolved) return undefined;
+        const wrapper = wrappers.get(
+          resolved.entity.category,
+        );
+        if (!wrapper) return undefined;
+        return { entity: resolved.entity, wrapper };
+      },
+      wrappers,
+    };
   };
-};

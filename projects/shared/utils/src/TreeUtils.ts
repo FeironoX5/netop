@@ -7,65 +7,80 @@ export type treeWalker<T> = {
   children: (e: T) => T[];
 };
 
-export type ResolvedTreeNode<T> = {
-  entity: T;
-  path: PathSegment[];
-};
-
-export type TreeChainNode<T> = {
-  node: T;
-  parent: T | undefined;
-  segment: PathSegment;
-};
-
 type tree<T> = { root: T; walker: treeWalker<T> };
 
 export namespace TreeUtils {
-  export function flatten<T>({
-    root,
-    walker,
-  }: tree<T>): Map<string, T> {
+  export function flatten<T>({ root, walker }: tree<T>) {
     const result = new Map<string, T>();
-    function dfs(node: T, path: PathSegment[]): void {
+
+    function processNode(
+      node: T,
+      path: PathSegment[] = [],
+    ): void {
+      path = [...path, walker.extract(node)];
       result.set(walker.join(path), node);
-      const childPath = [...path, walker.extract(node)];
       for (const child of walker.children(node)) {
-        dfs(child, childPath);
+        processNode(child, path);
       }
     }
 
-    dfs(root, []);
+    processNode(root);
     return result;
   }
 
-  export function resolve<T>({ root, walker }: tree<T>) {
-    const chainResolver = resolveChain({ root, walker });
-
-    return (path: PathSegment[]) => {
-      const chain = chainResolver(path);
-      if (!chain) return undefined;
-      return {
-        entity: chain[chain.length - 1].node,
-        path: chain.map((n) => n.segment),
-      };
-    };
-  }
-
-  export function resolveChain<T>({
+  export function resolveByFullPath<T>({
     root,
     walker,
   }: tree<T>) {
+    // path includes root
+    return (path: PathSegment[]): T[] | undefined => {
+      const result: T[] = [root];
+      let current = root;
+
+      for (const segment of path) {
+        const child = walker
+          .children(current)
+          .find((c) => walker.match(segment, c));
+        if (!child) return undefined;
+        result.push(child);
+        current = child;
+      }
+
+      return result;
+    };
+  }
+
+  export function resolveByPartialPath<T>({
+    root,
+    walker,
+  }: tree<T>) {
+    type TreeChainNode<T> = {
+      node: T;
+      parent: T | undefined;
+      segment: PathSegment;
+    };
+
+    function chainedToPath(chain: TreeChainNode<T>[]) {
+      if (chain.length === 0) return undefined;
+      return {
+        entity: chain[chain.length - 1].node,
+        path: chain.map((n) => n.segment),
+        chain: chain.map((n) => n.node),
+      };
+    }
+
     return (path: PathSegment[]) => {
       const rootMatches = new Set<number>([0]);
-      if (walker.match(path[0], root)) rootMatches.add(1);
+      if (path.length > 0 && walker.match(path[0], root))
+        rootMatches.add(1);
       if (rootMatches.has(path.length)) {
-        return [
+        return chainedToPath([
           {
             node: root,
             parent: undefined,
             segment: walker.extract(root),
           },
-        ];
+        ]);
       }
 
       const queue: Array<{
@@ -105,12 +120,15 @@ export namespace TreeUtils {
             }
           }
 
-          if (walker.match(path[0], child)) {
+          if (
+            path.length > 0 &&
+            walker.match(path[0], child)
+          ) {
             childMatches.add(1);
           }
 
           if (childMatches.has(path.length)) {
-            return childChain;
+            return chainedToPath(childChain);
           }
 
           queue.push({

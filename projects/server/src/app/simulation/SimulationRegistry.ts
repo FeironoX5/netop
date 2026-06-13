@@ -1,10 +1,5 @@
 import { SimulationEntity } from '@entites/SimulationEntity';
-import {
-  PathSegment,
-  Simulation as SimulationTypes,
-} from '@netop/types';
-import { TreeUtils } from '@netop/utils';
-import { simulationTreeWalker } from '@simulation/helpers/simulationTreeWalker';
+import { Simulation as SimulationTypes } from '@netop/types';
 import { Simulation } from './Simulation';
 
 type DetailsOf<T extends SimulationEntity> =
@@ -13,10 +8,10 @@ type DetailsOf<T extends SimulationEntity> =
 type EntityManager<
   T extends SimulationEntity = SimulationEntity,
 > = {
-  // use only if you don't want result to be cached
+  // use directly only if you don't want result to be cached
   from: new (
     e: SimulationTypes.Entity,
-    p?: SimulationTypes.Entity,
+    p?: SimulationEntity | null,
   ) => T;
   tick: (
     e: SimulationTypes.Entity & { details?: DetailsOf<T> },
@@ -27,6 +22,12 @@ type EntityManager<
   ) => SimulationTypes.Entity & { details?: DetailsOf<T> };
 };
 
+/** Used to:
+ * - store behaviours and entity managers
+ * - translate entity data to entity instance
+ * - cache entity instances
+ * - access simulation state
+ */
 export class SimulationRegistry {
   static behaviours: Record<
     string,
@@ -58,7 +59,7 @@ export class SimulationRegistry {
   }
 
   static getManager(category: SimulationTypes.Category) {
-    const entry = SimulationRegistry.managers[category];
+    const entry = this.managers[category];
     if (!entry)
       throw new Error(
         `Entity category ${category} not registered. Use one of ${Object.keys(SimulationRegistry.managers).join(', ')}.`,
@@ -76,49 +77,27 @@ export class SimulationRegistry {
     return this.simulation;
   }
 
-  static getRootEntity() {
-    return this.getEntity(this.get().root);
+  static root() {
+    return this.get().rootEntity;
   }
 
-  static getEntity<
+  static fromChain<
     T extends SimulationEntity = SimulationEntity,
-  >(e: SimulationTypes.Entity, path?: PathSegment[]): T {
-    const cached = SimulationRegistry.entities.get(e) as
-      | T
-      | undefined;
-    if (cached) return cached;
+  >(
+    chain: SimulationTypes.Entity[],
+    parent: SimulationEntity | null = null,
+  ): T {
+    const [e, ...rest] = chain;
+    if (!e) throw new Error('Empty chain');
 
-    if (!path || path.length === 0) {
-      return this.createEntity(e, e) as T;
+    let entity = this.entities.get(e) as T | undefined;
+    if (!entity) {
+      const Ctor = this.getManager(e.category).from;
+      entity = new Ctor(e, parent) as T;
+      this.entities.set(e, entity);
     }
 
-    const chain = TreeUtils.resolveChain({
-      root: this.get().root,
-      walker: simulationTreeWalker,
-    })(path);
-
-    if (!chain) {
-      throw new Error(
-        `path "${path.join(':')}" does not resolve to any entity`,
-      );
-    }
-
-    for (const { node, parent } of chain) {
-      if (!SimulationRegistry.entities.has(node)) {
-        this.createEntity(node, parent ?? node);
-      }
-    }
-
-    return SimulationRegistry.entities.get(e) as T;
-  }
-
-  private static createEntity(
-    e: SimulationTypes.Entity,
-    parent: SimulationTypes.Entity,
-  ): SimulationEntity {
-    const Ctor = this.getManager(e.category).from;
-    const entity = new Ctor(e, parent);
-    SimulationRegistry.entities.set(e, entity);
-    return entity;
+    if (rest.length === 0) return entity;
+    return this.fromChain(rest, entity);
   }
 }

@@ -18,8 +18,6 @@ export const simulationUndoHandler =
   new SimulationUndoHandler();
 
 export const actionHandler = new ActionHandler([
-  getSimulationEntityFactory(
-    SimulationRegistry.getRootEntity(),
-  ),
+  getSimulationEntityFactory(),
   getSimulationEventFactory(),
 ]);

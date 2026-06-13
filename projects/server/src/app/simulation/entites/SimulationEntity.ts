@@ -1,6 +1,5 @@
 import { PathSegment, Simulation } from '@netop/types';
 import { EventTarget } from '@netop/utils';
-import { SimulationRegistry } from '../SimulationRegistry';
 
 export abstract class SimulationEntity<
   DetailsType = {},
@@ -11,7 +10,7 @@ export abstract class SimulationEntity<
 
   constructor(
     private e: Simulation.Entity,
-    private p: Simulation.Entity = e,
+    private p: SimulationEntity | null = null,
   ) {
     super();
   }
@@ -41,15 +40,12 @@ export abstract class SimulationEntity<
   }
 
   get parent() {
-    return this.p === this.e ? null : this.p;
+    return this.p;
   }
 
   get path(): PathSegment[] {
     return this.parent
-      ? [
-          ...SimulationRegistry.getEntity(this.parent).path,
-          this.id,
-        ]
+      ? [...this.parent.path, this.id]
       : [this.id];
   }
 
@@ -96,7 +92,7 @@ export abstract class SimulationEntity<
     const parent = this.parent;
     if (!parent) return;
 
-    SimulationRegistry.getEntity(parent).call({
+    parent.call({
       ...event,
       path: [this.id, ...event.path],
     });

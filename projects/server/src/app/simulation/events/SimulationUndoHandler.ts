@@ -6,14 +6,9 @@ export class SimulationUndoHandler {
   private history = new Map<string, Simulation.Event>();
 
   constructor() {
-    SimulationRegistry.getRootEntity().subscribe(
-      (event) => {
-        this.history.set(
-          String(this.eventCounter++),
-          event,
-        );
-      },
-    );
+    SimulationRegistry.root().subscribe((event) => {
+      this.history.set(String(this.eventCounter++), event);
+    });
   }
 
   undo(eventId: string): void {

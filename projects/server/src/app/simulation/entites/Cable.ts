@@ -79,7 +79,10 @@ export class Cable extends SimulationEntity<{
     });
   }
 
-  constructor(e: Simulation.Entity, p?: Simulation.Entity) {
+  constructor(
+    e: Simulation.Entity,
+    p?: SimulationEntity | null,
+  ) {
     super(e, p);
     if (typeof this.details.delay !== 'number') {
       throw new Error('Cable must have delay');
