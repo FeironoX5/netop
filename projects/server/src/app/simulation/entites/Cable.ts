@@ -1,5 +1,4 @@
-import { CableCategory, Simulation } from '@netop/types';
-import { SimulationRegistry } from '@simulation/SimulationRegistry';
+import { Simulation } from '@netop/types';
 import { SimulationEntity } from './SimulationEntity';
 
 interface Transit {
@@ -19,64 +18,58 @@ export class Cable extends SimulationEntity<{
   rightOutput?: 0 | 1;
 }> {
   static {
-    SimulationRegistry.setManager(CableCategory, {
-      build(id) {
-        return {
-          id,
-          category: CableCategory,
-          details: {
-            delay: 1,
-            currentTick: 0,
-            l2r: [],
-            r2l: [],
-          },
-        };
-      },
-      from: Cable,
-      tick(e) {
-        const cable = new this.from(e);
-        const d = cable.details;
-
-        d.currentTick += 1;
-
-        d.leftOutput = undefined;
-        d.rightOutput = undefined;
-
-        if (d.leftInput !== undefined) {
-          d.l2r.push({
-            symbol: d.leftInput,
-            sentAt: d.currentTick,
-          });
-          d.leftInput = undefined;
-        }
-
-        if (d.rightInput !== undefined) {
-          d.r2l.push({
-            symbol: d.rightInput,
-            sentAt: d.currentTick,
-          });
-          d.rightInput = undefined;
-        }
-
-        const rightHead = d.l2r[0];
-        if (
-          rightHead &&
-          d.currentTick - rightHead.sentAt >= d.delay
-        ) {
-          d.rightOutput = rightHead.symbol;
-          d.l2r.shift();
-        }
-
-        const leftHead = d.r2l[0];
-        if (
-          leftHead &&
-          d.currentTick - leftHead.sentAt >= d.delay
-        ) {
-          d.leftOutput = leftHead.symbol;
-          d.r2l.shift();
-        }
-      },
-    });
+    // SimulationRegistry.setManager(, {
+    //   build(id) {
+    //     return {
+    //       id,
+    //       category: CableCategory,
+    //       details: {
+    //         delay: 1,
+    //         currentTick: 0,
+    //         l2r: [],
+    //         r2l: [],
+    //       },
+    //     };
+    //   },
+    //   from: Cable,
+    //   tick(e) {
+    //     const cable = new this.from(e);
+    //     const d = cable.details;
+    //     d.currentTick += 1;
+    //     d.leftOutput = undefined;
+    //     d.rightOutput = undefined;
+    //     if (d.leftInput !== undefined) {
+    //       d.l2r.push({
+    //         symbol: d.leftInput,
+    //         sentAt: d.currentTick,
+    //       });
+    //       d.leftInput = undefined;
+    //     }
+    //     if (d.rightInput !== undefined) {
+    //       d.r2l.push({
+    //         symbol: d.rightInput,
+    //         sentAt: d.currentTick,
+    //       });
+    //       d.rightInput = undefined;
+    //     }
+    //     const rightHead = d.l2r[0];
+    //     if (
+    //       rightHead &&
+    //       d.currentTick - rightHead.sentAt >= d.delay
+    //     ) {
+    //       d.rightOutput = rightHead.symbol;
+    //       d.l2r.shift();
+    //     }
+    //     const leftHead = d.r2l[0];
+    //     if (
+    //       leftHead &&
+    //       d.currentTick - leftHead.sentAt >= d.delay
+    //     ) {
+    //       d.leftOutput = leftHead.symbol;
+    //       d.r2l.shift();
+    //     }
+    //   },
+    // });
   }
 
   constructor(

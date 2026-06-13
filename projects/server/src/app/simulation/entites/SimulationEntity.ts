@@ -1,9 +1,10 @@
 import { PathSegment, Simulation } from '@netop/types';
 import { ActionCodec, EventTarget } from '@netop/utils';
+import { SimulationEvent } from '../events/types';
 
 export abstract class SimulationEntity<
   DetailsType = {},
-> extends EventTarget<Simulation.Event> {
+> extends EventTarget<SimulationEvent.type> {
   static ALLOWED_CHILD_CATEGORIES:
     | Simulation.Category[]
     | null = [];
@@ -86,7 +87,9 @@ export abstract class SimulationEntity<
     return removed;
   }
 
-  protected override call(event: Simulation.Event): void {
+  protected override call(
+    event: SimulationEvent.type,
+  ): void {
     super.call(event);
 
     const parent = this.parent;
@@ -94,7 +97,7 @@ export abstract class SimulationEntity<
 
     parent.call({
       ...event,
-      path: [this.id, ...event.path],
+      parentPath: [this.id, ...(event.parentPath || [])],
     });
   }
 }

@@ -101,7 +101,8 @@ console.log(`runs on ${server.port} port`);
 
 SimulationRegistry.root().subscribe((event) => {
   let serverMessage: ServerMessage;
-  switch (event.type) {
+  if (event.scope === 'connection') return;
+  switch (event.operation) {
     case 'create':
       serverMessage = {
         type: ServerMessageType.EntityCreate,
@@ -117,8 +118,8 @@ SimulationRegistry.root().subscribe((event) => {
     case 'delete':
       serverMessage = {
         type: ServerMessageType.EntityDelete,
-        path: event.path,
-        id: event.oldData.id,
+        path: event.parentPath,
+        id: event.data.id,
       };
       break;
     default:

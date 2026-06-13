@@ -1,16 +1,13 @@
 import type { PathSegment } from '../action';
-import { CableCategory } from './cable';
 import { DeviceCategory } from './device';
 import { SceneCategory } from './scene';
 
 export * from './device';
 export * from './scene';
-export * from './cable';
 
 export namespace Simulation {
   export type Category =
     | DeviceCategory
-    | typeof CableCategory
     | typeof SceneCategory;
 
   export type Entity = {
@@ -21,17 +18,10 @@ export namespace Simulation {
     details?: object;
   };
 
-  export type Event =
-    | { type: 'create'; path: PathSegment[]; data: Entity }
-    | {
-        type: 'update';
-        path: PathSegment[];
-        data: Entity;
-        oldData: Entity;
-      }
-    | {
-        type: 'delete';
-        path: PathSegment[];
-        oldData: Entity;
-      };
+  export type Connection = {
+    id: string;
+    type: 'duplex';
+    left: { path: PathSegment[]; port: number };
+    right: { path: PathSegment[]; port: number };
+  };
 }
