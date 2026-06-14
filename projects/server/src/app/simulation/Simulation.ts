@@ -44,4 +44,11 @@ export class Simulation {
     if (!chain) return undefined;
     return SimulationRegistry.fromChain(chain);
   }
+
+  resolveConnection(id: string) {
+    const c = this.connections.find((c) => c.id === id);
+    return c
+      ? SimulationRegistry.getConnection(c)
+      : undefined;
+  }
 }

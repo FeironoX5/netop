@@ -14,12 +14,29 @@ type Transit = {
 //TODO implement other types of connections
 export class SimulationConnection extends EventTarget<SimulationEvent.type> {
   constructor(
-    private c: Simulation.Connection,
+    public c: Simulation.Connection,
     private currentTick: number = 0,
     private l2r: Transit = { buffer: [], timestamps: [] },
     private r2l: Transit = { buffer: [], timestamps: [] },
   ) {
     super();
+  }
+
+  static build(
+    leftFullPath: PathSegment[],
+    leftPort: number,
+    rightFullPath: PathSegment[],
+    rightPort: number,
+    speed: number = 1,
+    delay: number = 0,
+  ): SimulationConnection {
+    return new SimulationConnection({
+      id: crypto.randomUUID(),
+      left: { path: leftFullPath, port: leftPort },
+      right: { path: rightFullPath, port: rightPort },
+      speed,
+      delay,
+    });
   }
 
   get id() {
