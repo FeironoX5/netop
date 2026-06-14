@@ -3,7 +3,7 @@ import { ActionCodec, EventTarget } from '@netop/utils';
 import { SimulationEvent } from '../events/types';
 
 export abstract class SimulationEntity<
-  DetailsType = {},
+  DetailsType extends object = {},
 > extends EventTarget<SimulationEvent.type> {
   static ALLOWED_CHILD_CATEGORIES:
     | Simulation.Category[]
@@ -30,6 +30,18 @@ export abstract class SimulationEntity<
 
   get details() {
     return (this.e.details || {}) as DetailsType;
+  }
+
+  set details(details: DetailsType) {
+    const oldDetails = this.e.details;
+    this.e.details = details;
+    this.call({
+      scope: 'entity',
+      operation: 'update',
+      parentPath: this.path,
+      data: this.e,
+      oldData: { ...this.e, details: oldDetails },
+    });
   }
 
   get children() {
@@ -75,6 +87,12 @@ export abstract class SimulationEntity<
       );
     }
     this.e.children = this.children.concat(child);
+    this.call({
+      scope: 'entity',
+      operation: 'create',
+      parentPath: this.path,
+      data: child,
+    });
   }
 
   removeChild(id: string): Simulation.Entity {
@@ -84,6 +102,12 @@ export abstract class SimulationEntity<
     if (index === -1)
       throw new Error(`Child not found: ${id}`);
     const [removed] = this.e.children!.splice(index, 1);
+    this.call({
+      scope: 'entity',
+      operation: 'delete',
+      parentPath: this.path,
+      data: removed,
+    });
     return removed;
   }
 
@@ -91,11 +115,11 @@ export abstract class SimulationEntity<
     super.call(event);
 
     const parent = this.parent;
-    if (!parent) return;
+    if (!parent || event.scope !== 'entity') return;
 
     parent.call({
       ...event,
-      parentPath: [this.id, ...(event.parentPath || [])],
+      parentPath: [this.id, ...event.parentPath],
     });
   }
 }

@@ -1,4 +1,4 @@
-import { EventTarget } from '@netop/utils';
+import { SimulationRegistry } from '../SimulationRegistry';
 import { SimulationEvent } from './types';
 
 type ScopeApplier = (event: SimulationEvent.type) => void;
@@ -8,13 +8,12 @@ export class SimulationUndoHandler {
   private history = new Map<string, SimulationEvent.type>();
 
   constructor(
-    private eventSource: EventTarget<SimulationEvent.type>,
     private scopes: Record<
       SimulationEvent.type['scope'],
       ScopeApplier
     >,
   ) {
-    this.eventSource.subscribe((e) => {
+    SimulationRegistry.get().eventBus.subscribe((e) => {
       this.history.set(String(this.eventCounter++), e);
     });
   }

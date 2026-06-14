@@ -1,7 +1,4 @@
-import {
-  actionHandler,
-  simulationEventSource,
-} from '@app/main';
+import { actionHandler } from '@app/main';
 import {
   ClientMessageType,
   ServerMessageType,
@@ -62,12 +59,11 @@ const server = Bun.serve({
   routes: {
     '/scene': {
       GET: () => {
-        //TODO change
         const flatScene = TreeUtils.flatten({
           root: SimulationRegistry.get().root,
           walker: simulationTreeWalker,
         });
-        return Response.json(flatScene);
+        return Response.json(Object.fromEntries(flatScene));
       },
     },
   },
@@ -102,7 +98,7 @@ const server = Bun.serve({
 
 console.log(`runs on ${server.port} port`);
 
-simulationEventSource.subscribe((event) => {
+SimulationRegistry.get().eventBus.subscribe((event) => {
   let serverMessage: ServerMessage;
   if (event.scope === 'connection') return;
   switch (event.operation) {

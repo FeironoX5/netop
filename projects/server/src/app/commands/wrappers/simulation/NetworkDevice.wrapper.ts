@@ -23,7 +23,7 @@ export const NetworkDeviceWrapper: EntityWrapper<NetworkDevice> =
               ActionCodec.split(targetPath),
             );
             if (!target) return 'Target not found';
-            SimulationRegistry.get().connections.push(
+            SimulationRegistry.get().addConnection(
               SimulationConnection.build(
                 entity.path,
                 Number(port),

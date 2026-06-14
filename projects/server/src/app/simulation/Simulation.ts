@@ -2,16 +2,24 @@ import {
   PathSegment,
   Simulation as SimulationType,
 } from '@netop/types';
-import { Timer, TreeUtils } from '@netop/utils';
+import {
+  Timer,
+  TreeUtils,
+  EventTarget,
+} from '@netop/utils';
 import { simulationTreeWalker } from '@simulation/helpers/simulationTreeWalker';
+import { SimulationEvent } from './events/types';
 import { SimulationRegistry } from './SimulationRegistry';
 
 export class Simulation {
   constructor(
     public root: SimulationType.Entity,
-    public connections: SimulationType.Connection[] = [],
-    public timer: Timer = new Timer(() => this.tick()),
-  ) {}
+    private connections: SimulationType.Connection[] = [],
+    public eventBus = new EventTarget<SimulationEvent.type>(),
+    private timer = new Timer(() => this.tick()),
+  ) {
+    this.rootEntity.subscribe(this.eventBus.call);
+  }
 
   tick() {
     SimulationRegistry.getManager(this.root.category).tick(
@@ -53,6 +61,29 @@ export class Simulation {
     })(path);
     if (!chain) return undefined;
     return SimulationRegistry.fromChain(chain);
+  }
+
+  addConnection(connection: SimulationType.Connection) {
+    this.connections.push(connection);
+    this.eventBus.call({
+      scope: 'connection',
+      operation: 'create',
+      data: connection,
+    });
+  }
+
+  removeConnection(id: string) {
+    const index = this.connections.findIndex(
+      (c) => c.id === id,
+    );
+    if (index === -1) return false;
+    const r = this.connections.splice(index, 1);
+    this.eventBus.call({
+      scope: 'connection',
+      operation: 'delete',
+      data: r[0],
+    });
+    return true;
   }
 
   resolveConnection(id: string) {

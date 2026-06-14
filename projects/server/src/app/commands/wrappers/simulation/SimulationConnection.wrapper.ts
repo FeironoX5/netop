@@ -11,20 +11,12 @@ export const SimulationConnectionWrapper: EntityWrapper<SimulationConnection> =
         {
           info: 'Deletes the simulation connection',
           args: [],
-          fn: (entity) => {
-            const i =
-              SimulationRegistry.get().connections.findIndex(
-                (c) => c.id === entity.id,
-              );
-            if (i > -1) {
-              SimulationRegistry.get().connections.splice(
-                i,
-                1,
-              );
-              return 'Connection deleted';
-            }
-            return 'Connection not found';
-          },
+          fn: (entity) =>
+            SimulationRegistry.get().removeConnection(
+              entity.id,
+            )
+              ? 'Connection deleted'
+              : 'Connection not found',
         },
       ],
     ]),
