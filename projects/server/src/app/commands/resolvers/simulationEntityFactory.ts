@@ -18,19 +18,15 @@ const wrappers: EntityWrapperMap = new Map([
 ]);
 
 export const getSimulationEntityFactory =
-  (): ResolverFactory<SimulationEntity> => {
-    const simulation = SimulationRegistry.get();
-
-    return {
-      resolver: (p) => {
-        const resolved = simulation.resolve(p);
-        if (!resolved) return undefined;
-        const wrapper = wrappers.get(
-          resolved.entity.category,
-        );
-        if (!wrapper) return undefined;
-        return { entity: resolved.entity, wrapper };
-      },
-      wrappers,
-    };
-  };
+  (): ResolverFactory<SimulationEntity> => ({
+    resolver: (p) => {
+      const resolved = SimulationRegistry.get().resolve(p);
+      if (!resolved) return undefined;
+      const wrapper = wrappers.get(
+        resolved.entity.category,
+      );
+      if (!wrapper) return undefined;
+      return { entity: resolved.entity, wrapper };
+    },
+    wrappers,
+  });
