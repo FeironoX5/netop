@@ -62,7 +62,7 @@ const server = Bun.serve({
   routes: {
     '/scene': {
       GET: () => {
-        // todo change
+        //TODO change
         const flatScene = TreeUtils.flatten({
           root: SimulationRegistry.get().root,
           walker: simulationTreeWalker,

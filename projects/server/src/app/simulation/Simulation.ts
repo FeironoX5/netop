@@ -9,11 +9,15 @@ import { SimulationRegistry } from './SimulationRegistry';
 export class Simulation {
   constructor(
     public root: SimulationType.Entity,
-    public timer: Timer = new Timer(() =>
+    public connections: SimulationType.Connection[] = [],
+    public timer: Timer = new Timer(() => {
       SimulationRegistry.getManager(
         this.root.category,
-      ).tick(this.root),
-    ),
+      ).tick(this.root);
+      this.connections.forEach((c) =>
+        SimulationRegistry.getConnection(c).tick(),
+      );
+    }),
   ) {}
 
   get rootEntity() {

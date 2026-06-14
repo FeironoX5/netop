@@ -20,8 +20,10 @@ export namespace Simulation {
 
   export type Connection = {
     id: string;
-    type: 'duplex';
     left: { path: PathSegment[]; port: number };
     right: { path: PathSegment[]; port: number };
+    direction: 'left' | 'right';
+    speed: number;
+    delay: number;
   };
 }

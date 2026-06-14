@@ -1,15 +1,8 @@
 import { DeviceCategory } from '@netop/types';
-import { IpAddress } from '@simulation/details/IpAddress';
-import { MacAddress } from '@simulation/details/MacAddress';
 import { SimulationRegistry } from '@simulation/SimulationRegistry';
-import { SimulationEntity } from '../SimulationEntity';
+import { NetworkDevice } from './NetworkDevice';
 
-export class NetworkCard extends SimulationEntity<{
-  portsCount?: number;
-  macAddress?: number[];
-  ipAddress?: number[];
-  ports?: (unknown | null)[];
-}> {
+export class NetworkCard extends NetworkDevice {
   static {
     SimulationRegistry.setManager(
       DeviceCategory.NETWORK_CARD,
@@ -18,12 +11,7 @@ export class NetworkCard extends SimulationEntity<{
           id,
           category: DeviceCategory.NETWORK_CARD,
           name,
-          details: {
-            portsCount: 1,
-            macAddress: Array.from(MacAddress.generate()),
-            ipAddress: Array.from(IpAddress.generate()),
-            ports: [null],
-          },
+          details: { ports: [] },
         }),
         from: NetworkCard,
         tick(e) {

@@ -1,6 +1,7 @@
 import { SimulationEntity } from '@entites/SimulationEntity';
 import { Simulation as SimulationTypes } from '@netop/types';
 import { Simulation } from './Simulation';
+import { SimulationConnection } from './SimulationConnection';
 
 type DetailsOf<T extends SimulationEntity> =
   T extends SimulationEntity<infer D> ? D : never;
@@ -49,6 +50,11 @@ export class SimulationRegistry {
     SimulationEntity
   >();
 
+  private static connections = new WeakMap<
+    SimulationTypes.Connection,
+    SimulationConnection
+  >();
+
   private static simulation?: Simulation;
 
   static setManager<T extends SimulationEntity>(
@@ -64,6 +70,18 @@ export class SimulationRegistry {
       throw new Error(
         `Entity category ${category} not registered. Use one of ${Object.keys(SimulationRegistry.managers).join(', ')}.`,
       );
+    return entry;
+  }
+
+  static getConnection(
+    connection: SimulationTypes.Connection,
+  ) {
+    const entry =
+      this.connections.get(connection) ||
+      new SimulationConnection(connection);
+    if (!this.connections.has(connection)) {
+      this.connections.set(connection, entry);
+    }
     return entry;
   }
 
