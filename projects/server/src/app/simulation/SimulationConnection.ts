@@ -5,12 +5,19 @@ import { NetworkDevice } from './entites/devices/NetworkDevice';
 import { SimulationEvent } from './events/types';
 import { SimulationRegistry } from './SimulationRegistry';
 
-// half-duplex for now
+type Timestamp = { at: number; n: number };
+type Transit = {
+  buffer: Bit.type[];
+  timestamps: Timestamp[];
+};
+
 //TODO implement other types of connections
 export class SimulationConnection extends EventTarget<SimulationEvent.type> {
   constructor(
     private c: Simulation.Connection,
-    private buffer: Bit.type[] = [],
+    private currentTick: number = 0,
+    private l2r: Transit = { buffer: [], timestamps: [] },
+    private r2l: Transit = { buffer: [], timestamps: [] },
   ) {
     super();
   }
@@ -25,14 +32,6 @@ export class SimulationConnection extends EventTarget<SimulationEvent.type> {
 
   get right() {
     return this.c.right;
-  }
-
-  get direction() {
-    return this.c.direction;
-  }
-
-  set direction(d: Simulation.Connection['direction']) {
-    this.c.direction = d;
   }
 
   get speed() {
@@ -50,20 +49,36 @@ export class SimulationConnection extends EventTarget<SimulationEvent.type> {
     return e.ports(d.port);
   }
 
-  get target() {
-    return this.direction === 'left'
-      ? this.port(this.right)
-      : this.port(this.left);
-  }
+  passSymbols(
+    from: ReturnType<typeof this.port>,
+    to: ReturnType<typeof this.port>,
+    transit: Transit,
+  ) {
+    if (
+      transit.timestamps.length > 0 &&
+      transit.timestamps[0].at === this.currentTick
+    ) {
+      const ts = transit.timestamps.shift()!;
+      to.in.push(...transit.buffer.splice(0, ts.n));
+    }
 
-  get source() {
-    return this.direction === 'left'
-      ? this.port(this.left)
-      : this.port(this.right);
+    const readSymbols = from.in.splice(0, this.speed);
+    if (readSymbols.length === 0) return;
+    transit.buffer.push(...readSymbols);
+    transit.timestamps.push({
+      at: this.currentTick,
+      n: readSymbols.length,
+    });
   }
 
   tick() {
-    this.buffer.push(...this.source);
-    this.source.length = 0;
+    const left = this.port(this.left);
+    const right = this.port(this.right);
+
+    this.passSymbols(left, right, this.l2r);
+    this.passSymbols(right, left, this.r2l);
+
+    this.currentTick =
+      (this.currentTick + 1) % this.c.delay;
   }
 }

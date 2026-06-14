@@ -22,8 +22,9 @@ export namespace Simulation {
     id: string;
     left: { path: PathSegment[]; port: number };
     right: { path: PathSegment[]; port: number };
-    direction: 'left' | 'right';
+    // symbols per tick
     speed: number;
+    // ticks to deliver
     delay: number;
   };
 }
