@@ -6,6 +6,7 @@ import { SimulationEvent } from '@simulation/events/types';
 import { Simulation } from '@simulation/Simulation';
 import { SimulationRegistry } from '@simulation/SimulationRegistry';
 import '@entites';
+import { getSimulationConnectionFactory } from './commands/resolvers/simulationConnectionFactory';
 import { getSimulationEntityFactory } from './commands/resolvers/simulationEntityFactory';
 import { getSimulationEventFactory } from './commands/resolvers/simulationEventFactory';
 
@@ -34,5 +35,6 @@ export const simulationUndoHandler =
 
 export const actionHandler = new ActionHandler([
   getSimulationEntityFactory(),
+  getSimulationConnectionFactory(),
   getSimulationEventFactory(),
 ]);

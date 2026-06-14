@@ -10,15 +10,25 @@ export class Simulation {
   constructor(
     public root: SimulationType.Entity,
     public connections: SimulationType.Connection[] = [],
-    public timer: Timer = new Timer(() => {
-      SimulationRegistry.getManager(
-        this.root.category,
-      ).tick(this.root);
-      this.connections.forEach((c) =>
-        SimulationRegistry.getConnection(c).tick(),
-      );
-    }),
+    public timer: Timer = new Timer(() => this.tick()),
   ) {}
+
+  tick() {
+    SimulationRegistry.getManager(this.root.category).tick(
+      this.root,
+    );
+    this.connections.forEach((c) =>
+      SimulationRegistry.getConnection(c).tick(),
+    );
+  }
+
+  start() {
+    this.timer.start(500);
+  }
+
+  stop() {
+    this.timer.stop();
+  }
 
   get rootEntity() {
     return SimulationRegistry.fromChain([this.root]);

@@ -11,7 +11,7 @@ export class NetworkCard extends NetworkDevice {
           id,
           category: DeviceCategory.NETWORK_CARD,
           name,
-          details: { ports: [] },
+          details: { ports: [{ in: [], out: [] }] },
         }),
         from: NetworkCard,
         tick(e) {

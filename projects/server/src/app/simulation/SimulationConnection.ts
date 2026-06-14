@@ -28,15 +28,15 @@ export class SimulationConnection extends EventTarget<SimulationEvent.type> {
     rightFullPath: PathSegment[],
     rightPort: number,
     speed: number = 1,
-    delay: number = 0,
-  ): SimulationConnection {
-    return new SimulationConnection({
+    delay: number = 5,
+  ): Simulation.Connection {
+    return {
       id: crypto.randomUUID(),
       left: { path: leftFullPath, port: leftPort },
       right: { path: rightFullPath, port: rightPort },
       speed,
       delay,
-    });
+    };
   }
 
   get id() {
@@ -79,7 +79,7 @@ export class SimulationConnection extends EventTarget<SimulationEvent.type> {
       to.in.push(...transit.buffer.splice(0, ts.n));
     }
 
-    const readSymbols = from.in.splice(0, this.speed);
+    const readSymbols = from.out.splice(0, this.speed);
     if (readSymbols.length === 0) return;
     transit.buffer.push(...readSymbols);
     transit.timestamps.push({
