@@ -18,7 +18,9 @@ export class Simulation {
     public eventBus = new EventTarget<SimulationEvent.type>(),
     private timer = new Timer(() => this.tick()),
   ) {
-    this.rootEntity.subscribe(this.eventBus.call);
+    this.rootEntity.subscribe((event) =>
+      this.eventBus.call(event),
+    );
   }
 
   tick() {

@@ -27,4 +27,32 @@ export namespace Simulation {
     // ticks to deliver
     delay: number;
   };
+
+  export namespace Event {
+    export type Create = { operation: 'create' };
+    export type Update = { operation: 'update' };
+    export type Delete = { operation: 'delete' };
+
+    export type EntityPayload = {
+      data: Simulation.Entity;
+      scope: 'entity';
+      parentPath: PathSegment[];
+    };
+
+    export type ConnectionPayload = {
+      data: Simulation.Connection;
+      scope: 'connection';
+    };
+
+    export type Payload = EntityPayload | ConnectionPayload;
+
+    export type CreateEvent = Create & Payload;
+    export type UpdateEvent = Update & Payload;
+    export type DeleteEvent = Delete & Payload;
+
+    export type type =
+      | CreateEvent
+      | UpdateEvent
+      | DeleteEvent;
+  }
 }

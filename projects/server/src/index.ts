@@ -102,33 +102,14 @@ const server = Bun.serve({
 
 console.log(`runs on ${server.port} port`);
 
-SimulationRegistry.get().eventBus.subscribe((event) => {
-  let serverMessage: ServerMessage;
-  if (event.scope === 'connection') return;
-  switch (event.operation) {
-    case 'create':
-      serverMessage = {
-        type: ServerMessageType.EntityCreate,
-        entity: event.data,
-      };
-      break;
-    case 'update':
-      serverMessage = {
-        type: ServerMessageType.EntityUpdate,
-        entity: event.data,
-      };
-      break;
-    case 'delete':
-      serverMessage = {
-        type: ServerMessageType.EntityDelete,
-        path: event.parentPath,
-        id: event.data.id,
-      };
-      break;
-    default:
-      return;
-  }
-  for (const ws of connections) {
-    send(ws, serverMessage);
-  }
-});
+SimulationRegistry.get().eventBus.subscribe(
+  (simulationEvent) => {
+    const serverMessage: ServerMessage = {
+      type: ServerMessageType.SimulationEvent,
+      event: simulationEvent,
+    };
+    for (const ws of connections) {
+      send(ws, serverMessage);
+    }
+  },
+);

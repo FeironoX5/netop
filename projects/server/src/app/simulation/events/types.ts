@@ -1,37 +1,22 @@
-import { PathSegment, Simulation } from '@netop/types';
+import { Simulation } from '@netop/types';
 
 export namespace SimulationEvent {
-  type CreateEvent = { operation: 'create' };
+  export type CreateType = Simulation.Event.CreateEvent;
 
-  type UpdateEvent = { operation: 'update' };
+  export type DeleteType = Simulation.Event.DeleteEvent;
 
-  type UpdatePayload<P extends Payload> = Omit<
-    P,
-    'data'
-  > & { data: P['data']; oldData: P['data'] };
-
-  type DeleteEvent = { operation: 'delete' };
-
-  type EntityPayload = {
-    data: Simulation.Entity;
-    scope: 'entity';
-    parentPath: PathSegment[];
-  };
-
-  type ConnectionPayload = {
-    data: Simulation.Connection;
-    scope: 'connection';
-  };
-
-  type Payload = EntityPayload | ConnectionPayload;
-
-  type CreateType = CreateEvent & Payload;
-
-  type UpdateType =
-    | (UpdateEvent & UpdatePayload<EntityPayload>)
-    | (UpdateEvent & UpdatePayload<ConnectionPayload>);
-
-  type DeleteType = DeleteEvent & Payload;
+  export type UpdateType =
+    | (Simulation.Event.Update & {
+        data: Simulation.Event.EntityPayload['data'];
+        scope: 'entity';
+        parentPath: Simulation.Event.EntityPayload['parentPath'];
+        oldData: Simulation.Event.EntityPayload['data'];
+      })
+    | (Simulation.Event.Update & {
+        data: Simulation.Event.ConnectionPayload['data'];
+        scope: 'connection';
+        oldData: Simulation.Event.ConnectionPayload['data'];
+      });
 
   export type type = CreateType | UpdateType | DeleteType;
 }
