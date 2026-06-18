@@ -33,17 +33,13 @@
       />
     </div>
     <div class="action-area">
-      <Button
-        icon="trash"
-        text="Clear"
-        @click="wsService.log.value = []"
-      />
+      <Button icon="trash" text="Clear" />
     </div>
     <div class="output-area" ref="outputArea">
       <div class="inline-container column reversed">
         <div
           class="inline-container column output-item"
-          v-for="entry in filteredLog"
+          v-for="entry in [] as any[]"
           :key="entry.id"
         >
           <span class="output-item-content">
@@ -98,17 +94,7 @@ import {
   useFocus,
   useScroll,
 } from '@vueuse/core';
-import {
-  computed,
-  onMounted,
-  ref,
-  useTemplateRef,
-  watch,
-} from 'vue';
-import {
-  wsService,
-  type LogEntry,
-} from '@/app/services/wsService';
+import { onMounted, ref, useTemplateRef } from 'vue';
 import { useHandlers } from './ConsoleView.comps';
 import { FILTER_ITEMS } from './ConsoleView.consts';
 import {
@@ -128,6 +114,7 @@ const outputArea = useTemplateRef<HTMLElement | null>(
 const input = ref('');
 const filterCollapsed = ref<boolean>(true);
 const activeItemIndexes = ref<number[]>([]);
+const commandPending = ref(false);
 
 const { copy } = useClipboard();
 const { focused } = useFocus(promptTextarea as any, {
@@ -141,27 +128,10 @@ const handlers = useHandlers(
   focused,
   outputArea,
   scrollY,
-);
-
-const activeTypes = computed<ServerMessage['type'][]>(() =>
-  activeItemIndexes.value.length === 0
-    ? Object.values(ServerMessageType)
-    : activeItemIndexes.value.map(
-        (i) => Object.values(ServerMessageType)[i]!,
-      ),
-);
-
-const filteredLog = computed(() =>
-  wsService.log.value.filter((e) =>
-    activeTypes.value.includes(e.message.type),
-  ),
+  commandPending,
 );
 
 onMounted(handlers.mount);
-
-watch(() => filteredLog.value.length, handlers.logChange, {
-  flush: 'post',
-});
 </script>
 
 <style scoped>

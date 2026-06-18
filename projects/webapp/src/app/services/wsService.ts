@@ -1,153 +1,130 @@
 import {
   ClientMessageType,
-  ServerMessageType,
   type ClientMessage,
   type ServerMessage,
 } from '@netop/types';
-import { WebSocket as PartyWebSocket } from 'partysocket';
-import { ref } from 'vue';
+import { useWebSocket } from '@vueuse/core';
+import {
+  computed,
+  effectScope,
+  readonly,
+  ref,
+  watch,
+  type ShallowRef,
+} from 'vue';
+import { useAppStore } from '../stores/appStore';
 
-const WS_HOST = 'localhost';
-const DEFAULT_WS_PORT = 3001;
+export type WsStatus = 'OPEN' | 'CONNECTING' | 'CLOSED';
 
-export enum WsConnectionStatus {
-  Connected = 'connected',
-  Connecting = 'connecting',
-  Disconnected = 'disconnected',
-}
+export type WsMessageHandler = (
+  message: ServerMessage,
+) => void;
 
-export type LogEntry = {
-  id: number;
-  timestamp: Date;
-  message: ServerMessage;
-};
+export class WsService {
+  private scope = effectScope();
 
-let counter = 0;
+  constructor() {
+    this.scope = effectScope();
+  }
+  private handlers = new Set<WsMessageHandler>();
 
-class WsService {
-  readonly log = ref<LogEntry[]>([]);
-  readonly connected = ref(false);
-  readonly port = ref(DEFAULT_WS_PORT);
-  readonly status = ref(WsConnectionStatus.Disconnected);
-  readonly commandPending = ref(false);
+  private _status = ref<WsStatus>('CLOSED');
+  private _outbox = ref<ClientMessage[]>([]);
 
-  private socket: PartyWebSocket | null = null;
-  private outbox: string[] = [];
+  private socket: ShallowRef<WebSocket | undefined> | null =
+    null;
+  private close?: () => void;
+  private open?: () => void;
+
+  readonly status = readonly(this._status);
+  readonly outbox = readonly(this._outbox);
 
   connect() {
-    if (this.socket) {
-      if (
-        this.socket.readyState !== WebSocket.CLOSING &&
-        this.socket.readyState !== WebSocket.CLOSED
-      ) {
-        return;
-      }
+    if (this.socket) return;
 
-      this.socket = null;
-    }
+    this.scope.run(() => {
+      const { connection } = useAppStore();
+      const url = computed(() =>
+        connection
+          ? `ws://${connection.url}:${connection.port}`
+          : undefined,
+      );
 
-    this.status.value = WsConnectionStatus.Connecting;
+      const { status, close, open, ws } = useWebSocket(
+        url,
+        {
+          autoReconnect: { retries: Infinity, delay: 1000 },
+          onMessage: (_ws, event) => {
+            try {
+              const message = JSON.parse(
+                event.data,
+              ) as ServerMessage;
+              this.handlers.forEach((handler) =>
+                handler(message),
+              );
+            } catch {
+              // ignore malformed messages
+            }
+          },
+        },
+      );
 
-    const ws = new PartyWebSocket(this.url, [], {
-      connectionTimeout: 4000,
-      maxEnqueuedMessages: 100,
-      maxRetries: 1,
+      watch(
+        status,
+        (value) => {
+          this._status.value = value;
+          if (value === 'OPEN') {
+            this.flushOutbox();
+          }
+        },
+        { immediate: true },
+      );
+
+      this.socket = ws;
+      this.close = close;
+      this.open = open;
     });
-
-    ws.onopen = () => {
-      if (this.socket !== ws) return;
-      this.connected.value = true;
-      this.status.value = WsConnectionStatus.Connected;
-      this.flushOutbox();
-    };
-
-    ws.onclose = () => {
-      if (this.socket !== ws) return;
-      this.connected.value = false;
-      this.status.value = WsConnectionStatus.Connecting;
-    };
-
-    ws.onmessage = (event: MessageEvent<string>) => {
-      try {
-        const message = JSON.parse(
-          event.data,
-        ) as ServerMessage;
-        this.log.value.push({
-          id: counter++,
-          timestamp: new Date(),
-          message,
-        });
-        if (
-          message.type ===
-            ServerMessageType.ActionResponse ||
-          message.type === ServerMessageType.Error
-        ) {
-          this.commandPending.value = false;
-        }
-      } catch {
-        // ignore malformed messages
-      }
-    };
-
-    this.socket = ws;
-  }
-
-  connectToPort(port: number) {
-    this.port.value = port;
-    this.recreateSocket();
   }
 
   disconnect() {
-    this.socket?.close();
+    this.close?.();
     this.socket = null;
-    this.outbox = [];
-    this.connected.value = false;
-    this.commandPending.value = false;
-    this.status.value = WsConnectionStatus.Disconnected;
+    this.close = undefined;
+    this.open = undefined;
+    this.scope.stop();
+    this.scope = effectScope();
+  }
+
+  reconnect() {
+    this.open?.();
   }
 
   send(message: ClientMessage) {
-    this.outbox.push(JSON.stringify(message));
-    this.connect();
+    this._outbox.value.push(message);
     this.flushOutbox();
   }
 
-  sendCommand(command: string) {
-    this.commandPending.value = true;
-
-    try {
-      this.send({
-        type: ClientMessageType.Action,
-        body: command,
-      });
-    } catch (error) {
-      this.commandPending.value = false;
-      throw error;
-    }
+  sendCommand(body: string) {
+    this.send({ type: ClientMessageType.Action, body });
   }
 
-  get url() {
-    return `ws://${WS_HOST}:${this.port.value}`;
-  }
-
-  get label() {
-    return `${WS_HOST}:${this.port.value}`;
-  }
-
-  private recreateSocket() {
-    this.socket?.close();
-    this.socket = null;
-    this.connected.value = false;
-    this.connect();
+  subscribe(handler: WsMessageHandler): () => void {
+    this.handlers.add(handler);
+    return () => this.handlers.delete(handler);
   }
 
   private flushOutbox() {
-    if (this.socket?.readyState !== WebSocket.OPEN) return;
+    if (
+      !this.socket?.value ||
+      this.socket.value.readyState !== WebSocket.OPEN
+    ) {
+      return;
+    }
 
-    while (this.outbox.length) {
-      const message = this.outbox.shift();
+    while (this._outbox.value.length) {
+      const message = this._outbox.value.shift();
       if (!message) continue;
-      this.socket.send(message);
+      this.socket.value.send(JSON.stringify(message));
     }
   }
 }

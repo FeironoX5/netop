@@ -6,6 +6,7 @@ export function useHandlers(
   focused: Ref<boolean>,
   outputArea: Ref<HTMLElement | null>,
   scrollY: Ref<number>,
+  commandPending: Ref<boolean>,
 ) {
   return {
     mount: () => wsService.connect(),
@@ -17,6 +18,7 @@ export function useHandlers(
     submit: () => {
       const cmd = input.value.trim();
       if (!cmd) return;
+      commandPending.value = true;
       wsService.sendCommand(cmd);
       input.value = '';
       focused.value = true;
