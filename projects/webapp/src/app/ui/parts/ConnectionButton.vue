@@ -3,27 +3,11 @@
     <Button
       :class="connectionClass"
       :icon="connectionIcon"
-      @click.stop="
-        wsService.connectToPort(wsService.port.value)
-      "
     />
     <Button
       :class="connectionClass"
       :text="connectionText"
-      @click.stop="
-        openMenu([
-          { name: `New Connection`, icon: 'plus' },
-          {
-            name: 'Close Connection',
-            icon: 'unplug',
-            action: () => wsService.disconnect(),
-          },
-          ...PORT_OPTIONS.map((port) => ({
-            name: `localhost:${port}`,
-            action: () => wsService.connectToPort(port),
-          })),
-        ])
-      "
+      @click.stop="openMenu(connectionItems)"
     />
     <Button
       class="view-picker"
@@ -67,88 +51,42 @@ import ButtonSections from '@bits/ButtonSections.vue';
 import { openMenu, openSubmenu } from '@bits/menu';
 import type { MenuItemData } from '@bits/menu';
 import { computed } from 'vue';
-import {
-  wsService,
-  WsConnectionStatus,
-} from '@/app/services/wsService';
-
-const PORT_OPTIONS = [3001, 4324];
+import { useAppStore } from '@/app/stores/appStore';
 
 const connectionIcon = computed(() => {
-  switch (wsService.status.value) {
-    case WsConnectionStatus.Connected:
-      return 'radio';
-    case WsConnectionStatus.Connecting:
-      return 'refresh-cw';
-    default:
-      return 'refresh-cw-off';
-  }
+  return 'refresh-cw';
 });
 
-const connectionClass = computed(() => ({
-  success:
-    wsService.status.value === WsConnectionStatus.Connected,
-  warning:
-    wsService.status.value ===
-    WsConnectionStatus.Connecting,
-  error:
-    wsService.status.value ===
-    WsConnectionStatus.Disconnected,
-}));
+const connectionClass = 'success';
 
-const connectionText = computed(() => wsService.label);
+const connectionText = computed(() => {
+  const connection = appStore.connection;
+  return connection
+    ? `${connection.url}:${connection.port}`
+    : 'No Connection';
+});
+
+const appStore = useAppStore();
 
 const connectionItems = computed<readonly MenuItemData[]>(
   () => [
     {
-      name:
-        wsService.status.value ===
-        WsConnectionStatus.Disconnected
-          ? `Connect to ${wsService.label}`
-          : `Reconnect to ${wsService.label}`,
-      icon: 'radio',
-      action: () =>
-        wsService.connectToPort(wsService.port.value),
-    },
-    {
-      name: 'Disconnect',
-      icon: 'radio-tower',
-      action: () => wsService.disconnect(),
-    },
-    ...PORT_OPTIONS.map((port) => ({
-      name: `localhost:${port}`,
-      icon: 'server',
-      endIcon:
-        port === wsService.port.value ? 'check' : undefined,
-      action: () => wsService.connectToPort(port),
-    })),
-    {
-      name: 'Custom Port',
-      icon: 'settings',
+      name: 'Add Connection',
+      icon: 'plus',
       action: () => {
-        const value = window.prompt(
-          'Port',
-          String(wsService.port.value),
-        );
-        if (!value) return 'dismiss';
-
-        const port = Number(value);
-        if (
-          !Number.isInteger(port) ||
-          port < 1 ||
-          port > 65535
-        )
-          return 'dismiss';
-
-        wsService.connectToPort(port);
+        appStore.connections.push({
+          url: 'localhost',
+          port: 3001,
+        });
       },
     },
+    ...appStore.connections.map((c, i) => ({
+      name: `${c.url}:${c.port}`,
+      icon: 'server',
+      action: () => appStore.setConnection(i),
+    })),
   ],
 );
-
-function openConnectionMenu() {
-  openMenu(connectionItems.value);
-}
 </script>
 
 <style scoped>

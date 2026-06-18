@@ -20,6 +20,7 @@ import {
   Layer as VLayer,
   Stage as VStage,
 } from 'vue-konva';
+import { useSimulationStore } from '@/app/stores/simulationStore';
 import type { ReqProp } from '@/types/req';
 import { useHandlers } from './CanvasView.comps';
 import CanvasGrid from './components/CanvasGrid.vue';
@@ -50,6 +51,8 @@ const handlers = useHandlers(
     stageConfig.value.height = height;
   },
 );
+
+useSimulationStore();
 
 useResizeObserver(stageContainerRef, ([entry]) => {
   if (!entry) return;
