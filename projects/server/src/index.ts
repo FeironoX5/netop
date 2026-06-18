@@ -8,6 +8,7 @@ import {
 import '@/db';
 import { TreeUtils } from '@netop/utils';
 import { PORT } from '@/config';
+import { CORS_HEADERS, withCors } from '@/utils';
 import { simulationTreeWalker } from './app/simulation/helpers/simulationTreeWalker';
 import { SimulationRegistry } from './app/simulation/SimulationRegistry';
 
@@ -58,13 +59,13 @@ const server = Bun.serve({
   port: PORT,
   routes: {
     '/scene': {
-      GET: () => {
+      GET: withCors(() => {
         const flatScene = TreeUtils.flatten({
           root: SimulationRegistry.get().root,
           walker: simulationTreeWalker,
         });
         return Response.json(Object.fromEntries(flatScene));
-      },
+      }),
     },
   },
   websocket: {
@@ -92,7 +93,10 @@ const server = Bun.serve({
   },
   fetch: (req, server) => {
     if (server.upgrade(req)) return;
-    return new Response('Not Found', { status: 404 });
+    return new Response('Not Found', {
+      status: 404,
+      headers: CORS_HEADERS,
+    });
   },
 });
 
