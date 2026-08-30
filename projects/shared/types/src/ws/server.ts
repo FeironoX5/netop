@@ -26,6 +26,7 @@ export type StatusMessage = {
 
 export type SimulationEventMessage = {
   type: ServerMessageType.SimulationEvent;
+  id: number;
   event: Simulation.Event.type;
 };
 

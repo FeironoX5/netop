@@ -1,4 +1,5 @@
 import ConsoleView from '../views/ConsoleView.vue';
+import HistoryView from '../views/HistoryView.vue';
 import type { PanelTool } from './EditorPage.types';
 
 export const LEFT_PANEL_TOOLS: PanelTool[] = [
@@ -8,6 +9,10 @@ export const LEFT_PANEL_TOOLS: PanelTool[] = [
 ] as const;
 
 export const RIGHT_PANEL_TOOLS: PanelTool[] = [
-  { icon: 'history', name: 'Change History' },
+  {
+    icon: 'history',
+    name: 'Change History',
+    view: HistoryView,
+  },
   { icon: 'terminal', name: 'Console', view: ConsoleView },
 ] as const;

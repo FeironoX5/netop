@@ -9,7 +9,7 @@ export const SimulationUndoHandlerWrapper: EntityWrapper<SimulationUndoHandler> 
         {
           args: ['eventId'],
           fn: (handler, eventId) => {
-            handler.undo(eventId);
+            handler.undo(Number(eventId));
             return `Event with id ${eventId} undone`;
           },
         },

@@ -1,4 +1,7 @@
-import { actionHandler } from '@app/main';
+import {
+  actionHandler,
+  simulationUndoHandler,
+} from '@app/main';
 import {
   ClientMessageType,
   ServerMessageType,
@@ -126,11 +129,12 @@ const server = Bun.serve({
 
 console.log(`runs on ${server.port} port`);
 
-SimulationRegistry.get().eventBus.subscribe(
-  (simulationEvent) => {
+simulationUndoHandler.eventBus.subscribe(
+  ({ id, event }) => {
     const serverMessage: ServerMessage = {
       type: ServerMessageType.SimulationEvent,
-      event: simulationEvent,
+      id,
+      event,
     };
     sendBroadcast(serverMessage);
   },
