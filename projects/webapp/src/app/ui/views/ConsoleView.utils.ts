@@ -1,20 +1,9 @@
-import {
-  ServerMessageType,
-  type ServerMessage,
-} from '@netop/types';
-import { FILTER_ITEMS } from './ConsoleView.consts';
+import type { ActionResponseMessage } from '@netop/types';
 
-export function getEntryText(msg: ServerMessage): string {
-  switch (msg.type) {
-    case ServerMessageType.ActionResponse:
-      return msg.result;
-    case ServerMessageType.Error:
-      return msg.message;
-    case ServerMessageType.ConsoleOutput:
-      return msg.output;
-    default:
-      return 'Empty';
-  }
+export function getEntryText(
+  message: ActionResponseMessage,
+): string {
+  return message.result;
 }
 
 export function formatTime(date: Date): string {
@@ -23,18 +12,4 @@ export function formatTime(date: Date): string {
     minute: '2-digit',
     second: '2-digit',
   });
-}
-
-export function formatMessageType(
-  type: ServerMessageType,
-): string {
-  return type.split('-').join(' ');
-}
-
-export function getFilterItemIndex(
-  type: ServerMessageType,
-): number {
-  return FILTER_ITEMS.findIndex(
-    (item) => item.name === formatMessageType(type),
-  );
 }

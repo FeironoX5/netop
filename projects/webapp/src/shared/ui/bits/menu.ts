@@ -26,6 +26,7 @@ let id = 0;
 
 export function openMenu(
   items: readonly MenuItemData[],
+  position?: { x: number; y: number },
 ): Promise<MenuCloseReason> {
   const anchor = getAnchorRect();
   const rootMenu = menus.value[0];
@@ -33,8 +34,8 @@ export function openMenu(
 
   return pushMenu(
     items,
-    anchor?.left ?? 0,
-    anchor?.bottom ?? 0,
+    position?.x ?? anchor?.left ?? 0,
+    position?.y ?? anchor?.bottom ?? 0,
   );
 }
 

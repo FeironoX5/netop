@@ -1,44 +1,49 @@
 import {
   ClientMessageType,
   ServerMessageType,
-  type ConsoleOutputMessage,
+  type ActionResponseMessage,
+  type ClientMessage,
+  type ServerMessage,
 } from '@netop/types';
-import { onUnmounted, type Ref } from 'vue';
-import { wsService } from '@/app/services/wsService';
-import { useWsStore } from '@/app/stores/wsStore';
+
+export type ConsoleLogEntry = {
+  timestamp: Date;
+  message: ActionResponseMessage;
+};
 
 export function useHandlers(
-  input: Ref<string>,
-  focused: Ref<boolean>,
-  outputArea: Ref<HTMLElement | null>,
-  scrollY: Ref<number>,
-  history: Ref<string[]>,
-  log: Ref<ConsoleOutputMessage[]>,
+  subscribe: (
+    handler: (message: ServerMessage) => void,
+  ) => () => void,
+  enqueue: (message: ClientMessage) => void,
+  addLogEntry: (entry: ConsoleLogEntry) => void,
+  commandSubmitted: (command: string) => void,
 ) {
-  const wsStore = useWsStore();
-  const unsubscribe = wsService.subscribe((message) => {
-    if (message.type === ServerMessageType.ConsoleOutput) {
-      log.value.push(message);
-    }
-  });
-  onUnmounted(unsubscribe);
+  let unsubscribe: (() => void) | undefined;
+
+  function message(message: ServerMessage) {
+    if (message.type !== ServerMessageType.ActionResponse)
+      return;
+
+    addLogEntry({ timestamp: new Date(), message });
+  }
 
   return {
-    logChange: () => {
-      const el = outputArea.value;
-      if (!el) return;
-      scrollY.value = -el.scrollHeight;
+    mount: () => {
+      unsubscribe = subscribe(message);
     },
-    submit: () => {
-      const cmd = input.value.trim();
-      if (!cmd) return;
-      history.value.push(cmd);
-      wsStore.enqueue({
+
+    submit: (input: string) => {
+      const command = input.trim();
+      if (!command) return;
+
+      enqueue({
         type: ClientMessageType.Action,
-        body: cmd,
+        body: command,
       });
-      input.value = '';
-      focused.value = true;
+      commandSubmitted(command);
     },
+
+    unmount: () => unsubscribe?.(),
   };
 }

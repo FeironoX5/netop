@@ -8,39 +8,20 @@
         placeholder="Type help to list commands"
         :rows="1"
         v-model="input"
-        @keydown.enter.exact.prevent="handlers.submit()"
+        @keydown.enter.exact.prevent="
+          handlers.submit(input)
+        "
       />
     </div>
     <div
-      class="filter-area inline-container row full"
-      :class="{ collapsed: filterCollapsed }"
+      class="output-area"
+      ref="outputArea"
+      @contextmenu.prevent="openConsoleMenu($event)"
     >
-      <div class="filter-content">
-        <ButtonMultiGroup
-          :items="FILTER_ITEMS"
-          :isSelectable="true"
-          v-model:activeItemIndexes="activeItemIndexes"
-        />
-      </div>
-      <Button
-        class="filter-toggle"
-        :icon="
-          filterCollapsed
-            ? 'chevrons-up-down'
-            : 'chevrons-down-up'
-        "
-        @click="filterCollapsed = !filterCollapsed"
-      />
-    </div>
-    <div class="action-area">
-      <Button icon="trash" text="Clear" />
-    </div>
-    <div class="output-area" ref="outputArea">
       <div class="inline-container column reversed">
         <div
           class="inline-container column output-item"
-          v-for="entry in [] as any[]"
-          :key="entry.id"
+          v-for="entry in log"
         >
           <span class="output-item-content">
             {{ getEntryText(entry.message) }}
@@ -48,22 +29,9 @@
           <div
             class="inline-container row output-item-footer"
           >
-            <Button
-              :text="formatMessageType(entry.message.type)"
-              :class="[
-                entry.message.type ===
-                  ServerMessageType.ActionResponse &&
-                entry.message.status === 'success'
-                  ? 'success'
-                  : 'error',
-                entry.message.type ===
-                  ServerMessageType.Error && 'error',
-              ]"
-              @click="
-                activeItemIndexes = [
-                  getFilterItemIndex(entry.message.type),
-                ]
-              "
+            <span
+              class="status-dot"
+              :class="entry.message.status"
             />
             <span class="timestamp">
               {{ formatTime(entry.timestamp) }}
@@ -83,26 +51,29 @@
 
 <script setup lang="ts">
 import Button from '@bits/Button.vue';
+import { openMenu } from '@bits/menu';
 import Textarea from '@bits/Textarea.vue';
-import ButtonMultiGroup from '@components/ButtonMultiGroup.vue';
-import {
-  type ConsoleOutputMessage,
-  ServerMessageType,
-  type ServerMessage,
-} from '@netop/types';
 import {
   useClipboard,
   useFocus,
   useScroll,
 } from '@vueuse/core';
-import { ref, useTemplateRef } from 'vue';
-import { useHandlers } from './ConsoleView.comps';
-import { FILTER_ITEMS } from './ConsoleView.consts';
 import {
-  formatMessageType,
+  onMounted,
+  onUnmounted,
+  ref,
+  useTemplateRef,
+  watch,
+} from 'vue';
+import { wsService } from '@/app/services/wsService';
+import { useWsStore } from '@/app/stores/wsStore';
+import {
+  useHandlers,
+  type ConsoleLogEntry,
+} from './ConsoleView.comps';
+import {
   formatTime,
   getEntryText,
-  getFilterItemIndex,
 } from './ConsoleView.utils';
 
 const promptTextarea = useTemplateRef<InstanceType<
@@ -113,10 +84,9 @@ const outputArea = useTemplateRef<HTMLElement | null>(
 );
 
 const input = ref('');
-const filterCollapsed = ref<boolean>(true);
-const activeItemIndexes = ref<number[]>([]);
 const history = ref<string[]>([]);
-const log = ref<ConsoleOutputMessage[]>([]);
+const log = ref<ConsoleLogEntry[]>([]);
+const wsStore = useWsStore();
 const { copy } = useClipboard();
 const { focused } = useFocus(promptTextarea as any, {
   initialValue: true,
@@ -125,12 +95,52 @@ const { y: scrollY } = useScroll(outputArea, {
   behavior: 'smooth',
 });
 const handlers = useHandlers(
-  input,
-  focused,
-  outputArea,
-  scrollY,
-  history,
-  log,
+  (handler) => wsService.subscribe(handler),
+  (message) => wsStore.enqueue(message),
+  (entry) => log.value.push(entry),
+  (command) => {
+    history.value.push(command);
+    input.value = '';
+    focused.value = true;
+  },
+);
+
+onMounted(handlers.mount);
+onUnmounted(handlers.unmount);
+
+function openConsoleMenu(event: MouseEvent) {
+  void openMenu(
+    [
+      {
+        name: 'Copy all',
+        icon: 'copy',
+        action: () =>
+          copy(
+            log.value
+              .map((entry) => getEntryText(entry.message))
+              .join('\n'),
+          ),
+      },
+      {
+        name: 'Clear',
+        icon: 'trash',
+        action: () => {
+          log.value = [];
+        },
+      },
+    ],
+    { x: event.clientX, y: event.clientY },
+  );
+}
+
+watch(
+  () => log.value.length,
+  () => {
+    const el = outputArea.value;
+    if (!el) return;
+    scrollY.value = -el.scrollHeight;
+  },
+  { flush: 'post' },
 );
 </script>
 
@@ -158,47 +168,6 @@ const handlers = useHandlers(
   color: var(--c-border);
 }
 
-.filter-area {
-  flex: 0 0 auto;
-  align-items: flex-start;
-  padding: var(--s-spacing);
-
-  .filter-content {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--s-gap);
-
-    :deep(.button-group-item) {
-      flex-shrink: 0;
-    }
-  }
-
-  .filter-toggle {
-    flex-shrink: 0;
-  }
-
-  &.collapsed .filter-content {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-
-    &:deep(button) {
-      flex: 1 0 auto;
-    }
-  }
-}
-
-.action-area {
-  flex-direction: row;
-  display: flex;
-  justify-content: end;
-  gap: var(--s-gap);
-  padding: var(--s-spacing);
-  padding-top: 0;
-  border-bottom: var(--border);
-}
-
 .output-area {
   background: var(--c-l0-bg);
   flex: 1 1 auto;
@@ -214,11 +183,11 @@ const handlers = useHandlers(
 }
 
 .output-item .output-item-action {
-  display: none;
+  visibility: hidden;
 }
 
 .output-item:hover .output-item-action {
-  display: inline-flex;
+  visibility: visible;
 }
 
 .output-item-content {
@@ -227,9 +196,23 @@ const handlers = useHandlers(
   overflow-wrap: anywhere;
 }
 
+.status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--c-error-text);
+  border-radius: 50%;
+
+  &.success {
+    background: var(--c-success-text);
+  }
+}
+
 .output-item-footer {
   align-items: center;
   gap: var(--s-gap);
   font-size: var(--s-font-size-sm);
+  min-height: calc(
+    var(--s-font-size) + 2 * var(--s-spacing-sm)
+  );
 }
 </style>

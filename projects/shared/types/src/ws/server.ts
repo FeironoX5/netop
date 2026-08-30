@@ -3,7 +3,6 @@ import type { Simulation } from '../simulation';
 export enum ServerMessageType {
   ActionResponse = 'action-response',
   Error = 'error',
-  ConsoleOutput = 'console-output',
   SimulationEvent = 'simulation-event',
 }
 
@@ -21,11 +20,6 @@ export type ErrorMessage = {
   message: string;
 };
 
-export type ConsoleOutputMessage = {
-  type: ServerMessageType.ConsoleOutput;
-  output: string;
-};
-
 export type SimulationEventMessage = {
   type: ServerMessageType.SimulationEvent;
   event: Simulation.Event.type;
@@ -33,8 +27,7 @@ export type SimulationEventMessage = {
 
 export type SystemMessage =
   | ActionResponseMessage
-  | ErrorMessage
-  | ConsoleOutputMessage;
+  | ErrorMessage;
 
 export type ServerMessage =
   | SystemMessage
