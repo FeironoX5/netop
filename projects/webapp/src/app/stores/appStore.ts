@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 export type Connection = { url: string; port: number };
 
@@ -10,18 +10,32 @@ const DEFAULT_CONNECTION: Connection = {
 
 export const useAppStore = defineStore('app', () => {
   const state = {
-    connections: ref(new Set([DEFAULT_CONNECTION])),
-    connection: ref<Connection | null>(DEFAULT_CONNECTION),
+    connections: ref<Connection[]>([DEFAULT_CONNECTION]),
+    activeConnection: ref(0),
   };
 
   return {
     ...state,
-    setConnection(connection: Connection) {
-      state.connection.value = connection;
+    connection: computed(
+      () =>
+        state.connections.value[
+          state.activeConnection.value
+        ],
+    ),
+    setConnection(index: number) {
+      state.activeConnection.value = index;
     },
     addConnection(connection: Connection) {
-      state.connections.value.add(connection);
-      state.connection.value = connection;
+      const index = state.connections.value.findIndex(
+        (current) =>
+          current.url === connection.url &&
+          current.port === connection.port,
+      );
+
+      state.activeConnection.value =
+        index === -1
+          ? state.connections.value.push(connection) - 1
+          : index;
     },
   } as const;
 });

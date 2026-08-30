@@ -157,15 +157,15 @@ const isConnectionValid = computed(
 
 const connectionItems = computed<readonly MenuItemData[]>(
   () => [
-    ...Array.from(appStore.connections, (connection) => ({
+    ...appStore.connections.map((connection, index) => ({
       name: `${connection.url}:${connection.port}`,
       icon: 'server',
       endIcon:
-        connection === appStore.connection
+        index === appStore.activeConnection
           ? 'check'
           : undefined,
       action: () => {
-        appStore.setConnection(connection);
+        appStore.setConnection(index);
         connectIfClosed();
       },
     })),
