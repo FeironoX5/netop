@@ -7,6 +7,9 @@ export enum ServerMessageType {
   SimulationEvent = 'simulation-event',
 }
 
+export const BROADCAST_SERVER_MESSAGE_TYPES: ReadonlySet<ServerMessageType> =
+  new Set([ServerMessageType.SimulationEvent]);
+
 export type ActionResponseMessage = {
   type: ServerMessageType.ActionResponse;
   status: 'success' | 'fail';

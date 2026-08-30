@@ -1,5 +1,5 @@
 import {
-  ClientMessageType,
+  BROADCAST_SERVER_MESSAGE_TYPES,
   type ClientMessage,
   type ServerMessage,
 } from '@netop/types';
@@ -13,6 +13,7 @@ import {
   type ShallowRef,
 } from 'vue';
 import { useAppStore } from '../stores/appStore';
+import { useWsStore } from '../stores/wsStore';
 
 export type WsStatus = 'OPEN' | 'CONNECTING' | 'CLOSED';
 
@@ -29,7 +30,8 @@ export class WsService {
   private handlers = new Set<WsMessageHandler>();
 
   private _status = ref<WsStatus>('CLOSED');
-  private _outbox = ref<ClientMessage[]>([]);
+  private inFlight: ClientMessage | null = null;
+  private inFlightSent = false;
 
   private socket: ShallowRef<WebSocket | undefined> | null =
     null;
@@ -37,16 +39,16 @@ export class WsService {
   private open?: () => void;
 
   readonly status = readonly(this._status);
-  readonly outbox = readonly(this._outbox);
 
   connect() {
     if (this.socket) return;
 
     this.scope.run(() => {
-      const { connection } = useAppStore();
+      const appStore = useAppStore();
+      const wsStore = useWsStore();
       const url = computed(() =>
-        connection
-          ? `ws://${connection.url}:${connection.port}`
+        appStore.connection
+          ? `ws://${appStore.connection.url}:${appStore.connection.port}`
           : undefined,
       );
 
@@ -59,9 +61,20 @@ export class WsService {
               const message = JSON.parse(
                 event.data,
               ) as ServerMessage;
-              this.handlers.forEach((handler) =>
-                handler(message),
-              );
+
+              const isBroadcast =
+                BROADCAST_SERVER_MESSAGE_TYPES.has(
+                  message.type,
+                );
+              try {
+                this.handlers.forEach((handler) =>
+                  handler(message),
+                );
+              } finally {
+                if (!isBroadcast) {
+                  this.completeInFlight();
+                }
+              }
             } catch {
               // ignore malformed messages
             }
@@ -74,7 +87,9 @@ export class WsService {
         (value) => {
           this._status.value = value;
           if (value === 'OPEN') {
-            this.flushOutbox();
+            this.flushQueue();
+          } else {
+            this.inFlightSent = false;
           }
         },
         { immediate: true },
@@ -83,6 +98,13 @@ export class WsService {
       this.socket = ws;
       this.close = close;
       this.open = open;
+
+      watch(
+        () => wsStore.queue.length,
+        () => this.flushQueue(),
+      );
+
+      this.flushQueue();
     });
   }
 
@@ -91,6 +113,7 @@ export class WsService {
     this.socket = null;
     this.close = undefined;
     this.open = undefined;
+    this.inFlightSent = false;
     this.scope.stop();
     this.scope = effectScope();
   }
@@ -99,33 +122,44 @@ export class WsService {
     this.open?.();
   }
 
-  send(message: ClientMessage) {
-    this._outbox.value.push(message);
-    this.flushOutbox();
-  }
-
-  sendCommand(body: string) {
-    this.send({ type: ClientMessageType.Action, body });
-  }
-
   subscribe(handler: WsMessageHandler): () => void {
     this.handlers.add(handler);
     return () => this.handlers.delete(handler);
   }
 
-  private flushOutbox() {
+  private flushQueue() {
     if (
       !this.socket?.value ||
-      this.socket.value.readyState !== WebSocket.OPEN
+      this.socket.value.readyState !== WebSocket.OPEN ||
+      this.inFlightSent
     ) {
       return;
     }
 
-    while (this._outbox.value.length) {
-      const message = this._outbox.value.shift();
-      if (!message) continue;
+    const wsStore = useWsStore();
+    const message = this.inFlight ?? wsStore.queue[0];
+    if (!message) return;
+
+    this.inFlight = message;
+    try {
       this.socket.value.send(JSON.stringify(message));
+    } catch {
+      this.inFlight = null;
+      return;
     }
+
+    this.inFlightSent = true;
+    if (wsStore.queue[0] === message) {
+      wsStore.removeHead();
+    }
+  }
+
+  private completeInFlight() {
+    if (!this.inFlight) return;
+
+    this.inFlight = null;
+    this.inFlightSent = false;
+    this.flushQueue();
   }
 }
 

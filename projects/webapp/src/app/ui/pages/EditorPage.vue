@@ -28,7 +28,8 @@
 </template>
 <script setup lang="ts">
 import Sidebar from '@components/Sidebar.vue';
-import { computed, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { wsService } from '@/app/services/wsService';
 import Header from '@/ui/parts/Header.vue';
 import Toolbar from '@/ui/parts/Toolbar.vue';
 import CanvasView from '@/ui/views/canvas/CanvasView.vue';
@@ -36,6 +37,12 @@ import {
   LEFT_PANEL_TOOLS,
   RIGHT_PANEL_TOOLS,
 } from './EditorPage.consts';
+
+onMounted(() => wsService.connect());
+
+onUnmounted(() => {
+  wsService.disconnect();
+});
 
 const activeLeftPanelIndex = ref<number | null>(null);
 const CurrentLeftPanel = computed(() => {

@@ -86,6 +86,7 @@ import Button from '@bits/Button.vue';
 import Textarea from '@bits/Textarea.vue';
 import ButtonMultiGroup from '@components/ButtonMultiGroup.vue';
 import {
+  type ConsoleOutputMessage,
   ServerMessageType,
   type ServerMessage,
 } from '@netop/types';
@@ -94,7 +95,7 @@ import {
   useFocus,
   useScroll,
 } from '@vueuse/core';
-import { onMounted, ref, useTemplateRef } from 'vue';
+import { ref, useTemplateRef } from 'vue';
 import { useHandlers } from './ConsoleView.comps';
 import { FILTER_ITEMS } from './ConsoleView.consts';
 import {
@@ -114,8 +115,8 @@ const outputArea = useTemplateRef<HTMLElement | null>(
 const input = ref('');
 const filterCollapsed = ref<boolean>(true);
 const activeItemIndexes = ref<number[]>([]);
-const commandPending = ref(false);
-
+const history = ref<string[]>([]);
+const log = ref<ConsoleOutputMessage[]>([]);
 const { copy } = useClipboard();
 const { focused } = useFocus(promptTextarea as any, {
   initialValue: true,
@@ -128,10 +129,9 @@ const handlers = useHandlers(
   focused,
   outputArea,
   scrollY,
-  commandPending,
+  history,
+  log,
 );
-
-onMounted(handlers.mount);
 </script>
 
 <style scoped>

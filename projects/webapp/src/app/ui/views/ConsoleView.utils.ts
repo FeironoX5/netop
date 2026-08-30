@@ -10,6 +10,8 @@ export function getEntryText(msg: ServerMessage): string {
       return msg.result;
     case ServerMessageType.Error:
       return msg.message;
+    case ServerMessageType.ConsoleOutput:
+      return msg.output;
     default:
       return 'Empty';
   }

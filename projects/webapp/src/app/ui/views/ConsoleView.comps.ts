@@ -1,15 +1,29 @@
-import type { Ref } from 'vue';
+import {
+  ClientMessageType,
+  ServerMessageType,
+  type ConsoleOutputMessage,
+} from '@netop/types';
+import { onUnmounted, type Ref } from 'vue';
 import { wsService } from '@/app/services/wsService';
+import { useWsStore } from '@/app/stores/wsStore';
 
 export function useHandlers(
   input: Ref<string>,
   focused: Ref<boolean>,
   outputArea: Ref<HTMLElement | null>,
   scrollY: Ref<number>,
-  commandPending: Ref<boolean>,
+  history: Ref<string[]>,
+  log: Ref<ConsoleOutputMessage[]>,
 ) {
+  const wsStore = useWsStore();
+  const unsubscribe = wsService.subscribe((message) => {
+    if (message.type === ServerMessageType.ConsoleOutput) {
+      log.value.push(message);
+    }
+  });
+  onUnmounted(unsubscribe);
+
   return {
-    mount: () => wsService.connect(),
     logChange: () => {
       const el = outputArea.value;
       if (!el) return;
@@ -18,8 +32,11 @@ export function useHandlers(
     submit: () => {
       const cmd = input.value.trim();
       if (!cmd) return;
-      commandPending.value = true;
-      wsService.sendCommand(cmd);
+      history.value.push(cmd);
+      wsStore.enqueue({
+        type: ClientMessageType.Action,
+        body: cmd,
+      });
       input.value = '';
       focused.value = true;
     },
