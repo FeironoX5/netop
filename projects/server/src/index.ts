@@ -55,6 +55,12 @@ const send = (
   ws.send(JSON.stringify(message));
 };
 
+const sendBroadcast = (message: ServerMessage) => {
+  connections.forEach((ws) => {
+    ws.send(JSON.stringify(message));
+  });
+};
+
 const server = Bun.serve({
   port: PORT,
   routes: {
@@ -108,8 +114,6 @@ SimulationRegistry.get().eventBus.subscribe(
       type: ServerMessageType.SimulationEvent,
       event: simulationEvent,
     };
-    for (const ws of connections) {
-      send(ws, serverMessage);
-    }
+    sendBroadcast(serverMessage);
   },
 );
