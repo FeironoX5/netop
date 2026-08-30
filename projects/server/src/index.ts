@@ -35,7 +35,8 @@ const process = (message: ClientMessage): ServerMessage => {
         };
       default:
         return {
-          type: ServerMessageType.Error,
+          type: ServerMessageType.Status,
+          status: 'error',
           message: 'Unknown message type',
         };
     }
@@ -63,6 +64,17 @@ const sendBroadcast = (message: ServerMessage) => {
 
 const server = Bun.serve({
   port: PORT,
+  error: (error) => {
+    sendBroadcast({
+      type: ServerMessageType.Status,
+      status: 'error',
+      message: error.message,
+    });
+    return new Response('Internal Server Error', {
+      status: 500,
+      headers: CORS_HEADERS,
+    });
+  },
   routes: {
     '/scene': {
       GET: withCors(() => {
@@ -77,6 +89,11 @@ const server = Bun.serve({
   websocket: {
     open(ws) {
       connections.add(ws);
+      sendBroadcast({
+        type: ServerMessageType.Status,
+        status: 'info',
+        message: 'WebSocket client connected',
+      });
     },
     close(ws) {
       connections.delete(ws);
@@ -87,7 +104,8 @@ const server = Bun.serve({
       const message = parse(raw);
       if (!message) {
         send(ws, {
-          type: ServerMessageType.Error,
+          type: ServerMessageType.Status,
+          status: 'error',
           message: 'Invalid JSON message',
         });
         return;

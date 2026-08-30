@@ -2,12 +2,15 @@ import type { Simulation } from '../simulation';
 
 export enum ServerMessageType {
   ActionResponse = 'action-response',
-  Error = 'error',
+  Status = 'status',
   SimulationEvent = 'simulation-event',
 }
 
 export const BROADCAST_SERVER_MESSAGE_TYPES: ReadonlySet<ServerMessageType> =
-  new Set([ServerMessageType.SimulationEvent]);
+  new Set([
+    ServerMessageType.Status,
+    ServerMessageType.SimulationEvent,
+  ]);
 
 export type ActionResponseMessage = {
   type: ServerMessageType.ActionResponse;
@@ -15,8 +18,9 @@ export type ActionResponseMessage = {
   result: string;
 };
 
-export type ErrorMessage = {
-  type: ServerMessageType.Error;
+export type StatusMessage = {
+  type: ServerMessageType.Status;
+  status: 'info' | 'error';
   message: string;
 };
 
@@ -27,7 +31,7 @@ export type SimulationEventMessage = {
 
 export type SystemMessage =
   | ActionResponseMessage
-  | ErrorMessage;
+  | StatusMessage;
 
 export type ServerMessage =
   | SystemMessage

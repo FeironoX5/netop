@@ -33,16 +33,27 @@ import { wsService } from '@/app/services/wsService';
 import Header from '@/ui/parts/Header.vue';
 import Toolbar from '@/ui/parts/Toolbar.vue';
 import CanvasView from '@/ui/views/canvas/CanvasView.vue';
+import { useHandlers } from './EditorPage.comps';
 import {
   LEFT_PANEL_TOOLS,
   RIGHT_PANEL_TOOLS,
 } from './EditorPage.consts';
 
-onMounted(() => wsService.connect());
+const handlers = useHandlers(
+  () => wsService.connect(),
+  () => wsService.disconnect(),
+  (handler) => wsService.subscribe(handler),
+  (message) => {
+    if (message.status === 'error') {
+      console.error(message.message);
+    } else {
+      console.info(message.message);
+    }
+  },
+);
 
-onUnmounted(() => {
-  wsService.disconnect();
-});
+onMounted(handlers.mount);
+onUnmounted(handlers.unmount);
 
 const activeLeftPanelIndex = ref<number | null>(null);
 const CurrentLeftPanel = computed(() => {
