@@ -9,9 +9,14 @@ export const useWsStore = defineStore('ws', () => {
     queue.value.push(message);
   }
 
+  function remove(message: ClientMessage): void {
+    const index = queue.value.indexOf(message);
+    if (index !== -1) queue.value.splice(index, 1);
+  }
+
   function removeHead(): ClientMessage | undefined {
     return queue.value.shift();
   }
 
-  return { queue, enqueue, removeHead } as const;
+  return { queue, enqueue, remove, removeHead } as const;
 });

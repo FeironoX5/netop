@@ -13,6 +13,23 @@
         "
       />
     </div>
+    <div v-if="wsStore.queue.length" class="queue-area">
+      <div
+        class="inline-container row output-item queued-item"
+        v-for="message in wsStore.queue"
+      >
+        <Icon class="queued-spinner" icon="loader-circle" />
+        <span class="output-item-content">
+          {{ message.body }}
+        </span>
+        <span class="spacer" />
+        <Button
+          class="output-item-action"
+          icon="x"
+          @click="wsStore.remove(message)"
+        />
+      </div>
+    </div>
     <div
       class="output-area"
       ref="outputArea"
@@ -51,6 +68,7 @@
 
 <script setup lang="ts">
 import Button from '@bits/Button.vue';
+import Icon from '@bits/Icon.vue';
 import { openMenu } from '@bits/menu';
 import Textarea from '@bits/Textarea.vue';
 import {
@@ -168,6 +186,23 @@ watch(
   color: var(--c-border);
 }
 
+.queue-area {
+  flex: 0 0 auto;
+  min-height: 0;
+  max-height: 10rem;
+  overflow-y: auto;
+  border-bottom: var(--border);
+}
+
+.queued-item {
+  align-items: center;
+}
+
+.queued-spinner {
+  flex: 0 0 auto;
+  animation: spin 1s linear infinite;
+}
+
 .output-area {
   background: var(--c-l0-bg);
   flex: 1 1 auto;
@@ -214,5 +249,11 @@ watch(
   min-height: calc(
     var(--s-font-size) + 2 * var(--s-spacing-sm)
   );
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
 }
 </style>
