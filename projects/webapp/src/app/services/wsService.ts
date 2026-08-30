@@ -114,11 +114,16 @@ export class WsService {
     this.close = undefined;
     this.open = undefined;
     this.inFlightSent = false;
+    this._status.value = 'CLOSED';
     this.scope.stop();
     this.scope = effectScope();
   }
 
   reconnect() {
+    if (!this.socket) {
+      this.connect();
+      return;
+    }
     this.open?.();
   }
 
