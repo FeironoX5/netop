@@ -1,36 +1,147 @@
+import {
+  ServerMessageType,
+  type FlatSimulationEntity,
+  type ServerMessage,
+  type Simulation,
+  type SimulationEventMessage,
+  type SimulationSnapshot,
+} from '@netop/types';
+import { ActionCodec } from '@netop/utils';
 import { defineStore } from 'pinia';
-import { ref, watch } from 'vue';
+import { onScopeDispose, ref, watch } from 'vue';
 import { httpService } from '../services/httpService';
-import { useAppStore } from './appStore';
+import { wsService } from '../services/wsService';
+
+function toFlatSimulationEntity(
+  entity: Simulation.Entity,
+): FlatSimulationEntity {
+  const { children: _children, ...flatEntity } = entity;
+  return flatEntity;
+}
 
 export const useSimulationStore = defineStore(
   'simulation',
   () => {
-    const state = {
-      entities: ref<Array<any> | null>(null),
-      loading: ref(false),
-      error: ref<any>(null),
-    };
+    const entities = ref(
+      new Map<string, FlatSimulationEntity>(),
+    );
+    const connections = ref(
+      new Map<string, Simulation.Connection>(),
+    );
+    const loading = ref(false);
+    const error = ref<unknown>();
 
-    async function fetchEntities() {
-      if (state.loading.value) return;
-      const p = httpService.get('scene');
-      if (!p) return;
-      state.loading.value = true;
-      state.error.value = null;
-      p.then((r) => {
-        state.entities.value = r;
-      })
-        .catch((err) => {
-          state.error.value = err;
-        })
-        .finally(() => {
-          state.loading.value = false;
-        });
+    const pendingEvents: SimulationEventMessage[] = [];
+    let activeRequest: AbortController | undefined;
+
+    function apply(message: SimulationEventMessage): void {
+      const event = message.event;
+      if (event.scope === 'connection') {
+        if (event.operation === 'delete') {
+          connections.value.delete(event.data.id);
+        } else {
+          connections.value.set(event.data.id, event.data);
+        }
+      } else {
+        const path = ActionCodec.join([
+          ...event.parentPath,
+          event.data.id,
+        ]);
+
+        if (event.operation === 'delete') {
+          entities.value.delete(path);
+        } else {
+          entities.value.set(
+            path,
+            toFlatSimulationEntity(event.data),
+          );
+        }
+      }
     }
 
-    watch(() => useAppStore().connection, fetchEntities);
+    function receive(message: ServerMessage): void {
+      if (
+        message.type !== ServerMessageType.SimulationEvent
+      ) {
+        return;
+      }
 
-    return { ...state, fetchEntities } as const;
+      if (loading.value) {
+        pendingEvents.push(message);
+        return;
+      }
+
+      apply(message);
+    }
+
+    async function synchronize(): Promise<void> {
+      activeRequest?.abort();
+      const request = new AbortController();
+      activeRequest = request;
+      pendingEvents.length = 0;
+      entities.value = new Map();
+      connections.value = new Map();
+      loading.value = true;
+      error.value = undefined;
+
+      try {
+        const snapshot =
+          await httpService.get<SimulationSnapshot>(
+            'simulation',
+            request.signal,
+          );
+        if (!snapshot || request.signal.aborted) return;
+
+        entities.value = new Map(
+          Object.entries(snapshot.entities),
+        );
+        connections.value = new Map(
+          Object.entries(snapshot.connections),
+        );
+
+        pendingEvents.forEach(apply);
+        pendingEvents.length = 0;
+      } catch (cause) {
+        if (!request.signal.aborted) {
+          error.value = cause;
+          pendingEvents.length = 0;
+        }
+      } finally {
+        if (activeRequest === request) {
+          activeRequest = undefined;
+          loading.value = false;
+        }
+      }
+    }
+
+    const unsubscribe = wsService.subscribe(receive);
+    onScopeDispose(() => {
+      unsubscribe();
+      activeRequest?.abort();
+    });
+
+    watch(
+      wsService.status,
+      (status) => {
+        if (status === 'OPEN') {
+          void synchronize();
+          return;
+        }
+
+        activeRequest?.abort();
+        activeRequest = undefined;
+        pendingEvents.length = 0;
+        loading.value = false;
+      },
+      { flush: 'sync', immediate: true },
+    );
+
+    return {
+      entities,
+      connections,
+      loading,
+      error,
+      synchronize,
+    } as const;
   },
 );

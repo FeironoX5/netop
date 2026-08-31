@@ -2,6 +2,7 @@ import {
   actionHandler,
   simulationUndoHandler,
 } from '@app/main';
+import { getSimulationSnapshot } from '@app/queries/getSimulationSnapshot';
 import {
   ClientMessageType,
   ServerMessageType,
@@ -9,11 +10,8 @@ import {
   type ServerMessage,
 } from '@netop/types';
 import '@/db';
-import { TreeUtils } from '@netop/utils';
 import { PORT } from '@/config';
 import { CORS_HEADERS, withCors } from '@/utils';
-import { simulationTreeWalker } from './app/simulation/helpers/simulationTreeWalker';
-import { SimulationRegistry } from './app/simulation/SimulationRegistry';
 
 const connections: Set<Bun.ServerWebSocket> = new Set();
 
@@ -79,14 +77,10 @@ const server = Bun.serve({
     });
   },
   routes: {
-    '/scene': {
-      GET: withCors(() => {
-        const flatScene = TreeUtils.flatten({
-          root: SimulationRegistry.get().root,
-          walker: simulationTreeWalker,
-        });
-        return Response.json(Object.fromEntries(flatScene));
-      }),
+    '/simulation': {
+      GET: withCors(() =>
+        Response.json(getSimulationSnapshot()),
+      ),
     },
   },
   websocket: {

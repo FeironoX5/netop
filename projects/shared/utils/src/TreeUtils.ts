@@ -34,10 +34,18 @@ export namespace TreeUtils {
   }: tree<T>) {
     // path includes root
     return (path: PathSegment[]): T[] | undefined => {
+      const [rootSegment, ...segments] = path;
+      if (
+        rootSegment === undefined ||
+        !walker.match(rootSegment, root)
+      ) {
+        return undefined;
+      }
+
       const result: T[] = [root];
       let current = root;
 
-      for (const segment of path) {
+      for (const segment of segments) {
         const child = walker
           .children(current)
           .find((c) => walker.match(segment, c));

@@ -2,6 +2,11 @@ import { PathSegment, Simulation } from '@netop/types';
 import { ActionCodec, EventTarget } from '@netop/utils';
 import { SimulationEvent } from '../events/types';
 
+type EntityEvent = Extract<
+  SimulationEvent.type,
+  { scope: 'entity' }
+>;
+
 export abstract class SimulationEntity<
   DetailsType extends object = {},
 > extends EventTarget<SimulationEvent.type> {
@@ -38,7 +43,7 @@ export abstract class SimulationEntity<
     this.call({
       scope: 'entity',
       operation: 'update',
-      parentPath: this.path,
+      parentPath: [],
       data: this.e,
       oldData: { ...this.e, details: oldDetails },
     });
@@ -90,7 +95,7 @@ export abstract class SimulationEntity<
     this.call({
       scope: 'entity',
       operation: 'create',
-      parentPath: this.path,
+      parentPath: [],
       data: child,
     });
   }
@@ -105,21 +110,23 @@ export abstract class SimulationEntity<
     this.call({
       scope: 'entity',
       operation: 'delete',
-      parentPath: this.path,
+      parentPath: [],
       data: removed,
     });
     return removed;
   }
 
-  override call(event: SimulationEvent.type): void {
+  override call(event: EntityEvent): void {
+    const parentPath =
+      event.operation === 'update'
+        ? (this.parent?.path ?? [])
+        : this.path;
+
+    this.propagate({ ...event, parentPath });
+  }
+
+  private propagate(event: EntityEvent): void {
     super.call(event);
-
-    const parent = this.parent;
-    if (!parent || event.scope !== 'entity') return;
-
-    parent.call({
-      ...event,
-      parentPath: [this.id, ...event.parentPath],
-    });
+    this.parent?.propagate(event);
   }
 }

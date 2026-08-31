@@ -1,4 +1,4 @@
-import {
+import type {
   PathSegment,
   Simulation as SimulationType,
 } from '@netop/types';
@@ -14,7 +14,7 @@ import { SimulationRegistry } from './SimulationRegistry';
 export class Simulation {
   constructor(
     public root: SimulationType.Entity,
-    private connections: SimulationType.Connection[] = [],
+    public connections: SimulationType.Connection[] = [],
     public eventBus = new EventTarget<SimulationEvent.type>(),
     private timer = new Timer(() => this.tick()),
   ) {

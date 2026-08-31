@@ -32,6 +32,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { wsService } from '@/app/services/wsService';
 import { useConsoleStore } from '@/app/stores/consoleStore';
 import { useHistoryStore } from '@/app/stores/historyStore';
+import { useSimulationStore } from '@/app/stores/simulationStore';
 import Header from '@/ui/parts/Header.vue';
 import Toolbar from '@/ui/parts/Toolbar.vue';
 import CanvasView from '@/ui/views/canvas/CanvasView.vue';
@@ -43,6 +44,7 @@ import {
 
 useConsoleStore();
 useHistoryStore();
+useSimulationStore();
 
 const handlers = useHandlers(
   () => wsService.connect(),
