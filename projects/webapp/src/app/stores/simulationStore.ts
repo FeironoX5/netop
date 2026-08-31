@@ -6,11 +6,11 @@ import {
   type SimulationEventMessage,
   type SimulationSnapshot,
 } from '@netop/types';
-import { ActionCodec } from '@netop/utils';
 import { defineStore } from 'pinia';
 import { onScopeDispose, ref, watch } from 'vue';
 import { httpService } from '../services/httpService';
 import { wsService } from '../services/wsService';
+import { getSimulationEntityPath } from '../utils/simulation';
 
 function toFlatSimulationEntity(
   entity: Simulation.Entity,
@@ -43,10 +43,7 @@ export const useSimulationStore = defineStore(
           connections.value.set(event.data.id, event.data);
         }
       } else {
-        const path = ActionCodec.join([
-          ...event.parentPath,
-          event.data.id,
-        ]);
+        const path = getSimulationEntityPath(event);
 
         if (event.operation === 'delete') {
           entities.value.delete(path);

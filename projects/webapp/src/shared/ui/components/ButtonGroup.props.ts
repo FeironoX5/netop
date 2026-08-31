@@ -7,4 +7,5 @@ export const buttonGroupProps = {
     required: true,
   },
   isSelectable: { type: Boolean, default: false },
+  isDeselectable: { type: Boolean, default: true },
 } as const;

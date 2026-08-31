@@ -25,11 +25,13 @@ const modelValue = defineModel<number | null>(
 
 async function handleClick(index: number) {
   modelValue.value =
-    modelValue.value === index ? null : index;
+    props.isDeselectable && modelValue.value === index
+      ? null
+      : index;
   const item = props.items[index];
   if (!item || !item.action) return;
   await item.action();
-  if (modelValue.value === index) {
+  if (props.isDeselectable && modelValue.value === index) {
     modelValue.value = null;
   }
 }

@@ -5,5 +5,6 @@ export const buttonProps = {
   text: { type: String, default: '' },
   isActive: { type: Boolean, default: false },
   isSelectable: { type: Boolean, default: false },
+  isQuiet: { type: Boolean, default: false },
   disabled: { type: Boolean, default: false },
 } as const;

@@ -1,6 +1,10 @@
 <template>
   <button
-    :class="{ active: isActive, selectable: isSelectable }"
+    :class="{
+      active: isActive,
+      selectable: isSelectable,
+      quiet: isQuiet,
+    }"
     :disabled="disabled"
   >
     <Icon :icon="icon" />
@@ -24,6 +28,7 @@ button {
   cursor: pointer;
   font-size: var(--s-font-size);
   line-height: 1;
+  text-align: left;
   min-width: calc(1em + 2 * var(--s-spacing-sm));
   max-height: calc(
     var(--s-font-size) * 2 + var(--s-spacing-sm) * 2
@@ -48,10 +53,25 @@ button {
     background: var(--c-element-active);
   }
 
+  &.quiet {
+    background: transparent;
+  }
+
+  &.quiet:hover {
+    background: var(--c-element-hover);
+  }
+
   &:disabled {
     cursor: not-allowed;
     color: var(--c-disabled-text);
     opacity: 0.55;
+  }
+
+  &.quiet:disabled {
+    cursor: default;
+    color: inherit;
+    background: transparent;
+    opacity: 1;
   }
 }
 </style>
