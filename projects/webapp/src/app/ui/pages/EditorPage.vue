@@ -30,6 +30,8 @@
 import Sidebar from '@components/Sidebar.vue';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { wsService } from '@/app/services/wsService';
+import { useConsoleStore } from '@/app/stores/consoleStore';
+import { useHistoryStore } from '@/app/stores/historyStore';
 import Header from '@/ui/parts/Header.vue';
 import Toolbar from '@/ui/parts/Toolbar.vue';
 import CanvasView from '@/ui/views/canvas/CanvasView.vue';
@@ -38,6 +40,9 @@ import {
   LEFT_PANEL_TOOLS,
   RIGHT_PANEL_TOOLS,
 } from './EditorPage.consts';
+
+useConsoleStore();
+useHistoryStore();
 
 const handlers = useHandlers(
   () => wsService.connect(),

@@ -100,10 +100,9 @@
 <script setup lang="ts">
 import Button from '@bits/Button.vue';
 import ButtonSections from '@bits/ButtonSections.vue';
-import type { SimulationEventMessage } from '@netop/types';
 import { useClipboard } from '@vueuse/core';
-import { onMounted, onUnmounted, ref } from 'vue';
-import { wsService } from '@/app/services/wsService';
+import { storeToRefs } from 'pinia';
+import { useHistoryStore } from '@/app/stores/historyStore';
 import { useWsStore } from '@/app/stores/wsStore';
 import { useHandlers } from './HistoryView.comps';
 import {
@@ -113,17 +112,13 @@ import {
   getEventIcon,
 } from './HistoryView.utils';
 
-const history = ref<SimulationEventMessage[]>([]);
+const historyStore = useHistoryStore();
+const { history } = storeToRefs(historyStore);
 const wsStore = useWsStore();
 const { copy } = useClipboard();
-const handlers = useHandlers(
-  (handler) => wsService.subscribe(handler),
-  (message) => wsStore.enqueue(message),
-  (message) => history.value.push(message),
+const handlers = useHandlers((message) =>
+  wsStore.enqueue(message),
 );
-
-onMounted(handlers.mount);
-onUnmounted(handlers.unmount);
 </script>
 
 <style scoped>

@@ -76,19 +76,11 @@ import {
   useFocus,
   useScroll,
 } from '@vueuse/core';
-import {
-  onMounted,
-  onUnmounted,
-  ref,
-  useTemplateRef,
-  watch,
-} from 'vue';
-import { wsService } from '@/app/services/wsService';
+import { storeToRefs } from 'pinia';
+import { ref, useTemplateRef, watch } from 'vue';
+import { useConsoleStore } from '@/app/stores/consoleStore';
 import { useWsStore } from '@/app/stores/wsStore';
-import {
-  useHandlers,
-  type ConsoleLogEntry,
-} from './ConsoleView.comps';
+import { useHandlers } from './ConsoleView.comps';
 import {
   formatTime,
   getEntryText,
@@ -102,8 +94,8 @@ const outputArea = useTemplateRef<HTMLElement | null>(
 );
 
 const input = ref('');
-const history = ref<string[]>([]);
-const log = ref<ConsoleLogEntry[]>([]);
+const consoleStore = useConsoleStore();
+const { log } = storeToRefs(consoleStore);
 const wsStore = useWsStore();
 const { copy } = useClipboard();
 const { focused } = useFocus(promptTextarea as any, {
@@ -113,18 +105,13 @@ const { y: scrollY } = useScroll(outputArea, {
   behavior: 'smooth',
 });
 const handlers = useHandlers(
-  (handler) => wsService.subscribe(handler),
   (message) => wsStore.enqueue(message),
-  (entry) => log.value.push(entry),
   (command) => {
-    history.value.push(command);
+    consoleStore.addCommand(command);
     input.value = '';
     focused.value = true;
   },
 );
-
-onMounted(handlers.mount);
-onUnmounted(handlers.unmount);
 
 function openConsoleMenu(event: MouseEvent) {
   void openMenu(
@@ -142,9 +129,7 @@ function openConsoleMenu(event: MouseEvent) {
       {
         name: 'Clear',
         icon: 'trash',
-        action: () => {
-          log.value = [];
-        },
+        action: consoleStore.clearLog,
       },
     ],
     { x: event.clientX, y: event.clientY },
