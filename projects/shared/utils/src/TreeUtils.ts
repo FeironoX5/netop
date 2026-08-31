@@ -1,4 +1,4 @@
-import { PathSegment } from '@netop/types';
+import type { PathSegment } from '@netop/types';
 
 export type treeWalker<T> = {
   match: (s: PathSegment, e: T) => boolean;
@@ -61,17 +61,19 @@ export namespace TreeUtils {
     };
 
     function chainedToPath(chain: TreeChainNode<T>[]) {
-      if (chain.length === 0) return undefined;
+      const last = chain.at(-1);
+      if (!last) return undefined;
       return {
-        entity: chain[chain.length - 1].node,
+        entity: last.node,
         path: chain.map((n) => n.segment),
         chain: chain.map((n) => n.node),
       };
     }
 
     return (path: PathSegment[]) => {
+      const first = path[0];
       const rootMatches = new Set<number>([0]);
-      if (path.length > 0 && walker.match(path[0], root))
+      if (first !== undefined && walker.match(first, root))
         rootMatches.add(1);
       if (rootMatches.has(path.length)) {
         return chainedToPath([
@@ -114,15 +116,19 @@ export namespace TreeUtils {
 
           for (const matched of matches) {
             if (matched > 0 && matched < path.length) {
-              if (walker.match(path[matched], child)) {
+              const current = path[matched];
+              if (
+                current !== undefined &&
+                walker.match(current, child)
+              ) {
                 childMatches.add(matched + 1);
               }
             }
           }
 
           if (
-            path.length > 0 &&
-            walker.match(path[0], child)
+            first !== undefined &&
+            walker.match(first, child)
           ) {
             childMatches.add(1);
           }
