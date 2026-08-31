@@ -88,6 +88,25 @@ export class Simulation {
     return true;
   }
 
+  updateConnection(connection: SimulationType.Connection) {
+    const index = this.connections.findIndex(
+      ({ id }) => id === connection.id,
+    );
+    if (index === -1)
+      throw new Error(
+        `Connection not found: ${connection.id}`,
+      );
+
+    const oldData = this.connections[index];
+    this.connections[index] = connection;
+    this.eventBus.call({
+      scope: 'connection',
+      operation: 'update',
+      data: connection,
+      oldData,
+    });
+  }
+
   resolveConnection(id: string) {
     const c = this.connections.find((c) => c.id === id);
     return c

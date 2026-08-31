@@ -1,8 +1,9 @@
 import { EventTarget } from '@netop/utils';
 import { SimulationRegistry } from '../SimulationRegistry';
+import { invertSimulationEvent } from './simulationEvent.utils';
 import { SimulationEvent } from './types';
 
-type ScopeApplier = (event: SimulationEvent.type) => void;
+type EventApplier = (event: SimulationEvent.type) => void;
 
 export class SimulationUndoHandler {
   private eventCounter = 0;
@@ -13,9 +14,9 @@ export class SimulationUndoHandler {
   }>();
 
   constructor(
-    private scopes: Record<
+    private appliers: Record<
       SimulationEvent.type['scope'],
-      ScopeApplier
+      EventApplier
     >,
   ) {
     SimulationRegistry.get().eventBus.subscribe((e) => {
@@ -28,19 +29,8 @@ export class SimulationUndoHandler {
   undo(eventId: number): void {
     const event = this.history.get(eventId);
     if (!event) throw new Error('event not found');
-    this.handleUndo(event);
-  }
-
-  private handleUndo(event: SimulationEvent.type): void {
-    switch (event.operation) {
-      case 'create':
-        break;
-      case 'delete':
-        break;
-      case 'update':
-        break;
-      default:
-        break;
-    }
+    const inverse = invertSimulationEvent(event);
+    this.appliers[inverse.scope](inverse);
+    this.history.delete(eventId);
   }
 }

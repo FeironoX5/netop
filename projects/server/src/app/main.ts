@@ -1,4 +1,5 @@
 import { ActionHandler } from '@commands/ActionHandler';
+import { simulationEventAppliers } from '@events/simulationEventAppliers';
 import { SimulationUndoHandler } from '@events/SimulationUndoHandler';
 import { SceneCategory } from '@netop/types';
 import { Simulation } from '@simulation/Simulation';
@@ -18,10 +19,7 @@ SimulationRegistry.set(
 // HANDLERS //
 
 export const simulationUndoHandler =
-  new SimulationUndoHandler({
-    entity: (_) => {},
-    connection: (_) => {},
-  });
+  new SimulationUndoHandler(simulationEventAppliers);
 
 export const actionHandler = new ActionHandler([
   getSimulationEntityFactory(),

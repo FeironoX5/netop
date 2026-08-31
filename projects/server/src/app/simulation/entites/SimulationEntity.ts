@@ -38,14 +38,24 @@ export abstract class SimulationEntity<
   }
 
   set details(details: DetailsType) {
-    const oldDetails = this.e.details;
-    this.e.details = details;
+    this.update({ ...this.e, details });
+  }
+
+  update(data: Simulation.Entity): void {
+    const oldData = { ...this.e };
+
+    if (data.name === undefined) delete this.e.name;
+    else this.e.name = data.name;
+
+    if (data.details === undefined) delete this.e.details;
+    else this.e.details = data.details;
+
     this.call({
       scope: 'entity',
       operation: 'update',
       parentPath: [],
-      data: this.e,
-      oldData: { ...this.e, details: oldDetails },
+      data: { ...this.e },
+      oldData,
     });
   }
 
