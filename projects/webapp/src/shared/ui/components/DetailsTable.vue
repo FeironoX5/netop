@@ -15,7 +15,12 @@
           <span class="details-label">{{
             field.label
           }}</span>
-          <span>{{ field.value }}</span>
+          <span
+            class="details-value"
+            @click="copy(field.value)"
+          >
+            {{ field.value }}
+          </span>
         </div>
       </div>
     </div>
@@ -23,9 +28,11 @@
 </template>
 
 <script setup lang="ts">
+import { useClipboard } from '@vueuse/core';
 import { detailsTableProps } from './DetailsTable.props';
 
 defineProps(detailsTableProps);
+const { copy } = useClipboard();
 </script>
 
 <style scoped>
@@ -65,5 +72,9 @@ defineProps(detailsTableProps);
   font-family: var(--f-main);
   font-size: var(--s-font-size-sm);
   text-transform: uppercase;
+}
+
+.details-value {
+  cursor: copy;
 }
 </style>

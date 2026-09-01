@@ -28,15 +28,37 @@
         </ButtonSections>
       </div>
 
+      <EmptyView v-if="loading" class="content-area">
+        Loading simulation
+      </EmptyView>
+
+      <EmptyView v-else-if="error" class="content-area">
+        Failed to load simulation
+      </EmptyView>
+
+      <EmptyView
+        v-else-if="
+          activeTab === 'entities' &&
+          entityEntries.length === 0
+        "
+        class="content-area"
+      >
+        No entities found
+      </EmptyView>
+
       <div
-        v-if="
+        v-else-if="
           activeTab === 'entities' && entityView === 'tree'
         "
         class="content-area tree-view"
       >
         <TreeList :items="entityEntries">
           <template #item="{ item: entry }">
-            <Button icon="box" :text="entry.text" />
+            <Button
+              :icon="entry.icon"
+              :text="entry.text"
+              isQuiet
+            />
           </template>
         </TreeList>
       </div>
@@ -53,6 +75,13 @@
         />
       </div>
 
+      <EmptyView
+        v-else-if="connectionEntries.length === 0"
+        class="content-area"
+      >
+        No connections found
+      </EmptyView>
+
       <div v-else class="content-area list-view">
         <ConnectionDetails
           v-for="connection in connectionEntries"
@@ -68,6 +97,7 @@
 import Button from '@bits/Button.vue';
 import ButtonSections from '@bits/ButtonSections.vue';
 import Textarea from '@bits/Textarea.vue';
+import EmptyView from '@components/EmptyView.vue';
 import TabbedGroup from '@components/TabbedGroup.vue';
 import TreeList from '@components/TreeList.vue';
 import { storeToRefs } from 'pinia';
@@ -86,7 +116,7 @@ const entityView = ref<EntityView>('tree');
 const query = ref('');
 
 const simulationStore = useSimulationStore();
-const { entities, connections } =
+const { entities, connections, loading, error } =
   storeToRefs(simulationStore);
 const entityEntries = computed(() =>
   getEntityEntries(entities.value, query.value),
@@ -104,7 +134,7 @@ const connectionEntries = computed(() =>
 
 .input-area {
   flex: 0 0 auto;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--s-gap);
   padding: var(--s-spacing);
   border-bottom: var(--border);

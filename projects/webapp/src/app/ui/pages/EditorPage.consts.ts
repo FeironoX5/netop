@@ -5,7 +5,7 @@ import type { PanelTool } from './EditorPage.types';
 
 export const LEFT_PANEL_TOOLS: PanelTool[] = [
   {
-    icon: 'boxes',
+    icon: 'target',
     name: 'Simulation',
     view: SimulationView,
   },

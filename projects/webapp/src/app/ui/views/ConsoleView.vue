@@ -35,7 +35,10 @@
       ref="outputArea"
       @contextmenu.prevent="openConsoleMenu($event)"
     >
-      <div class="inline-container column reversed">
+      <EmptyView v-if="log.length === 0">
+        No console output
+      </EmptyView>
+      <div v-else class="inline-container column reversed">
         <div
           class="inline-container column output-item"
           v-for="entry in log"
@@ -71,6 +74,7 @@ import Button from '@bits/Button.vue';
 import Icon from '@bits/Icon.vue';
 import { openMenu } from '@bits/menu';
 import Textarea from '@bits/Textarea.vue';
+import EmptyView from '@components/EmptyView.vue';
 import {
   useClipboard,
   useFocus,

@@ -7,6 +7,7 @@ import {
   formatEndpoint,
   getEntityDisplayText,
 } from '@/app/utils/simulation';
+import { ENTITY_CATEGORY_ICON } from '../parts/EntityDetails.consts';
 import type { SimulationEntityEntry } from './SimulationView.types';
 
 export function getEntityEntries(
@@ -20,6 +21,7 @@ export function getEntityEntries(
     path,
     depth: ActionCodec.split(path).length - 1,
     text: getEntityDisplayText(entity),
+    icon: ENTITY_CATEGORY_ICON[entity.category],
     entity,
   }))
     .filter(({ path, entity }) =>

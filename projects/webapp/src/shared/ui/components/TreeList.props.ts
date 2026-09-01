@@ -4,6 +4,7 @@ export type TreeListEntry = {
   key: PropertyKey;
   depth: number;
   text: string;
+  icon?: string;
 };
 
 export const treeListProps = {

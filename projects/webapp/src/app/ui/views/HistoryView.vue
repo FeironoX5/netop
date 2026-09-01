@@ -1,7 +1,10 @@
 <template>
   <div class="history-view inline-container column full">
     <div class="output-area">
-      <div class="inline-container column reversed">
+      <EmptyView v-if="history.length === 0">
+        No simulation events
+      </EmptyView>
+      <div v-else class="inline-container column reversed">
         <EventDetails
           v-for="message in history"
           :key="message.id"
@@ -26,6 +29,7 @@
 <script setup lang="ts">
 import Button from '@bits/Button.vue';
 import ButtonSections from '@bits/ButtonSections.vue';
+import EmptyView from '@components/EmptyView.vue';
 import { useClipboard } from '@vueuse/core';
 import { storeToRefs } from 'pinia';
 import { useHistoryStore } from '@/app/stores/historyStore';
