@@ -1,8 +1,10 @@
 export namespace MacAddress {
-  /**
-   * Must be a number between 0 and 2^48-1 stored as a Uint8Array of length 6
-   */
-  export type type = Uint8Array;
+  export type type = number[];
+
+  export const BROADCAST: type = Array.from(
+    { length: 6 },
+    () => 0xff,
+  );
 
   export function toString(mac: type): string {
     return [...mac]
@@ -11,8 +13,23 @@ export namespace MacAddress {
   }
 
   export function generate(): type {
-    return Uint8Array.from({ length: 6 }, () =>
+    return Array.from({ length: 6 }, () =>
       Math.floor(Math.random() * 256),
     );
+  }
+
+  export function equals(
+    left: readonly number[],
+    right: readonly number[],
+  ): boolean {
+    return left.every(
+      (byte, index) => byte === right[index],
+    );
+  }
+
+  export function isBroadcast(
+    mac: readonly number[],
+  ): boolean {
+    return equals(mac, BROADCAST);
   }
 }

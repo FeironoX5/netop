@@ -1,23 +1,22 @@
 import { PathSegment, Simulation } from '@netop/types';
 import { EventTarget } from '@netop/utils';
 import { Bit } from './details/Bit';
+import { PortBuffer } from './details/PortBuffer';
 import { NetworkDevice } from './entites/devices/NetworkDevice';
 import { SimulationEvent } from './events/types';
 import { SimulationRegistry } from './SimulationRegistry';
 
-type Timestamp = { at: number; n: number };
-type Transit = {
-  buffer: Bit.type[];
-  timestamps: Timestamp[];
-};
+type TransitChunk = { at: number; bits: Bit.type[] };
+
+type Transit = TransitChunk[];
 
 //TODO implement other types of connections
 export class SimulationConnection extends EventTarget<SimulationEvent.type> {
   constructor(
     public c: Simulation.Connection,
     private currentTick: number = 0,
-    private l2r: Transit = { buffer: [], timestamps: [] },
-    private r2l: Transit = { buffer: [], timestamps: [] },
+    private l2r: Transit = [],
+    private r2l: Transit = [],
   ) {
     super();
   }
@@ -66,36 +65,32 @@ export class SimulationConnection extends EventTarget<SimulationEvent.type> {
     return e.ports(d.port);
   }
 
-  passSymbols(
-    from: ReturnType<typeof this.port>,
-    to: ReturnType<typeof this.port>,
+  transferBits(
+    from: PortBuffer.type,
+    to: PortBuffer.type,
     transit: Transit,
   ) {
-    if (
-      transit.timestamps.length > 0 &&
-      transit.timestamps[0].at === this.currentTick
-    ) {
-      const ts = transit.timestamps.shift()!;
-      to.in.push(...transit.buffer.splice(0, ts.n));
+    const bits = from.out.splice(0, this.speed);
+    if (bits.length > 0) {
+      transit.push({
+        at: this.currentTick + this.delay,
+        bits,
+      });
     }
 
-    const readSymbols = from.out.splice(0, this.speed);
-    if (readSymbols.length === 0) return;
-    transit.buffer.push(...readSymbols);
-    transit.timestamps.push({
-      at: this.currentTick,
-      n: readSymbols.length,
-    });
+    while (transit[0]?.at === this.currentTick) {
+      const chunk = transit.shift()!;
+      to.in.push(...chunk.bits);
+    }
   }
 
   tick() {
     const left = this.port(this.left);
     const right = this.port(this.right);
 
-    this.passSymbols(left, right, this.l2r);
-    this.passSymbols(right, left, this.r2l);
+    this.transferBits(left, right, this.l2r);
+    this.transferBits(right, left, this.r2l);
 
-    this.currentTick =
-      (this.currentTick + 1) % this.c.delay;
+    this.currentTick += 1;
   }
 }

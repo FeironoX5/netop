@@ -1,5 +1,7 @@
 import { SimulationEntity } from '@entites/SimulationEntity';
 import { Simulation as SimulationTypes } from '@netop/types';
+import { EthernetFrame } from './details/EthernetFrame';
+import type { NetworkCardDetails } from './entites/devices/NetworkCard';
 import { Simulation } from './Simulation';
 import { SimulationConnection } from './SimulationConnection';
 
@@ -35,9 +37,31 @@ export class SimulationRegistry {
     (e: SimulationTypes.Entity) => void
   > = {
     entity(e) {
-      e.children?.forEach((c) =>
+      const children = e.children!;
+
+      children.forEach((c) =>
         SimulationRegistry.getManager(c.category).tick(c),
       );
+    },
+    ethernet(e) {
+      const { outgoingFrames, ports, receivedFrames } =
+        e.details as NetworkCardDetails;
+
+      for (const { port, frame } of outgoingFrames.splice(
+        0,
+      )) {
+        ports[port]!.out.push(
+          ...EthernetFrame.serialize(frame),
+        );
+      }
+
+      ports.forEach((port, portIndex) => {
+        let frame = EthernetFrame.read(port.in);
+        while (frame) {
+          receivedFrames.push({ port: portIndex, frame });
+          frame = EthernetFrame.read(port.in);
+        }
+      });
     },
   };
 

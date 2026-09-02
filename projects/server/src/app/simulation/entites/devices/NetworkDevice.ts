@@ -1,17 +1,33 @@
 import { Bit } from '@simulation/details/Bit';
+import { PortBuffer } from '@simulation/details/PortBuffer';
 import { SimulationEntity } from '../SimulationEntity';
 
-type PortSymbols = Bit.type[];
-type Port = { in: PortSymbols; out: PortSymbols };
+export type NetworkDeviceDetails = {
+  ports: PortBuffer.type[];
+};
 
-export class NetworkDevice extends SimulationEntity<{
-  ports: Port[];
-}> {
+export class NetworkDevice<
+  Details extends NetworkDeviceDetails =
+    NetworkDeviceDetails,
+> extends SimulationEntity<Details> {
   get ports() {
-    return (i: number) => {
-      const port = this.details.ports[i];
-      if (!port) throw new Error(`Port ${i} not found`);
-      return port;
-    };
+    return (i: number) => this.details.ports[i]!;
+  }
+
+  get portsCount() {
+    return this.details.ports.length;
+  }
+
+  send(port: number, bits: readonly Bit.type[]): void {
+    this.ports(port).out.push(...bits);
+  }
+
+  sendExcept(
+    excludedPort: number,
+    bits: readonly Bit.type[],
+  ): void {
+    this.details.ports.forEach((_, port) => {
+      if (port !== excludedPort) this.send(port, bits);
+    });
   }
 }
