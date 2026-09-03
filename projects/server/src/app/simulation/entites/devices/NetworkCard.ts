@@ -4,51 +4,11 @@ import { MacAddress } from '@simulation/details/MacAddress';
 import { PortBuffer } from '@simulation/details/PortBuffer';
 import { SimulationRegistry } from '@simulation/SimulationRegistry';
 import {
-  NetworkDevice,
-  NetworkDeviceDetails,
-} from './NetworkDevice';
+  DataLinkDevice,
+  DataLinkFrame,
+} from './DataLinkDevice';
 
-export type NetworkCardFrame = {
-  port: number;
-  frame: EthernetFrame.type;
-};
-
-export type NetworkCardDetails = NetworkDeviceDetails & {
-  macAddress: MacAddress.type;
-  outgoingFrames: NetworkCardFrame[];
-  receivedFrames: NetworkCardFrame[];
-};
-
-export class NetworkCard extends NetworkDevice<NetworkCardDetails> {
-  sendFrame(
-    port: number,
-    destination: MacAddress.type,
-    etherType: EthernetFrame.EtherType,
-    payload: number[],
-  ): void {
-    this.details.outgoingFrames.push({
-      port,
-      frame: {
-        destination,
-        source: this.details.macAddress,
-        etherType,
-        payload,
-      },
-    });
-  }
-
-  takeReceivedFrames(): NetworkCardFrame[] {
-    return this.details.receivedFrames
-      .splice(0)
-      .filter(
-        ({ frame }) =>
-          MacAddress.equals(
-            frame.destination,
-            this.details.macAddress,
-          ) || MacAddress.isBroadcast(frame.destination),
-      );
-  }
-
+export class NetworkCard extends DataLinkDevice {
   static {
     SimulationRegistry.setManager(
       DeviceCategory.NETWORK_CARD,
@@ -71,5 +31,30 @@ export class NetworkCard extends NetworkDevice<NetworkCardDetails> {
         },
       },
     );
+  }
+
+  transmit(
+    destination: MacAddress.type,
+    etherType: EthernetFrame.EtherType,
+    payload: number[],
+  ): void {
+    this.queue(0, {
+      destination,
+      source: this.macAddress,
+      etherType,
+      payload,
+    });
+  }
+
+  override receive(): DataLinkFrame[] {
+    return super
+      .receive()
+      .filter(
+        ({ frame }) =>
+          MacAddress.equals(
+            frame.destination,
+            this.macAddress,
+          ) || MacAddress.isBroadcast(frame.destination),
+      );
   }
 }
