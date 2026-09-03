@@ -1,19 +1,14 @@
 import { ArpMessage } from './ArpMessage';
+import { ArpTable } from './ArpTable';
 import { IpAddress } from './IpAddress';
 import { Ipv4Packet } from './Ipv4Packet';
-import { MacAddress } from './MacAddress';
 
 export namespace NetworkInterface {
-  export type ResolvedPacket = {
-    destinationMacAddress: MacAddress.type;
-    packet: Ipv4Packet.type;
-  };
-
   export type type = {
     ipAddress: IpAddress.type;
     subnetMask: IpAddress.type;
-    arpCache: Record<string, MacAddress.type>;
-    outgoingPackets: ResolvedPacket[];
+    arpTable: ArpTable.type;
+    outgoingPackets: Ipv4Packet.type[];
     receivedPackets: Ipv4Packet.type[];
     receivedArpMessages: ArpMessage.type[];
   };
@@ -22,7 +17,7 @@ export namespace NetworkInterface {
     return {
       ipAddress: IpAddress.generate(),
       subnetMask: IpAddress.generate(),
-      arpCache: {},
+      arpTable: ArpTable.build(),
       outgoingPackets: [],
       receivedPackets: [],
       receivedArpMessages: [],

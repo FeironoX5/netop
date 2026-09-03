@@ -1,4 +1,5 @@
 import { DeviceCategory } from '@netop/types';
+import { Ipv4Packet } from '@simulation/details/Ipv4Packet';
 import { NetworkInterface } from '@simulation/details/NetworkInterface';
 import { SimulationRegistry } from '@simulation/SimulationRegistry';
 import { SimulationEntity } from '../SimulationEntity';
@@ -25,13 +26,10 @@ export class Computer extends SimulationEntity<ComputerDetails> {
       }),
       from: Computer,
       tick(e) {
-        SimulationRegistry.behaviours.networkInterfaceOutput(
-          e,
-        );
+        SimulationRegistry.behaviours.arp(e);
+        SimulationRegistry.behaviours.ethernetOutput(e);
         SimulationRegistry.behaviours.entity(e);
-        SimulationRegistry.behaviours.networkInterfaceInput(
-          e,
-        );
+        SimulationRegistry.behaviours.ethernetInput(e);
       },
     });
   }
@@ -48,14 +46,8 @@ export class Computer extends SimulationEntity<ComputerDetails> {
     ]);
   }
 
-  sendPacket({
-    destinationMacAddress,
-    packet,
-  }: NetworkInterface.ResolvedPacket) {
-    this.networkInterface.outgoingPackets.push({
-      destinationMacAddress,
-      packet,
-    });
+  sendPacket(packet: Ipv4Packet.type) {
+    this.networkInterface.outgoingPackets.push(packet);
   }
 
   receivePackets() {

@@ -10,4 +10,13 @@ export namespace IpAddress {
   export function generate(): type {
     return Array.from({ length: 4 }, () => 0);
   }
+
+  export function equals(
+    left: readonly number[],
+    right: readonly number[],
+  ): boolean {
+    return left.every(
+      (byte, index) => byte === right[index],
+    );
+  }
 }
