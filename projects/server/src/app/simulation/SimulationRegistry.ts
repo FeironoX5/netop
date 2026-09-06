@@ -1,12 +1,6 @@
 import { SimulationEntity } from '@entites/SimulationEntity';
 import { Simulation as SimulationTypes } from '@netop/types';
-import { ArpMessage } from './details/ArpMessage';
-import { ArpTable } from './details/ArpTable';
 import { EthernetFrame } from './details/EthernetFrame';
-import { IpAddress } from './details/IpAddress';
-import { Ipv4Packet } from './details/Ipv4Packet';
-import { MacAddress } from './details/MacAddress';
-import type { Computer } from './entites/devices/Computer';
 import type { DataLinkDetails } from './entites/devices/DataLinkDevice';
 import { Simulation } from './Simulation';
 import { SimulationConnection } from './SimulationConnection';
@@ -68,106 +62,6 @@ export class SimulationRegistry {
           frame = EthernetFrame.read(port.in);
         }
       });
-    },
-    arp(e) {
-      const computer =
-        SimulationRegistry.fromChain<Computer>([e]);
-      const { networkCard, networkInterface } = computer;
-
-      for (const message of networkInterface.receivedArpMessages.splice(
-        0,
-      )) {
-        ArpTable.learn(
-          networkInterface.arpTable,
-          message.senderIpAddress,
-          message.senderMacAddress,
-        );
-
-        if (
-          message.operation ===
-            ArpMessage.Operation.REQUEST &&
-          IpAddress.equals(
-            message.targetIpAddress,
-            networkInterface.ipAddress,
-          )
-        ) {
-          networkCard.transmit(
-            message.senderMacAddress,
-            EthernetFrame.EtherType.ARP,
-            ArpMessage.serialize({
-              operation: ArpMessage.Operation.REPLY,
-              senderMacAddress: networkCard.macAddress,
-              senderIpAddress: networkInterface.ipAddress,
-              targetMacAddress: message.senderMacAddress,
-              targetIpAddress: message.senderIpAddress,
-            }),
-          );
-        }
-      }
-    },
-    ethernetOutput(e) {
-      const computer =
-        SimulationRegistry.fromChain<Computer>([e]);
-      const { networkCard, networkInterface } = computer;
-
-      for (const packet of networkInterface.outgoingPackets.splice(
-        0,
-      )) {
-        const destinationMacAddress = ArpTable.get(
-          networkInterface.arpTable,
-          packet.destination,
-        );
-
-        if (!destinationMacAddress) {
-          networkInterface.outgoingPackets.push(packet);
-
-          if (destinationMacAddress === undefined) {
-            ArpTable.request(
-              networkInterface.arpTable,
-              packet.destination,
-            );
-            networkCard.transmit(
-              MacAddress.BROADCAST,
-              EthernetFrame.EtherType.ARP,
-              ArpMessage.serialize({
-                operation: ArpMessage.Operation.REQUEST,
-                senderMacAddress: networkCard.macAddress,
-                senderIpAddress: networkInterface.ipAddress,
-                targetIpAddress: packet.destination,
-              }),
-            );
-          }
-
-          continue;
-        }
-
-        networkCard.transmit(
-          destinationMacAddress,
-          EthernetFrame.EtherType.IPV4,
-          Ipv4Packet.serialize(packet),
-        );
-      }
-    },
-    ethernetInput(e) {
-      const computer =
-        SimulationRegistry.fromChain<Computer>([e]);
-      const { networkCard, networkInterface } = computer;
-
-      for (const { frame } of networkCard.receive()) {
-        if (
-          frame.etherType === EthernetFrame.EtherType.IPV4
-        ) {
-          networkInterface.receivedPackets.push(
-            Ipv4Packet.deserialize(frame.payload),
-          );
-        } else if (
-          frame.etherType === EthernetFrame.EtherType.ARP
-        ) {
-          networkInterface.receivedArpMessages.push(
-            ArpMessage.deserialize(frame.payload),
-          );
-        }
-      }
     },
   };
 
