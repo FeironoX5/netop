@@ -1,6 +1,6 @@
 import { EntityWrapper } from '@commands/interfaces/EntityWrapper';
 import { ComputerWrapper } from '@commands/wrappers/simulation/Computer.wrapper';
-import { NetworkDeviceWrapper } from '@commands/wrappers/simulation/NetworkDevice.wrapper';
+import { PhysicalDeviceWrapper } from '@commands/wrappers/simulation/PhysicalDevice.wrapper';
 import { SceneWrapper } from '@commands/wrappers/simulation/Scene.wrapper';
 import { SimulationEntity } from '@entites/SimulationEntity';
 import {
@@ -14,7 +14,7 @@ const wrappers: EntityWrapperMap = new Map([
   [DeviceCategory.COMPUTER, ComputerWrapper],
   [
     DeviceCategory.NETWORK_CARD,
-    NetworkDeviceWrapper as EntityWrapper<SimulationEntity>,
+    PhysicalDeviceWrapper as EntityWrapper<SimulationEntity>,
   ],
   [
     SceneCategory,

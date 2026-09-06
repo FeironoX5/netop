@@ -1,4 +1,4 @@
-import { IpAddress } from './IpAddress';
+import { IpAddress } from '../network/IpAddress';
 import { MacAddress } from './MacAddress';
 
 export namespace ArpTable {

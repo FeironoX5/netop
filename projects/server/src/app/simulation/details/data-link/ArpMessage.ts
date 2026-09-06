@@ -1,5 +1,5 @@
+import { IpAddress } from '../network/IpAddress';
 import { EthernetFrame } from './EthernetFrame';
-import { IpAddress } from './IpAddress';
 import { MacAddress } from './MacAddress';
 
 export namespace ArpMessage {

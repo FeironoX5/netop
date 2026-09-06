@@ -1,11 +1,13 @@
 import { DeviceCategory } from '@netop/types';
-import { EthernetFrame } from '@simulation/details/EthernetFrame';
-import { MacAddress } from '@simulation/details/MacAddress';
-import { PortBuffer } from '@simulation/details/PortBuffer';
+import { DataLinkPort } from '@simulation/details/data-link/DataLinkPort';
+import { EthernetFrame } from '@simulation/details/data-link/EthernetFrame';
+import { MacAddress } from '@simulation/details/data-link/MacAddress';
+import { SlipFrame } from '@simulation/details/data-link/SlipFrame';
 import { SimulationRegistry } from '@simulation/SimulationRegistry';
 import {
   DataLinkDevice,
-  DataLinkFrame,
+  FrameFormat,
+  PortFrame,
 } from './DataLinkDevice';
 
 export class NetworkCard extends DataLinkDevice {
@@ -13,48 +15,82 @@ export class NetworkCard extends DataLinkDevice {
     SimulationRegistry.setManager(
       DeviceCategory.NETWORK_CARD,
       {
-        build: (id, name) => ({
-          id,
-          category: DeviceCategory.NETWORK_CARD,
-          name,
-          details: {
-            macAddress: MacAddress.generate(),
-            ports: [PortBuffer.build()],
-            outgoingFrames: [],
-            receivedFrames: [],
-          },
-        }),
+        build: (id, name, ...frameFormats) => {
+          if (frameFormats.length === 0)
+            frameFormats.push(EthernetFrame.FORMAT);
+
+          return {
+            id,
+            category: DeviceCategory.NETWORK_CARD,
+            name,
+            details: {
+              macAddress: MacAddress.generate(),
+              ports: frameFormats.map((frameFormat) =>
+                DataLinkPort.build(
+                  frameFormat as FrameFormat,
+                ),
+              ),
+              receivedFrames: [],
+            },
+          };
+        },
         from: NetworkCard,
         tick(e) {
-          SimulationRegistry.behaviours.ethernet(e);
+          SimulationRegistry.behaviours.dataLink(e);
           SimulationRegistry.behaviours.entity(e);
         },
       },
     );
   }
 
-  transmit(
-    destination: MacAddress.type,
-    etherType: EthernetFrame.EtherType,
-    payload: number[],
-  ): void {
-    this.queue(0, {
-      destination,
-      source: this.macAddress,
-      etherType,
-      payload,
-    });
+  addPort(frameFormat: FrameFormat): number {
+    this.details.ports.push(
+      DataLinkPort.build(frameFormat),
+    );
+    return this.portsCount - 1;
   }
 
-  override receive(): DataLinkFrame[] {
-    return super
-      .receive()
-      .filter(
-        ({ frame }) =>
-          MacAddress.equals(
-            frame.destination,
-            this.macAddress,
-          ) || MacAddress.isBroadcast(frame.destination),
-      );
+  transmit(
+    port: number,
+    frame:
+      | Omit<EthernetFrame.type, 'source'>
+      | SlipFrame.type,
+  ): void {
+    switch (this.ports(port).frameFormat) {
+      case EthernetFrame.FORMAT:
+        this.queue(
+          port,
+          EthernetFrame.serialize({
+            ...(frame as Omit<
+              EthernetFrame.type,
+              'source'
+            >),
+            source: this.macAddress,
+          }),
+        );
+        break;
+      case SlipFrame.FORMAT:
+        this.queue(port, SlipFrame.serialize(frame));
+        break;
+    }
+  }
+
+  override receive(): PortFrame[] {
+    return super.receive().filter(({ port, frame }) => {
+      switch (this.ports(port).frameFormat) {
+        case EthernetFrame.FORMAT: {
+          const { destination } =
+            EthernetFrame.deserialize(frame);
+          return (
+            MacAddress.equals(
+              destination,
+              this.macAddress,
+            ) || MacAddress.isBroadcast(destination)
+          );
+        }
+        default:
+          return true;
+      }
+    });
   }
 }

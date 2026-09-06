@@ -1,15 +1,9 @@
 import { DeviceCategory } from '@netop/types';
-import { IpAddress } from '@simulation/details/IpAddress';
-import { MacAddress } from '@simulation/details/MacAddress';
+import { PortBuffer } from '@simulation/details/physical/PortBuffer';
 import { SimulationRegistry } from '@simulation/SimulationRegistry';
-import { SimulationEntity } from '../SimulationEntity';
+import { PhysicalDevice } from './PhysicalDevice';
 
-export class Hub extends SimulationEntity<{
-  portsCount: number;
-  macAddress: number[];
-  ipAddress: number[];
-  ports: (unknown | null)[];
-}> {
+export class Hub extends PhysicalDevice {
   static {
     SimulationRegistry.setManager(DeviceCategory.HUB, {
       build: (id, name) => ({
@@ -17,14 +11,15 @@ export class Hub extends SimulationEntity<{
         category: DeviceCategory.HUB,
         name,
         details: {
-          portsCount: 4,
-          macAddress: Array.from(MacAddress.generate()),
-          ipAddress: Array.from(IpAddress.generate()),
-          ports: Array.from({ length: 4 }, () => null),
+          ports: Array.from(
+            { length: 4 },
+            PortBuffer.build,
+          ),
         },
       }),
       from: Hub,
       tick(e) {
+        SimulationRegistry.behaviours.repeater(e);
         SimulationRegistry.behaviours.entity(e);
       },
     });

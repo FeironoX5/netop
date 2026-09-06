@@ -1,8 +1,8 @@
 import { PathSegment, Simulation } from '@netop/types';
 import { EventTarget } from '@netop/utils';
-import { Bit } from './details/Bit';
-import { PortBuffer } from './details/PortBuffer';
-import { NetworkDevice } from './entites/devices/NetworkDevice';
+import { Bit } from './details/physical/Bit';
+import { PortBuffer } from './details/physical/PortBuffer';
+import { PhysicalDevice } from './entites/devices/PhysicalDevice';
 import { SimulationEvent } from './events/types';
 import { SimulationRegistry } from './SimulationRegistry';
 
@@ -61,7 +61,7 @@ export class SimulationConnection extends EventTarget<SimulationEvent.type> {
   port(d: { path: PathSegment[]; port: number }) {
     const e = SimulationRegistry.get().resolveFull(
       d.path,
-    ) as NetworkDevice;
+    ) as PhysicalDevice;
     return e.ports(d.port);
   }
 

@@ -1,12 +1,12 @@
 import { EntityWrapper } from '@commands/interfaces/EntityWrapper';
 import { ActionCodec } from '@netop/utils';
-import { NetworkDevice } from '@/app/simulation/entites/devices/NetworkDevice';
+import { PhysicalDevice } from '@/app/simulation/entites/devices/PhysicalDevice';
 import { SimulationConnection } from '@/app/simulation/SimulationConnection';
 import { SimulationRegistry } from '@/app/simulation/SimulationRegistry';
 
-export const NetworkDeviceWrapper: EntityWrapper<NetworkDevice> =
+export const PhysicalDeviceWrapper: EntityWrapper<PhysicalDevice> =
   {
-    info: 'Used to manage a network device',
+    info: 'Used to manage a physical device',
     commands: new Map([
       [
         'link',

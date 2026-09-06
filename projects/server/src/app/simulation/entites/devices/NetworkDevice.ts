@@ -1,33 +1,39 @@
-import { Bit } from '@simulation/details/Bit';
-import { PortBuffer } from '@simulation/details/PortBuffer';
+import { NetworkInterface } from '@simulation/details/network/NetworkInterface';
+import { RoutingTable } from '@simulation/details/network/RoutingTable';
+import { SimulationRegistry } from '@simulation/SimulationRegistry';
 import { SimulationEntity } from '../SimulationEntity';
+import type { FrameFormat } from './DataLinkDevice';
+import type { NetworkCard } from './NetworkCard';
 
 export type NetworkDeviceDetails = {
-  ports: PortBuffer.type[];
+  networkInterfaces: NetworkInterface.type[];
+  routingTable: RoutingTable.type;
 };
 
-export class NetworkDevice<
+export abstract class NetworkDevice<
   Details extends NetworkDeviceDetails =
     NetworkDeviceDetails,
 > extends SimulationEntity<Details> {
-  get ports() {
-    return (i: number) => this.details.ports[i]!;
+  get networkInterfaces() {
+    return this.details.networkInterfaces;
   }
 
-  get portsCount() {
-    return this.details.ports.length;
+  get networkCard() {
+    return SimulationRegistry.fromChain<NetworkCard>([
+      this.entity,
+      this.children[0]!,
+    ]);
   }
 
-  send(port: number, bits: readonly Bit.type[]): void {
-    this.ports(port).out.push(...bits);
+  get routingTable() {
+    return this.details.routingTable;
   }
 
-  sendExcept(
-    excludedPort: number,
-    bits: readonly Bit.type[],
-  ): void {
-    this.details.ports.forEach((_, port) => {
-      if (port !== excludedPort) this.send(port, bits);
-    });
+  addInterface(frameFormat: FrameFormat) {
+    const networkInterface = NetworkInterface.build(
+      this.networkCard.addPort(frameFormat),
+    );
+    this.networkInterfaces.push(networkInterface);
+    return networkInterface;
   }
 }

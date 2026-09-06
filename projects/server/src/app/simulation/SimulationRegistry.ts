@@ -1,7 +1,16 @@
 import { SimulationEntity } from '@entites/SimulationEntity';
 import { Simulation as SimulationTypes } from '@netop/types';
-import { EthernetFrame } from './details/EthernetFrame';
-import type { DataLinkDetails } from './entites/devices/DataLinkDevice';
+import { ArpMessage } from './details/data-link/ArpMessage';
+import { ArpTable } from './details/data-link/ArpTable';
+import { EthernetFrame } from './details/data-link/EthernetFrame';
+import { MacAddress } from './details/data-link/MacAddress';
+import { SlipFrame } from './details/data-link/SlipFrame';
+import { IpAddress } from './details/network/IpAddress';
+import { Ipv4Packet } from './details/network/Ipv4Packet';
+import { DataLinkDevice } from './entites/devices/DataLinkDevice';
+import type { NetworkCard } from './entites/devices/NetworkCard';
+import type { NetworkDeviceDetails } from './entites/devices/NetworkDevice';
+import { PhysicalDevice } from './entites/devices/PhysicalDevice';
 import { Simulation } from './Simulation';
 import { SimulationConnection } from './SimulationConnection';
 
@@ -37,31 +46,191 @@ export class SimulationRegistry {
     (e: SimulationTypes.Entity) => void
   > = {
     entity(e) {
-      const children = e.children!;
-
-      children.forEach((c) =>
+      e.children?.forEach((c) =>
         SimulationRegistry.getManager(c.category).tick(c),
       );
     },
-    ethernet(e) {
-      const { outgoingFrames, ports, receivedFrames } =
-        e.details as DataLinkDetails;
+    repeater(e) {
+      const device =
+        SimulationRegistry.fromChain<PhysicalDevice>([e]);
 
-      for (const { port, frame } of outgoingFrames.splice(
-        0,
-      )) {
-        ports[port]!.out.push(
-          ...EthernetFrame.serialize(frame),
+      device.details.ports
+        .entries()
+        .filter(([, buffer]) => buffer.in.length > 0)
+        .take(1)
+        .forEach(([port, buffer]) =>
+          device.sendExcept(port, buffer.in.splice(0)),
         );
-      }
 
-      ports.forEach((port, portIndex) => {
-        let frame = EthernetFrame.read(port.in);
+      device.details.ports.forEach((buffer) =>
+        buffer.in.splice(0),
+      );
+    },
+    dataLink(e) {
+      const device =
+        SimulationRegistry.fromChain<DataLinkDevice>([e]);
+      const { ports, receivedFrames } = device.details;
+
+      ports.forEach((_, portIndex) => {
+        let frame = device.read(portIndex);
         while (frame) {
           receivedFrames.push({ port: portIndex, frame });
-          frame = EthernetFrame.read(port.in);
+          frame = device.read(portIndex);
         }
       });
+    },
+    arp(e) {
+      const { networkInterfaces } =
+        e.details as NetworkDeviceDetails;
+      const networkCard =
+        SimulationRegistry.fromChain<NetworkCard>([
+          e,
+          e.children![0]!,
+        ]);
+
+      for (const networkInterface of networkInterfaces) {
+        for (const message of networkInterface.receivedArpMessages.splice(
+          0,
+        )) {
+          ArpTable.learn(
+            networkInterface.arpTable,
+            message.senderIpAddress,
+            message.senderMacAddress,
+          );
+
+          if (
+            message.operation ===
+              ArpMessage.Operation.REQUEST &&
+            IpAddress.equals(
+              message.targetIpAddress,
+              networkInterface.ipAddress,
+            )
+          ) {
+            networkCard.transmit(networkInterface.port, {
+              destination: message.senderMacAddress,
+              etherType: EthernetFrame.EtherType.ARP,
+              payload: ArpMessage.serialize({
+                operation: ArpMessage.Operation.REPLY,
+                senderMacAddress: networkCard.macAddress,
+                senderIpAddress: networkInterface.ipAddress,
+                targetMacAddress: message.senderMacAddress,
+                targetIpAddress: message.senderIpAddress,
+              }),
+            });
+          }
+        }
+      }
+    },
+    networkOutput(e) {
+      const { networkInterfaces } =
+        e.details as NetworkDeviceDetails;
+      const networkCard =
+        SimulationRegistry.fromChain<NetworkCard>([
+          e,
+          e.children![0]!,
+        ]);
+
+      for (const networkInterface of networkInterfaces) {
+        for (const outgoingPacket of networkInterface.outgoingPackets.splice(
+          0,
+        )) {
+          const { packet, nextHop } = outgoingPacket;
+          switch (
+            networkCard.ports(networkInterface.port)
+              .frameFormat
+          ) {
+            case EthernetFrame.FORMAT:
+              break;
+            case SlipFrame.FORMAT:
+              networkCard.transmit(networkInterface.port, {
+                payload: Ipv4Packet.serialize(packet),
+              });
+              continue;
+            default:
+              continue;
+          }
+
+          const destinationMacAddress = ArpTable.get(
+            networkInterface.arpTable,
+            nextHop,
+          );
+
+          if (!destinationMacAddress) {
+            networkInterface.outgoingPackets.push(
+              outgoingPacket,
+            );
+
+            if (destinationMacAddress === undefined) {
+              ArpTable.request(
+                networkInterface.arpTable,
+                nextHop,
+              );
+              networkCard.transmit(networkInterface.port, {
+                destination: MacAddress.BROADCAST,
+                etherType: EthernetFrame.EtherType.ARP,
+                payload: ArpMessage.serialize({
+                  operation: ArpMessage.Operation.REQUEST,
+                  senderMacAddress: networkCard.macAddress,
+                  senderIpAddress:
+                    networkInterface.ipAddress,
+                  targetIpAddress: nextHop,
+                }),
+              });
+            }
+
+            continue;
+          }
+
+          networkCard.transmit(networkInterface.port, {
+            destination: destinationMacAddress,
+            etherType: EthernetFrame.EtherType.IPV4,
+            payload: Ipv4Packet.serialize(packet),
+          });
+        }
+      }
+    },
+    networkInput(e) {
+      const { networkInterfaces } =
+        e.details as NetworkDeviceDetails;
+      const networkCard =
+        SimulationRegistry.fromChain<NetworkCard>([
+          e,
+          e.children![0]!,
+        ]);
+
+      for (const { port, frame } of networkCard.receive()) {
+        const networkInterface = networkInterfaces.find(
+          (networkInterface) =>
+            networkInterface.port === port,
+        )!;
+
+        switch (networkCard.ports(port).frameFormat) {
+          case EthernetFrame.FORMAT: {
+            const { etherType, payload } =
+              EthernetFrame.deserialize(frame);
+            switch (etherType) {
+              case EthernetFrame.EtherType.IPV4:
+                networkInterface.receivedPackets.push(
+                  Ipv4Packet.deserialize(payload),
+                );
+                break;
+              case EthernetFrame.EtherType.ARP:
+                networkInterface.receivedArpMessages.push(
+                  ArpMessage.deserialize(payload),
+                );
+                break;
+            }
+            break;
+          }
+          case SlipFrame.FORMAT:
+            networkInterface.receivedPackets.push(
+              Ipv4Packet.deserialize(
+                SlipFrame.deserialize(frame).payload,
+              ),
+            );
+            break;
+        }
+      }
     },
   };
 

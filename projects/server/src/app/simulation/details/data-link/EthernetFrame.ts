@@ -1,7 +1,7 @@
-import { Bit } from './Bit';
 import { MacAddress } from './MacAddress';
 
 export namespace EthernetFrame {
+  export const FORMAT = 'ethernet';
   export const START_FRAME_DELIMITER = 0xd5;
 
   export enum EtherType {
@@ -28,10 +28,10 @@ export namespace EthernetFrame {
     payload: number[];
   };
 
-  export function serialize(frame: type): Bit.type[] {
+  export function serialize(frame: type): number[] {
     const payloadLength = frame.payload.length;
 
-    return Bit.fromBytes([
+    return [
       START_FRAME_DELIMITER,
       ...frame.destination,
       ...frame.source,
@@ -40,38 +40,34 @@ export namespace EthernetFrame {
       payloadLength >> 8,
       payloadLength & 0xff,
       ...frame.payload,
-    ]);
+    ];
   }
 
-  export function read(
-    stream: Bit.type[],
-  ): type | undefined {
-    const headerBitLength = HEADER_LENGTH * 8;
-    if (stream.length < headerBitLength) return;
+  export function byteLength(
+    bytes: readonly number[],
+  ): number | undefined {
+    if (bytes.length < HEADER_LENGTH) return;
 
-    const header = Bit.toBytes(
-      stream.slice(0, headerBitLength),
+    return (
+      HEADER_LENGTH +
+      ((bytes[LENGTH_FIELD_OFFSET] << 8) |
+        bytes[LENGTH_FIELD_OFFSET + 1])
     );
-    if (header[0] !== START_FRAME_DELIMITER) return;
+  }
 
-    const etherType =
-      (header[ETHER_TYPE_OFFSET] << 8) |
-      header[ETHER_TYPE_OFFSET + 1];
-    const payloadLength =
-      (header[LENGTH_FIELD_OFFSET] << 8) |
-      header[LENGTH_FIELD_OFFSET + 1];
-    const frameBitLength =
-      (HEADER_LENGTH + payloadLength) * 8;
-    if (stream.length < frameBitLength) return;
+  export function start(bytes: readonly number[]): number {
+    return bytes.indexOf(START_FRAME_DELIMITER);
+  }
 
-    const bytes = Bit.toBytes(
-      stream.splice(0, frameBitLength),
-    );
-
+  export function deserialize(
+    bytes: readonly number[],
+  ): type {
     return {
       destination: bytes.slice(1, 7),
       source: bytes.slice(7, 13),
-      etherType,
+      etherType:
+        (bytes[ETHER_TYPE_OFFSET] << 8) |
+        bytes[ETHER_TYPE_OFFSET + 1],
       payload: bytes.slice(HEADER_LENGTH),
     };
   }

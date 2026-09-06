@@ -19,4 +19,16 @@ export namespace IpAddress {
       (byte, index) => byte === right[index],
     );
   }
+
+  export function isInSubnet(
+    ip: type,
+    network: type,
+    subnetMask: type,
+  ): boolean {
+    return ip.every(
+      (byte, index) =>
+        (byte & subnetMask[index]) ===
+        (network[index] & subnetMask[index]),
+    );
+  }
 }
