@@ -39,19 +39,30 @@ export class Computer extends NetworkDevice<ComputerDetails> {
     });
   }
 
-  sendPacket(packet: Ipv4Packet.type) {
+  sendPacket(
+    destination: Ipv4Packet.type['destination'],
+    protocol: Ipv4Packet.Protocol,
+    payload: number[],
+  ) {
     const route = RoutingTable.resolve(
       this.routingTable,
       this.networkInterfaces,
-      packet.destination,
+      destination,
     )!;
 
-    this.networkInterfaces
-      .find(({ port }) => port === route.port)!
-      .outgoingPackets.push({
-        packet,
-        nextHop: route.nextHop,
-      });
+    const networkInterface = this.networkInterfaces.find(
+      ({ port }) => port === route.port,
+    )!;
+    networkInterface.outgoingPackets.push({
+      packet: {
+        source: networkInterface.ipAddress,
+        destination,
+        ttl: Ipv4Packet.DEFAULT_TTL,
+        protocol,
+        payload,
+      },
+      nextHop: route.nextHop,
+    });
   }
 
   receivePackets() {

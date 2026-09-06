@@ -1,3 +1,4 @@
+import { IpAddress } from '@simulation/details/network/IpAddress';
 import { NetworkInterface } from '@simulation/details/network/NetworkInterface';
 import { RoutingTable } from '@simulation/details/network/RoutingTable';
 import { SimulationRegistry } from '@simulation/SimulationRegistry';
@@ -35,5 +36,34 @@ export abstract class NetworkDevice<
     );
     this.networkInterfaces.push(networkInterface);
     return networkInterface;
+  }
+
+  removeInterface(port: number) {
+    this.networkCard.removePort(port);
+    RoutingTable.removePort(this.routingTable, port);
+    return NetworkInterface.remove(
+      this.networkInterfaces,
+      port,
+    );
+  }
+
+  configureInterface(
+    port: number,
+    ipAddress: IpAddress.type,
+    subnetMask: IpAddress.type,
+  ) {
+    const networkInterface = this.networkInterfaces.find(
+      (networkInterface) => networkInterface.port === port,
+    )!;
+    networkInterface.ipAddress = ipAddress;
+    networkInterface.subnetMask = subnetMask;
+  }
+
+  addRoute(route: RoutingTable.Entry) {
+    RoutingTable.add(this.routingTable, route);
+  }
+
+  removeRoute(index: number) {
+    return RoutingTable.remove(this.routingTable, index);
   }
 }

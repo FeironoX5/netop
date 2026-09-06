@@ -15,6 +15,33 @@ export namespace RoutingTable {
     return [];
   }
 
+  export function add(table: type, route: Entry): void {
+    table.push(route);
+  }
+
+  export function remove(
+    table: type,
+    index: number,
+  ): Entry {
+    return table.splice(index, 1)[0]!;
+  }
+
+  export function removePort(
+    table: type,
+    port: number,
+  ): void {
+    for (
+      let index = table.length - 1;
+      index >= 0;
+      index--
+    ) {
+      if (table[index]!.port === port)
+        table.splice(index, 1);
+      else if (table[index]!.port > port)
+        table[index]!.port -= 1;
+    }
+  }
+
   export function resolve(
     table: type,
     networkInterfaces: NetworkInterface.type[],

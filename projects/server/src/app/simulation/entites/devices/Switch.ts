@@ -42,6 +42,15 @@ export class Switch extends DataLinkDevice<SwitchDetails> {
     });
   }
 
+  override removePort(port: number) {
+    const removedPort = super.removePort(port);
+    SwitchingTable.removePort(
+      this.details.switchingTable,
+      port,
+    );
+    return removedPort;
+  }
+
   forward() {
     for (const { port, frame } of this.receive()) {
       switch (this.ports(port).frameFormat) {

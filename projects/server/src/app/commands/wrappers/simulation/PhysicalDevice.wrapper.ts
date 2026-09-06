@@ -9,15 +9,41 @@ export const PhysicalDeviceWrapper: EntityWrapper<PhysicalDevice> =
     info: 'Used to manage a physical device',
     commands: new Map([
       [
+        'new',
+        {
+          info: 'Adds a port',
+          fn: (entity) => `Added port ${entity.addPort()}`,
+        },
+      ],
+      [
+        'rm',
+        {
+          info: 'Removes a port',
+          args: ['port'],
+          fn: (entity, port: string) => {
+            entity.removePort(Number(port));
+            return `Removed port ${port}`;
+          },
+        },
+      ],
+      [
         'link',
         {
           info: 'Links two network devices together',
-          args: ['port', 'targetPath', 'targetPort'],
+          args: [
+            'port',
+            'targetPath',
+            'targetPort',
+            'speed?',
+            'delay?',
+          ],
           fn: (
             entity,
             port: string,
             targetPath: string,
             targetPort: string,
+            speed: string = '1',
+            delay: string = '5',
           ) => {
             const target = SimulationRegistry.get().resolve(
               ActionCodec.split(targetPath),
@@ -29,6 +55,8 @@ export const PhysicalDeviceWrapper: EntityWrapper<PhysicalDevice> =
                 Number(port),
                 target.entity.path,
                 Number(targetPort),
+                Number(speed),
+                Number(delay),
               ),
             );
             return `Linked ${entity.id} to ${target.entity.id}`;

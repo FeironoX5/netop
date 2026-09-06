@@ -7,6 +7,10 @@ export namespace IpAddress {
       .join('.');
   }
 
+  export function parse(ip: string): type {
+    return ip.split('.').map(Number);
+  }
+
   export function generate(): type {
     return Array.from({ length: 4 }, () => 0);
   }

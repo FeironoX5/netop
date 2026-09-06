@@ -43,13 +43,6 @@ export class NetworkCard extends DataLinkDevice {
     );
   }
 
-  addPort(frameFormat: FrameFormat): number {
-    this.details.ports.push(
-      DataLinkPort.build(frameFormat),
-    );
-    return this.portsCount - 1;
-  }
-
   transmit(
     port: number,
     frame:

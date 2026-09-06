@@ -21,4 +21,17 @@ export namespace SwitchingTable {
   ): void {
     table[MacAddress.toString(mac)] = port;
   }
+
+  export function removePort(
+    table: type,
+    port: number,
+  ): void {
+    Object.entries(table).forEach(
+      ([macAddress, entryPort]) => {
+        if (entryPort === port) delete table[macAddress];
+        else if (entryPort > port)
+          table[macAddress] = entryPort - 1;
+      },
+    );
+  }
 }

@@ -1,6 +1,8 @@
 import { EntityWrapper } from '@commands/interfaces/EntityWrapper';
 import { ComputerWrapper } from '@commands/wrappers/simulation/Computer.wrapper';
+import { DataLinkDeviceWrapper } from '@commands/wrappers/simulation/DataLinkDevice.wrapper';
 import { PhysicalDeviceWrapper } from '@commands/wrappers/simulation/PhysicalDevice.wrapper';
+import { RouterWrapper } from '@commands/wrappers/simulation/Router.wrapper';
 import { SceneWrapper } from '@commands/wrappers/simulation/Scene.wrapper';
 import { SimulationEntity } from '@entites/SimulationEntity';
 import {
@@ -10,16 +12,16 @@ import {
 import { SimulationRegistry } from '@simulation/SimulationRegistry';
 import { EntityWrapperMap, ResolverFactory } from './types';
 
-const wrappers: EntityWrapperMap = new Map([
+const wrappers: EntityWrapperMap = new Map<
+  string,
+  EntityWrapper<any>
+>([
   [DeviceCategory.COMPUTER, ComputerWrapper],
-  [
-    DeviceCategory.NETWORK_CARD,
-    PhysicalDeviceWrapper as EntityWrapper<SimulationEntity>,
-  ],
-  [
-    SceneCategory,
-    SceneWrapper as EntityWrapper<SimulationEntity>,
-  ],
+  [DeviceCategory.ROUTER, RouterWrapper],
+  [DeviceCategory.NETWORK_CARD, DataLinkDeviceWrapper],
+  [DeviceCategory.HUB, PhysicalDeviceWrapper],
+  [DeviceCategory.SWITCH, DataLinkDeviceWrapper],
+  [SceneCategory, SceneWrapper],
 ]);
 
 export const getSimulationEntityFactory =

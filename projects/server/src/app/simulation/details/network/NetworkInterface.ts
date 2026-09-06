@@ -30,4 +30,22 @@ export namespace NetworkInterface {
       receivedArpMessages: [],
     };
   }
+
+  export function remove(
+    networkInterfaces: type[],
+    port: number,
+  ): type {
+    const networkInterface = networkInterfaces.splice(
+      networkInterfaces.findIndex(
+        (networkInterface) =>
+          networkInterface.port === port,
+      ),
+      1,
+    )[0]!;
+    networkInterfaces.forEach((networkInterface) => {
+      if (networkInterface.port > port)
+        networkInterface.port -= 1;
+    });
+    return networkInterface;
+  }
 }

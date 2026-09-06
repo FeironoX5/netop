@@ -31,6 +31,31 @@ export abstract class DataLinkDevice<
     return this.details.receivedFrames;
   }
 
+  override addPort(
+    frameFormat: FrameFormat = EthernetFrame.FORMAT,
+  ): number {
+    this.details.ports.push(
+      DataLinkPort.build(frameFormat),
+    );
+    return this.portsCount - 1;
+  }
+
+  override removePort(port: number) {
+    const removedPort = super.removePort(port);
+    for (
+      let index = this.receivedFrames.length - 1;
+      index >= 0;
+      index--
+    ) {
+      const receivedFrame = this.receivedFrames[index]!;
+      if (receivedFrame.port === port)
+        this.receivedFrames.splice(index, 1);
+      else if (receivedFrame.port > port)
+        receivedFrame.port -= 1;
+    }
+    return removedPort;
+  }
+
   queue(port: number, frame: readonly number[]) {
     this.send(port, Bit.fromBytes(frame));
   }

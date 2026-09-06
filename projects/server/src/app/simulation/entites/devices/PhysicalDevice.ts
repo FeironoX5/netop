@@ -18,6 +18,15 @@ export class PhysicalDevice<
     return this.details.ports.length;
   }
 
+  addPort(): number {
+    this.details.ports.push(PortBuffer.build());
+    return this.portsCount - 1;
+  }
+
+  removePort(port: number): Details['ports'][number] {
+    return this.details.ports.splice(port, 1)[0]!;
+  }
+
   send(port: number, bits: readonly Bit.type[]): void {
     this.ports(port).out.push(...bits);
   }
