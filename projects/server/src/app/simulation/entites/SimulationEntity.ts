@@ -1,5 +1,9 @@
 import { PathSegment, Simulation } from '@netop/types';
-import { ActionCodec, EventTarget } from '@netop/utils';
+import {
+  ActionCodec,
+  EventTarget,
+  TreeUtils,
+} from '@netop/utils';
 import { SimulationEvent } from '../events/types';
 
 type EntityEvent = Extract<
@@ -82,11 +86,7 @@ export abstract class SimulationEntity<
   }
 
   generateChildId(): string {
-    const id = crypto.randomUUID();
-    if (this.children.find((d) => d.id === id)) {
-      return this.generateChildId();
-    }
-    return id;
+    return TreeUtils.generateChildId(this.children);
   }
 
   addChild(child: Simulation.Entity) {

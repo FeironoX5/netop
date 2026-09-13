@@ -10,7 +10,7 @@ export namespace NetworkInterface {
   };
 
   export type type = {
-    port: number;
+    portId: string;
     ipAddress: IpAddress.type;
     subnetMask: IpAddress.type;
     arpTable: ArpTable.type;
@@ -19,9 +19,9 @@ export namespace NetworkInterface {
     receivedArpMessages: ArpMessage.type[];
   };
 
-  export function build(port: number): type {
+  export function build(portId: string): type {
     return {
-      port,
+      portId,
       ipAddress: IpAddress.generate(),
       subnetMask: IpAddress.generate(),
       arpTable: ArpTable.build(),
@@ -33,19 +33,14 @@ export namespace NetworkInterface {
 
   export function remove(
     networkInterfaces: type[],
-    port: number,
+    portId: string,
   ): type {
-    const networkInterface = networkInterfaces.splice(
+    return networkInterfaces.splice(
       networkInterfaces.findIndex(
         (networkInterface) =>
-          networkInterface.port === port,
+          networkInterface.portId === portId,
       ),
       1,
     )[0]!;
-    networkInterfaces.forEach((networkInterface) => {
-      if (networkInterface.port > port)
-        networkInterface.port -= 1;
-    });
-    return networkInterface;
   }
 }

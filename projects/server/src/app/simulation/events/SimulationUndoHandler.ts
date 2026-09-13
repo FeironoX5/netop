@@ -5,13 +5,18 @@ import { SimulationEvent } from './types';
 
 type EventApplier = (event: SimulationEvent.type) => void;
 
+type EventEntry = {
+  id: number;
+  event: SimulationEvent.type;
+};
+
+type EventGroup = EventEntry[];
+
 export class SimulationUndoHandler {
   private eventCounter = 0;
-  private history = new Map<number, SimulationEvent.type>();
-  readonly eventBus = new EventTarget<{
-    id: number;
-    event: SimulationEvent.type;
-  }>();
+  private history = new Map<number, EventGroup>();
+  private activeGroup?: EventGroup;
+  readonly eventBus = new EventTarget<EventEntry>();
 
   constructor(
     private appliers: Record<
@@ -21,16 +26,38 @@ export class SimulationUndoHandler {
   ) {
     SimulationRegistry.get().eventBus.subscribe((e) => {
       const id = this.eventCounter++;
-      this.history.set(id, e);
-      this.eventBus.call({ id, event: e });
+      const group = this.activeGroup ?? [];
+      const entry = { id, event: e };
+      group.push(entry);
+      this.history.set(id, group);
+      this.eventBus.call(entry);
     });
   }
 
+  group<Result>(action: () => Result): Result {
+    if (this.activeGroup) return action();
+
+    this.activeGroup = [];
+    try {
+      return action();
+    } finally {
+      this.activeGroup = undefined;
+    }
+  }
+
   undo(eventId: number): void {
-    const event = this.history.get(eventId);
-    if (!event) throw new Error('event not found');
-    const inverse = invertSimulationEvent(event);
-    this.appliers[inverse.scope](inverse);
-    this.history.delete(eventId);
+    const group = this.history.get(eventId);
+    if (!group) throw new Error('event not found');
+
+    this.group(() => {
+      group
+        .slice()
+        .reverse()
+        .forEach(({ event }) => {
+          const inverse = invertSimulationEvent(event);
+          this.appliers[inverse.scope](inverse);
+        });
+    });
+    group.forEach(({ id }) => this.history.delete(id));
   }
 }

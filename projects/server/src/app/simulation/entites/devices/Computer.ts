@@ -15,20 +15,25 @@ export class Computer extends NetworkDevice<ComputerDetails> {
 
   static {
     SimulationRegistry.setManager(DeviceCategory.COMPUTER, {
-      build: (id, name) => ({
-        id,
-        category: DeviceCategory.COMPUTER,
-        name,
-        children: [
-          SimulationRegistry.getManager(
-            DeviceCategory.NETWORK_CARD,
-          ).build(crypto.randomUUID()),
-        ],
-        details: {
-          networkInterfaces: [NetworkInterface.build(0)],
-          routingTable: RoutingTable.build(),
-        },
-      }),
+      build: (id, name) => {
+        const networkCard = SimulationRegistry.getManager(
+          DeviceCategory.NETWORK_CARD,
+        ).build(crypto.randomUUID());
+        return {
+          id,
+          category: DeviceCategory.COMPUTER,
+          name,
+          children: [networkCard],
+          details: {
+            networkInterfaces: [
+              NetworkInterface.build(
+                networkCard.children![0]!.id,
+              ),
+            ],
+            routingTable: RoutingTable.build(),
+          },
+        };
+      },
       from: Computer,
       tick(e) {
         SimulationRegistry.behaviours.arp(e);
@@ -51,7 +56,7 @@ export class Computer extends NetworkDevice<ComputerDetails> {
     )!;
 
     const networkInterface = this.networkInterfaces.find(
-      ({ port }) => port === route.port,
+      ({ portId }) => portId === route.portId,
     )!;
     networkInterface.outgoingPackets.push({
       packet: {

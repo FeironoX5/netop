@@ -32,7 +32,9 @@ const process = (message: ClientMessage): ServerMessage => {
         return {
           type: ServerMessageType.ActionResponse,
           status: 'success',
-          result: actionHandler.execute(message.body),
+          result: simulationUndoHandler.group(() =>
+            actionHandler.execute(message.body),
+          ),
         };
       default:
         return {

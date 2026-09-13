@@ -2,8 +2,8 @@ import { IpAddress } from '@simulation/details/network/IpAddress';
 import { NetworkInterface } from '@simulation/details/network/NetworkInterface';
 import { RoutingTable } from '@simulation/details/network/RoutingTable';
 import { SimulationRegistry } from '@simulation/SimulationRegistry';
+import type { FrameFormat } from '../ports/DataLinkPort';
 import { SimulationEntity } from '../SimulationEntity';
-import type { FrameFormat } from './DataLinkDevice';
 import type { NetworkCard } from './NetworkCard';
 
 export type NetworkDeviceDetails = {
@@ -32,28 +32,47 @@ export abstract class NetworkDevice<
 
   addInterface(frameFormat: FrameFormat) {
     const networkInterface = NetworkInterface.build(
-      this.networkCard.addPort(frameFormat),
+      this.networkCard.addPort(frameFormat).id,
     );
-    this.networkInterfaces.push(networkInterface);
+    this.details = {
+      ...this.details,
+      networkInterfaces: [
+        ...this.networkInterfaces,
+        networkInterface,
+      ],
+    };
     return networkInterface;
   }
 
-  removeInterface(port: number) {
-    this.networkCard.removePort(port);
-    RoutingTable.removePort(this.routingTable, port);
-    return NetworkInterface.remove(
-      this.networkInterfaces,
-      port,
+  removeInterface(portId: string) {
+    const networkInterfaces = [...this.networkInterfaces];
+    const routingTable = [...this.routingTable];
+
+    const networkInterface = NetworkInterface.remove(
+      networkInterfaces,
+      portId,
     );
+    RoutingTable.removePort(routingTable, portId);
+    SimulationRegistry.get().removePort(
+      this.networkCard,
+      portId,
+    );
+    this.details = {
+      ...this.details,
+      networkInterfaces,
+      routingTable,
+    };
+    return networkInterface;
   }
 
   configureInterface(
-    port: number,
+    portId: string,
     ipAddress: IpAddress.type,
     subnetMask: IpAddress.type,
   ) {
     const networkInterface = this.networkInterfaces.find(
-      (networkInterface) => networkInterface.port === port,
+      (networkInterface) =>
+        networkInterface.portId === portId,
     )!;
     networkInterface.ipAddress = ipAddress;
     networkInterface.subnetMask = subnetMask;

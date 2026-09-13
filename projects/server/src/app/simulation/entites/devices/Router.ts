@@ -16,28 +16,28 @@ export class Router extends NetworkDevice<RouterDetails> {
 
   static {
     SimulationRegistry.setManager(DeviceCategory.ROUTER, {
-      build: (id, name) => ({
-        id,
-        category: DeviceCategory.ROUTER,
-        name,
-        children: [
-          SimulationRegistry.getManager(
-            DeviceCategory.NETWORK_CARD,
-          ).build(
-            crypto.randomUUID(),
-            '',
-            EthernetFrame.FORMAT,
-            EthernetFrame.FORMAT,
-          ),
-        ],
-        details: {
-          networkInterfaces: [
-            NetworkInterface.build(0),
-            NetworkInterface.build(1),
-          ],
-          routingTable: RoutingTable.build(),
-        },
-      }),
+      build: (id, name) => {
+        const networkCard = SimulationRegistry.getManager(
+          DeviceCategory.NETWORK_CARD,
+        ).build(
+          crypto.randomUUID(),
+          '',
+          EthernetFrame.FORMAT,
+          EthernetFrame.FORMAT,
+        );
+        return {
+          id,
+          category: DeviceCategory.ROUTER,
+          name,
+          children: [networkCard],
+          details: {
+            networkInterfaces: networkCard.children!.map(
+              ({ id }) => NetworkInterface.build(id),
+            ),
+            routingTable: RoutingTable.build(),
+          },
+        };
+      },
       from: Router,
       tick(e) {
         const router = SimulationRegistry.fromChain<Router>(
@@ -73,7 +73,7 @@ export class Router extends NetworkDevice<RouterDetails> {
         )!;
 
         this.networkInterfaces
-          .find(({ port }) => port === route.port)!
+          .find(({ portId }) => portId === route.portId)!
           .outgoingPackets.push({
             packet: { ...packet, ttl: packet.ttl - 1 },
             nextHop: route.nextHop,

@@ -5,7 +5,7 @@ export namespace RoutingTable {
   export type Entry = {
     network: IpAddress.type;
     subnetMask: IpAddress.type;
-    port: number;
+    portId: string;
     nextHop?: IpAddress.type;
   };
 
@@ -28,17 +28,15 @@ export namespace RoutingTable {
 
   export function removePort(
     table: type,
-    port: number,
+    portId: string,
   ): void {
     for (
       let index = table.length - 1;
       index >= 0;
       index--
     ) {
-      if (table[index]!.port === port)
+      if (table[index]!.portId === portId)
         table.splice(index, 1);
-      else if (table[index]!.port > port)
-        table[index]!.port -= 1;
     }
   }
 
@@ -46,14 +44,16 @@ export namespace RoutingTable {
     table: type,
     networkInterfaces: NetworkInterface.type[],
     destination: IpAddress.type,
-  ): { port: number; nextHop: IpAddress.type } | undefined {
+  ):
+    | { portId: string; nextHop: IpAddress.type }
+    | undefined {
     const route = [
       ...table,
       ...networkInterfaces.map(
-        ({ ipAddress, subnetMask, port }): Entry => ({
+        ({ ipAddress, subnetMask, portId }): Entry => ({
           network: ipAddress,
           subnetMask,
-          port,
+          portId,
         }),
       ),
     ]
@@ -72,7 +72,7 @@ export namespace RoutingTable {
 
     if (route)
       return {
-        port: route.port,
+        portId: route.portId,
         nextHop: route.nextHop || destination,
       };
   }

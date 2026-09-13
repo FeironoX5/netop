@@ -1,6 +1,6 @@
 import { EntityWrapper } from '@commands/interfaces/EntityWrapper';
-import type { FrameFormat } from '@entites/devices/DataLinkDevice';
 import { NetworkDevice } from '@entites/devices/NetworkDevice';
+import type { FrameFormat } from '@entites/ports/DataLinkPort';
 import { IpAddress } from '@simulation/details/network/IpAddress';
 import { SimulationEntityWrapper } from './SimulationEntity.wrapper';
 
@@ -18,15 +18,15 @@ export const NetworkDeviceWrapper = <
       const networkInterface = entity.addInterface(
         frameFormat as FrameFormat,
       );
-      return `Added port ${networkInterface.port}`;
+      return `Added port ${networkInterface.portId}`;
     },
   });
   commands.set('rm', {
     info: 'Removes a network interface and port',
-    args: ['port'],
-    fn: (entity, port) => {
-      entity.removeInterface(Number(port));
-      return `Removed port ${port}`;
+    args: ['portId'],
+    fn: (entity, portId) => {
+      entity.removeInterface(portId);
+      return `Removed port ${portId}`;
     },
   });
 
@@ -35,21 +35,21 @@ export const NetworkDeviceWrapper = <
     fn: (entity) =>
       entity.networkInterfaces
         .map(
-          ({ port, ipAddress, subnetMask }) =>
-            `${port}: ${IpAddress.toString(ipAddress)} ${IpAddress.toString(subnetMask)} (${entity.networkCard.ports(port).frameFormat})`,
+          ({ portId, ipAddress, subnetMask }) =>
+            `${portId}: ${IpAddress.toString(ipAddress)} ${IpAddress.toString(subnetMask)} (${entity.networkCard.port(portId).frameFormat})`,
         )
         .join('\n'),
   });
   commands.set('interface-set', {
     info: 'Configures a network interface',
-    args: ['port', 'ipAddress', 'subnetMask'],
-    fn: (entity, port, ipAddress, subnetMask) => {
+    args: ['portId', 'ipAddress', 'subnetMask'],
+    fn: (entity, portId, ipAddress, subnetMask) => {
       entity.configureInterface(
-        Number(port),
+        portId,
         IpAddress.parse(ipAddress),
         IpAddress.parse(subnetMask),
       );
-      return `Configured interface on port ${port}`;
+      return `Configured interface on port ${portId}`;
     },
   });
   commands.set('routes', {
@@ -57,19 +57,22 @@ export const NetworkDeviceWrapper = <
     fn: (entity) =>
       entity.routingTable
         .map(
-          ({ network, subnetMask, port, nextHop }, index) =>
-            `${index}: ${IpAddress.toString(network)} ${IpAddress.toString(subnetMask)} -> ${nextHop ? IpAddress.toString(nextHop) : 'direct'} on ${port}`,
+          (
+            { network, subnetMask, portId, nextHop },
+            index,
+          ) =>
+            `${index}: ${IpAddress.toString(network)} ${IpAddress.toString(subnetMask)} -> ${nextHop ? IpAddress.toString(nextHop) : 'direct'} on ${portId}`,
         )
         .join('\n'),
   });
   commands.set('route-add', {
     info: 'Adds a routing table entry',
-    args: ['network', 'subnetMask', 'port', 'nextHop?'],
-    fn: (entity, network, subnetMask, port, nextHop) => {
+    args: ['network', 'subnetMask', 'portId', 'nextHop?'],
+    fn: (entity, network, subnetMask, portId, nextHop) => {
       entity.addRoute({
         network: IpAddress.parse(network),
         subnetMask: IpAddress.parse(subnetMask),
-        port: Number(port),
+        portId,
         ...(nextHop
           ? { nextHop: IpAddress.parse(nextHop) }
           : {}),

@@ -1,5 +1,5 @@
-import { DeviceCategory } from '@netop/types';
-import { DataLinkPort } from '@simulation/details/data-link/DataLinkPort';
+import { DeviceCategory, PortCategory } from '@netop/types';
+import { TreeUtils } from '@netop/utils';
 import { EthernetFrame } from '@simulation/details/data-link/EthernetFrame';
 import { MacAddress } from '@simulation/details/data-link/MacAddress';
 import { SwitchingTable } from '@simulation/details/data-link/SwitchingTable';
@@ -20,11 +20,13 @@ export class Switch extends DataLinkDevice<SwitchDetails> {
         id,
         category: DeviceCategory.SWITCH,
         name,
+        children: TreeUtils.buildChildren(4, (portId) =>
+          SimulationRegistry.getManager(
+            PortCategory.DATA_LINK,
+          ).build(portId, EthernetFrame.FORMAT),
+        ),
         details: {
           macAddress: MacAddress.generate(),
-          ports: Array.from({ length: 4 }, () =>
-            DataLinkPort.build(EthernetFrame.FORMAT),
-          ),
           receivedFrames: [],
           switchingTable: SwitchingTable.build(),
         },
@@ -42,22 +44,23 @@ export class Switch extends DataLinkDevice<SwitchDetails> {
     });
   }
 
-  override removePort(port: number) {
-    const removedPort = super.removePort(port);
-    SwitchingTable.removePort(
-      this.details.switchingTable,
-      port,
-    );
+  override removePort(portId: string) {
+    const switchingTable = {
+      ...this.details.switchingTable,
+    };
+    SwitchingTable.removePort(switchingTable, portId);
+    const removedPort = super.removePort(portId);
+    this.details = { ...this.details, switchingTable };
     return removedPort;
   }
 
   forward() {
-    for (const { port, frame } of this.receive()) {
-      switch (this.ports(port).frameFormat) {
+    for (const { portId, frame } of this.receive()) {
+      switch (this.port(portId).frameFormat) {
         case EthernetFrame.FORMAT:
           break;
         default:
-          this.queueExcept(port, frame);
+          this.queueExcept(portId, frame);
           continue;
       }
 
@@ -67,21 +70,21 @@ export class Switch extends DataLinkDevice<SwitchDetails> {
       SwitchingTable.learn(
         this.details.switchingTable,
         ethernetFrame.source,
-        port,
+        portId,
       );
 
-      const destinationPort = SwitchingTable.get(
+      const destinationPortId = SwitchingTable.get(
         this.details.switchingTable,
         ethernetFrame.destination,
       );
 
       if (
-        destinationPort === undefined ||
+        destinationPortId === undefined ||
         MacAddress.isBroadcast(ethernetFrame.destination)
       ) {
-        this.queueExcept(port, frame);
-      } else if (destinationPort !== port) {
-        this.queue(destinationPort, frame);
+        this.queueExcept(portId, frame);
+      } else if (destinationPortId !== portId) {
+        this.queue(destinationPortId, frame);
       }
     }
   }

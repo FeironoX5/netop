@@ -8,6 +8,7 @@ import {
   EventTarget,
 } from '@netop/utils';
 import { simulationTreeWalker } from '@simulation/helpers/simulationTreeWalker';
+import type { PhysicalDevice } from './entites/devices/PhysicalDevice';
 import { SimulationEvent } from './events/types';
 import { SimulationRegistry } from './SimulationRegistry';
 
@@ -86,6 +87,22 @@ export class Simulation {
       data: r[0],
     });
     return true;
+  }
+
+  removePort(device: PhysicalDevice, portId: string) {
+    const path = device.port(portId).path;
+    this.connections
+      .filter(({ left, right }) =>
+        [left, right].some(
+          (endpoint) =>
+            endpoint.length === path.length &&
+            endpoint.every(
+              (segment, index) => segment === path[index],
+            ),
+        ),
+      )
+      .forEach(({ id }) => this.removeConnection(id));
+    return device.removePort(portId);
   }
 
   updateConnection(connection: SimulationType.Connection) {

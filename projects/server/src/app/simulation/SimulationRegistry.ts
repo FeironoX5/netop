@@ -54,28 +54,25 @@ export class SimulationRegistry {
       const device =
         SimulationRegistry.fromChain<PhysicalDevice>([e]);
 
-      device.details.ports
-        .entries()
-        .filter(([, buffer]) => buffer.in.length > 0)
-        .take(1)
-        .forEach(([port, buffer]) =>
-          device.sendExcept(port, buffer.in.splice(0)),
+      device.ports
+        .filter((port) => port.in.length > 0)
+        .slice(0, 1)
+        .forEach((port) =>
+          device.sendExcept(port.id, port.in.splice(0)),
         );
 
-      device.details.ports.forEach((buffer) =>
-        buffer.in.splice(0),
-      );
+      device.ports.forEach((port) => port.in.splice(0));
     },
     dataLink(e) {
       const device =
         SimulationRegistry.fromChain<DataLinkDevice>([e]);
-      const { ports, receivedFrames } = device.details;
+      const { receivedFrames } = device.details;
 
-      ports.forEach((_, portIndex) => {
-        let frame = device.read(portIndex);
+      device.ports.forEach((port) => {
+        let frame = device.read(port.id);
         while (frame) {
-          receivedFrames.push({ port: portIndex, frame });
-          frame = device.read(portIndex);
+          receivedFrames.push({ portId: port.id, frame });
+          frame = device.read(port.id);
         }
       });
     },
@@ -106,7 +103,7 @@ export class SimulationRegistry {
               networkInterface.ipAddress,
             )
           ) {
-            networkCard.transmit(networkInterface.port, {
+            networkCard.transmit(networkInterface.portId, {
               destination: message.senderMacAddress,
               etherType: EthernetFrame.EtherType.ARP,
               payload: ArpMessage.serialize({
@@ -136,15 +133,16 @@ export class SimulationRegistry {
         )) {
           const { packet, nextHop } = outgoingPacket;
           switch (
-            networkCard.ports(networkInterface.port)
+            networkCard.port(networkInterface.portId)
               .frameFormat
           ) {
             case EthernetFrame.FORMAT:
               break;
             case SlipFrame.FORMAT:
-              networkCard.transmit(networkInterface.port, {
-                payload: Ipv4Packet.serialize(packet),
-              });
+              networkCard.transmit(
+                networkInterface.portId,
+                { payload: Ipv4Packet.serialize(packet) },
+              );
               continue;
             default:
               continue;
@@ -165,23 +163,27 @@ export class SimulationRegistry {
                 networkInterface.arpTable,
                 nextHop,
               );
-              networkCard.transmit(networkInterface.port, {
-                destination: MacAddress.BROADCAST,
-                etherType: EthernetFrame.EtherType.ARP,
-                payload: ArpMessage.serialize({
-                  operation: ArpMessage.Operation.REQUEST,
-                  senderMacAddress: networkCard.macAddress,
-                  senderIpAddress:
-                    networkInterface.ipAddress,
-                  targetIpAddress: nextHop,
-                }),
-              });
+              networkCard.transmit(
+                networkInterface.portId,
+                {
+                  destination: MacAddress.BROADCAST,
+                  etherType: EthernetFrame.EtherType.ARP,
+                  payload: ArpMessage.serialize({
+                    operation: ArpMessage.Operation.REQUEST,
+                    senderMacAddress:
+                      networkCard.macAddress,
+                    senderIpAddress:
+                      networkInterface.ipAddress,
+                    targetIpAddress: nextHop,
+                  }),
+                },
+              );
             }
 
             continue;
           }
 
-          networkCard.transmit(networkInterface.port, {
+          networkCard.transmit(networkInterface.portId, {
             destination: destinationMacAddress,
             etherType: EthernetFrame.EtherType.IPV4,
             payload: Ipv4Packet.serialize(packet),
@@ -198,13 +200,16 @@ export class SimulationRegistry {
           e.children![0]!,
         ]);
 
-      for (const { port, frame } of networkCard.receive()) {
+      for (const {
+        portId,
+        frame,
+      } of networkCard.receive()) {
         const networkInterface = networkInterfaces.find(
           (networkInterface) =>
-            networkInterface.port === port,
+            networkInterface.portId === portId,
         )!;
 
-        switch (networkCard.ports(port).frameFormat) {
+        switch (networkCard.port(portId).frameFormat) {
           case EthernetFrame.FORMAT: {
             const { etherType, payload } =
               EthernetFrame.deserialize(frame);

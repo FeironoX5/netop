@@ -1,12 +1,11 @@
-import { DeviceCategory } from '@netop/types';
-import { DataLinkPort } from '@simulation/details/data-link/DataLinkPort';
+import { DeviceCategory, PortCategory } from '@netop/types';
+import { TreeUtils } from '@netop/utils';
 import { EthernetFrame } from '@simulation/details/data-link/EthernetFrame';
 import { MacAddress } from '@simulation/details/data-link/MacAddress';
 import { SlipFrame } from '@simulation/details/data-link/SlipFrame';
 import { SimulationRegistry } from '@simulation/SimulationRegistry';
 import {
   DataLinkDevice,
-  FrameFormat,
   PortFrame,
 } from './DataLinkDevice';
 
@@ -23,13 +22,15 @@ export class NetworkCard extends DataLinkDevice {
             id,
             category: DeviceCategory.NETWORK_CARD,
             name,
+            children: TreeUtils.buildChildren(
+              frameFormats.length,
+              (portId, index) =>
+                SimulationRegistry.getManager(
+                  PortCategory.DATA_LINK,
+                ).build(portId, frameFormats[index]),
+            ),
             details: {
               macAddress: MacAddress.generate(),
-              ports: frameFormats.map((frameFormat) =>
-                DataLinkPort.build(
-                  frameFormat as FrameFormat,
-                ),
-              ),
               receivedFrames: [],
             },
           };
@@ -44,15 +45,15 @@ export class NetworkCard extends DataLinkDevice {
   }
 
   transmit(
-    port: number,
+    portId: string,
     frame:
       | Omit<EthernetFrame.type, 'source'>
       | SlipFrame.type,
   ): void {
-    switch (this.ports(port).frameFormat) {
+    switch (this.port(portId).frameFormat) {
       case EthernetFrame.FORMAT:
         this.queue(
-          port,
+          portId,
           EthernetFrame.serialize({
             ...(frame as Omit<
               EthernetFrame.type,
@@ -63,14 +64,14 @@ export class NetworkCard extends DataLinkDevice {
         );
         break;
       case SlipFrame.FORMAT:
-        this.queue(port, SlipFrame.serialize(frame));
+        this.queue(portId, SlipFrame.serialize(frame));
         break;
     }
   }
 
   override receive(): PortFrame[] {
-    return super.receive().filter(({ port, frame }) => {
-      switch (this.ports(port).frameFormat) {
+    return super.receive().filter(({ portId, frame }) => {
+      switch (this.port(portId).frameFormat) {
         case EthernetFrame.FORMAT: {
           const { destination } =
             EthernetFrame.deserialize(frame);

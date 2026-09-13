@@ -1,5 +1,5 @@
-import { DeviceCategory } from '@netop/types';
-import { PortBuffer } from '@simulation/details/physical/PortBuffer';
+import { DeviceCategory, PortCategory } from '@netop/types';
+import { TreeUtils } from '@netop/utils';
 import { SimulationRegistry } from '@simulation/SimulationRegistry';
 import { PhysicalDevice } from './PhysicalDevice';
 
@@ -10,12 +10,11 @@ export class Hub extends PhysicalDevice {
         id,
         category: DeviceCategory.HUB,
         name,
-        details: {
-          ports: Array.from(
-            { length: 4 },
-            PortBuffer.build,
-          ),
-        },
+        children: TreeUtils.buildChildren(4, (portId) =>
+          SimulationRegistry.getManager(
+            PortCategory.PHYSICAL,
+          ).build(portId),
+        ),
       }),
       from: Hub,
       tick(e) {
@@ -23,5 +22,11 @@ export class Hub extends PhysicalDevice {
         SimulationRegistry.behaviours.entity(e);
       },
     });
+  }
+
+  protected override buildPort(id: string) {
+    return SimulationRegistry.getManager(
+      PortCategory.PHYSICAL,
+    ).build(id);
   }
 }

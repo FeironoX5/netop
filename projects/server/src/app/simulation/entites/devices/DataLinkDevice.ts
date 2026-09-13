@@ -1,8 +1,13 @@
-import { DataLinkPort } from '@simulation/details/data-link/DataLinkPort';
+import { PortCategory } from '@netop/types';
 import { EthernetFrame } from '@simulation/details/data-link/EthernetFrame';
 import { MacAddress } from '@simulation/details/data-link/MacAddress';
 import { SlipFrame } from '@simulation/details/data-link/SlipFrame';
 import { Bit } from '@simulation/details/physical/Bit';
+import { SimulationRegistry } from '@simulation/SimulationRegistry';
+import {
+  DataLinkPort,
+  FrameFormat,
+} from '../ports/DataLinkPort';
 import { PhysicalDevice } from './PhysicalDevice';
 
 const FRAME_DETAILS = {
@@ -10,19 +15,24 @@ const FRAME_DETAILS = {
   [SlipFrame.FORMAT]: SlipFrame,
 };
 
-export type FrameFormat = keyof typeof FRAME_DETAILS;
-
-export type PortFrame = { port: number; frame: number[] };
+export type PortFrame = { portId: string; frame: number[] };
 
 export type DataLinkDetails = {
   macAddress: MacAddress.type;
-  ports: DataLinkPort.type<FrameFormat>[];
   receivedFrames: PortFrame[];
 };
 
 export abstract class DataLinkDevice<
   Details extends DataLinkDetails = DataLinkDetails,
-> extends PhysicalDevice<Details> {
+> extends PhysicalDevice<
+  Details,
+  DataLinkPort,
+  [frameFormat?: FrameFormat]
+> {
+  static override ALLOWED_CHILD_CATEGORIES = [
+    PortCategory.DATA_LINK,
+  ];
+
   get macAddress() {
     return this.details.macAddress;
   }
@@ -31,51 +41,49 @@ export abstract class DataLinkDevice<
     return this.details.receivedFrames;
   }
 
-  override addPort(
+  protected override buildPort(
+    id: string,
     frameFormat: FrameFormat = EthernetFrame.FORMAT,
-  ): number {
-    this.details.ports.push(
-      DataLinkPort.build(frameFormat),
-    );
-    return this.portsCount - 1;
+  ) {
+    return SimulationRegistry.getManager(
+      PortCategory.DATA_LINK,
+    ).build(id, frameFormat);
   }
 
-  override removePort(port: number) {
-    const removedPort = super.removePort(port);
+  override removePort(portId: string) {
+    const removedPort = super.removePort(portId);
     for (
       let index = this.receivedFrames.length - 1;
       index >= 0;
       index--
     ) {
       const receivedFrame = this.receivedFrames[index]!;
-      if (receivedFrame.port === port)
+      if (receivedFrame.portId === portId)
         this.receivedFrames.splice(index, 1);
-      else if (receivedFrame.port > port)
-        receivedFrame.port -= 1;
     }
     return removedPort;
   }
 
-  queue(port: number, frame: readonly number[]) {
-    this.send(port, Bit.fromBytes(frame));
+  queue(portId: string, frame: readonly number[]) {
+    this.send(portId, Bit.fromBytes(frame));
   }
 
   queueExcept(
-    excludedPort: number,
+    excludedPortId: string,
     frame: readonly number[],
   ) {
-    this.sendExcept(excludedPort, Bit.fromBytes(frame));
+    this.sendExcept(excludedPortId, Bit.fromBytes(frame));
   }
 
   receive(): PortFrame[] {
     return this.receivedFrames.splice(0);
   }
 
-  read(port: number) {
-    const stream = this.ports(port).in;
+  read(portId: string) {
+    const port = this.port(portId);
+    const stream = port.in;
     const bytes = Bit.toBytes(stream);
-    const details =
-      FRAME_DETAILS[this.ports(port).frameFormat];
+    const details = FRAME_DETAILS[port.frameFormat];
     const start = details.start(bytes);
     if (start === -1) {
       stream.splice(0, bytes.length * 8);

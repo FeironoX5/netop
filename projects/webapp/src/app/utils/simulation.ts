@@ -33,5 +33,5 @@ export function getSimulationEntityPath(
 export function formatEndpoint(
   endpoint: Simulation.Connection['left'],
 ): string {
-  return `${formatSimulationPath(endpoint.path)}:${endpoint.port}`;
+  return formatSimulationPath(endpoint);
 }

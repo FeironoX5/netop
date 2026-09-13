@@ -1,13 +1,16 @@
 import type { PathSegment } from '../action';
 import { DeviceCategory } from './device';
+import { PortCategory } from './port';
 import { SceneCategory } from './scene';
 
 export * from './device';
+export * from './port';
 export * from './scene';
 
 export namespace Simulation {
   export type Category =
     | DeviceCategory
+    | PortCategory
     | typeof SceneCategory;
 
   export type Entity = {
@@ -20,8 +23,8 @@ export namespace Simulation {
 
   export type Connection = {
     id: string;
-    left: { path: PathSegment[]; port: number };
-    right: { path: PathSegment[]; port: number };
+    left: PathSegment[];
+    right: PathSegment[];
     // symbols per tick
     speed: number;
     // ticks to deliver

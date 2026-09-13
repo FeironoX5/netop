@@ -1,8 +1,7 @@
 import { PathSegment, Simulation } from '@netop/types';
 import { EventTarget } from '@netop/utils';
 import { Bit } from './details/physical/Bit';
-import { PortBuffer } from './details/physical/PortBuffer';
-import { PhysicalDevice } from './entites/devices/PhysicalDevice';
+import { PhysicalPort } from './entites/ports/PhysicalPort';
 import { SimulationEvent } from './events/types';
 import { SimulationRegistry } from './SimulationRegistry';
 
@@ -22,17 +21,15 @@ export class SimulationConnection extends EventTarget<SimulationEvent.type> {
   }
 
   static build(
-    leftFullPath: PathSegment[],
-    leftPort: number,
-    rightFullPath: PathSegment[],
-    rightPort: number,
+    left: PathSegment[],
+    right: PathSegment[],
     speed: number = 1,
     delay: number = 5,
   ): Simulation.Connection {
     return {
       id: crypto.randomUUID(),
-      left: { path: leftFullPath, port: leftPort },
-      right: { path: rightFullPath, port: rightPort },
+      left,
+      right,
       speed,
       delay,
     };
@@ -58,16 +55,15 @@ export class SimulationConnection extends EventTarget<SimulationEvent.type> {
     return this.c.delay;
   }
 
-  port(d: { path: PathSegment[]; port: number }) {
-    const e = SimulationRegistry.get().resolveFull(
-      d.path,
-    ) as PhysicalDevice;
-    return e.ports(d.port);
+  port(path: PathSegment[]) {
+    return SimulationRegistry.get().resolveFull(
+      path,
+    ) as PhysicalPort;
   }
 
   transferBits(
-    from: PortBuffer.type,
-    to: PortBuffer.type,
+    from: PhysicalPort,
+    to: PhysicalPort,
     transit: Transit,
   ) {
     const bits = from.out.splice(0, this.speed);

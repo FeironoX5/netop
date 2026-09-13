@@ -10,6 +10,31 @@ export type treeWalker<T> = {
 type tree<T> = { root: T; walker: treeWalker<T> };
 
 export namespace TreeUtils {
+  export function generateChildId(
+    children: readonly { id: string }[],
+  ): string {
+    const id = crypto.randomUUID();
+    if (children.some((child) => child.id === id)) {
+      return generateChildId(children);
+    }
+    return id;
+  }
+
+  export function buildChildren<
+    Child extends { id: string },
+  >(
+    count: number,
+    build: (id: string, index: number) => Child,
+  ): Child[] {
+    const children: Child[] = [];
+    while (children.length < count) {
+      children.push(
+        build(generateChildId(children), children.length),
+      );
+    }
+    return children;
+  }
+
   export function flatten<T>({ root, walker }: tree<T>) {
     const result = new Map<string, T>();
 

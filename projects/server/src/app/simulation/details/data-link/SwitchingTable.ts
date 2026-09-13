@@ -1,7 +1,7 @@
 import { MacAddress } from './MacAddress';
 
 export namespace SwitchingTable {
-  export type type = Record<string, number>;
+  export type type = Record<string, string>;
 
   export function build(): type {
     return {};
@@ -10,27 +10,26 @@ export namespace SwitchingTable {
   export function get(
     table: type,
     mac: MacAddress.type,
-  ): number | undefined {
+  ): string | undefined {
     return table[MacAddress.toString(mac)];
   }
 
   export function learn(
     table: type,
     mac: MacAddress.type,
-    port: number,
+    portId: string,
   ): void {
-    table[MacAddress.toString(mac)] = port;
+    table[MacAddress.toString(mac)] = portId;
   }
 
   export function removePort(
     table: type,
-    port: number,
+    portId: string,
   ): void {
     Object.entries(table).forEach(
-      ([macAddress, entryPort]) => {
-        if (entryPort === port) delete table[macAddress];
-        else if (entryPort > port)
-          table[macAddress] = entryPort - 1;
+      ([macAddress, entryPortId]) => {
+        if (entryPortId === portId)
+          delete table[macAddress];
       },
     );
   }
