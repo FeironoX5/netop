@@ -1,6 +1,10 @@
 import type { Context } from 'konva/lib/Context';
 import type { Stage } from 'konva/lib/Stage';
-import { CELL_POINTS } from './CanvasGrid.consts';
+import {
+  CELL_HEIGHT,
+  CELL_POINTS,
+  CELL_WIDTH,
+} from './CanvasGrid.consts';
 
 export function toAbsoluteScale(
   stage: Stage,
@@ -34,7 +38,7 @@ export function getBlockAxisLayout(
   return { start, count };
 }
 
-export function drawCell(
+export function drawDiamondCell(
   ctx: Context,
   x: number,
   y: number,
@@ -45,4 +49,17 @@ export function drawCell(
   ctx.lineTo(...right);
   ctx.lineTo(...bottom);
   ctx.closePath();
+}
+
+export function drawRectangleCell(
+  ctx: Context,
+  x: number,
+  y: number,
+) {
+  ctx.rect(
+    x - CELL_WIDTH / 2,
+    y - CELL_HEIGHT / 2,
+    CELL_WIDTH,
+    CELL_HEIGHT,
+  );
 }

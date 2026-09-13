@@ -9,13 +9,10 @@
     </div>
     <div class="toolbar-section">
       <ButtonGroup
-        :items="[
-          { icon: 'mouse-pointer-2' },
-          { icon: 'hand' },
-          { icon: 'cable' },
-          { icon: 'message-circle' },
-        ]"
+        :items="CURSOR_TOOLS"
         :isSelectable="true"
+        :isDeselectable="false"
+        v-model:activeItemIndex="activeCursorModeIndex"
       />
     </div>
     <div class="toolbar-section">
@@ -35,10 +32,26 @@
 import Button from '@bits/Button.vue';
 import List from '@bits/List.vue';
 import ButtonGroup from '@components/ButtonGroup.vue';
+import { computed } from 'vue';
+import { useCanvasStore } from '@/app/stores/canvasStore';
 import {
   LEFT_PANEL_TOOLS,
   RIGHT_PANEL_TOOLS,
 } from '@/ui/pages/EditorPage.consts';
+import { CURSOR_TOOLS } from './Toolbar.consts';
+
+const canvasStore = useCanvasStore();
+const activeCursorModeIndex = computed<number | null>({
+  get: () =>
+    CURSOR_TOOLS.findIndex(
+      ({ mode }) => mode === canvasStore.cursorMode,
+    ),
+  set: (index) => {
+    if (index === null) return;
+    const tool = CURSOR_TOOLS[index];
+    if (tool) canvasStore.setCursorMode(tool.mode);
+  },
+});
 
 const activeLeftPanelIndex = defineModel<number | null>(
   'activeLeftPanelIndex',

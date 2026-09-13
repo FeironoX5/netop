@@ -6,9 +6,18 @@
 import Konva from 'konva';
 import type { Layer } from 'konva/lib/Layer';
 import type { Stage } from 'konva/lib/Stage';
-import { useTemplateRef, onBeforeUnmount } from 'vue';
+import { storeToRefs } from 'pinia';
+import {
+  useTemplateRef,
+  onBeforeUnmount,
+  watch,
+} from 'vue';
 import { Layer as VLayer } from 'vue-konva';
 import { appTheme } from '@/app/App.theme';
+import {
+  CanvasCursorMode,
+  useCanvasStore,
+} from '@/app/stores/canvasStore';
 import {
   CELL_HEIGHT,
   CELL_WIDTH,
@@ -18,8 +27,11 @@ import {
 import {
   getViewportBounds,
   getBlockAxisLayout,
-  drawCell,
+  drawDiamondCell,
+  drawRectangleCell,
 } from './CanvasGrid.utils';
+
+const { cursorMode } = storeToRefs(useCanvasStore());
 
 const layerRef = useTemplateRef<{ getNode(): Layer }>(
   'layerRef',
@@ -28,6 +40,7 @@ const layerRef = useTemplateRef<{ getNode(): Layer }>(
 let active: Konva.Shape | null = null;
 let activeScale = 1;
 let activeSize = { width: 0, height: 0 };
+let currentStage: Stage | undefined;
 
 let lastXStart = Infinity,
   lastXCount = -1;
@@ -61,6 +74,10 @@ function computeMetrics(
 function createPiece(cellsX: number, cellsY: number) {
   const pw = cellsX * CELL_WIDTH;
   const ph = cellsY * CELL_HEIGHT;
+  const drawCell =
+    cursorMode.value === CanvasCursorMode.Drag
+      ? drawDiamondCell
+      : drawRectangleCell;
 
   const shape = new Konva.Shape({
     width: pw,
@@ -162,6 +179,7 @@ function syncTiles(
 }
 
 function update(stage: Stage) {
+  currentStage = stage;
   const layer = layerRef.value?.getNode();
   if (!layer) return;
 
@@ -212,6 +230,11 @@ function update(stage: Stage) {
   lastYStart = yLayout.start;
   lastYCount = yLayout.count;
 }
+
+watch(cursorMode, () => {
+  cleanup();
+  if (currentStage) update(currentStage);
+});
 
 defineExpose({ update });
 </script>
