@@ -1,0 +1,95 @@
+diff --git a/src/dialogs/testdialog.h b/src/dialogs/testdialog.h
+--- a/src/dialogs/testdialog.h
++++ b/src/dialogs/testdialog.h
+@@ -34,5 +34,6 @@ public:
+     explicit testDialog(myCanvas *c,QWidget *parent = 0);
+     virtual ~testDialog();
++    bool testFile(const QString &path);
+ protected:
+     virtual void changeEvent(QEvent *e);
+ private slots:
+diff --git a/src/dialogs/testdialog.cpp b/src/dialogs/testdialog.cpp
+--- a/src/dialogs/testdialog.cpp
++++ b/src/dialogs/testdialog.cpp
+@@ -19,5 +19,6 @@
+ #include <QtCore/QtDebug>
+ #include <QtCore/QFile>
++#include <QtCore/QTextStream>
+ #include <QFileDialog>
+ #include "testdialog.h"
+ #include "mycanvas.h"
+@@ -113,20 +114,25 @@ bool testDialog::test(QString s)
+ bool testDialog::test(QString s)
+ {
+-    qDebug() << s << " started";
+-    QString g = appSetting::scriptPath()+s+".js";
+-    QFile file(g);
++    return testFile(appSetting::scriptPath()+s+".js");
++}
++
++bool testDialog::testFile(const QString &path)
++{
++    qDebug() << path << " started";
++    QFile file(path);
+     file.open(QIODevice::ReadOnly);
+     QString temporary = file.readAll();
+     temporary.prepend("with (scene) {");
+     temporary.append(" }");
+     QScriptValue t = engine.evaluate(temporary);
+     if ( t.isError() ) {
+-        qDebug() << "ERROR in " << g << " file";
++        qDebug() << "ERROR in " << path << " file";
+         file.close();
+         return false;
+     }
+     file.close();
+-    if ( !t.toBool() ) qDebug() << s << " script failed";
+-    qDebug() << s << " finished";
++    QTextStream(stdout) << "CONFORMANCE_RESULT:" << t.toString() << "\n";
++    if ( !t.toBool() ) qDebug() << path << " script failed";
++    qDebug() << path << " finished";
+     return t.toBool();
+ }
+diff --git a/src/mainwindow.h b/src/mainwindow.h
+--- a/src/mainwindow.h
++++ b/src/mainwindow.h
+@@ -48,6 +48,7 @@ public:
+     void setEnabledFileItems(bool cur);
+     void writeSetting();
+     void readSetting();
++    bool runScript(const QString &path);
+ public slots:
+     void newFile();  // Слот создания нового файла
+     void closeFile();
+diff --git a/src/mainwindow.cpp b/src/mainwindow.cpp
+--- a/src/mainwindow.cpp
++++ b/src/mainwindow.cpp
+@@ -658,5 +658,12 @@ void MainWindow::test()
+     t->exec();
+ }
++
++bool MainWindow::runScript(const QString &path)
++{
++    testDialog runner(canva);
++    return runner.testFile(path);
++}
++
+ //Help=)
+ void MainWindow::helpDialog()
+ {
+diff --git a/src/main.cpp b/src/main.cpp
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -33,5 +33,11 @@ int main(int argc, char *argv[])
+ //                    "QWidget { background-color : black ; color : white}");
+-    MainWindow w(0, a.arguments() );
++    QStringList arguments = a.arguments();
++    int scriptIndex = arguments.indexOf("--script");
++    MainWindow w(0, scriptIndex == -1 ? arguments : arguments.mid(0, 1));
++    if (scriptIndex != -1) {
++        if (scriptIndex + 1 >= arguments.size()) return 1;
++        return w.runScript(arguments.at(scriptIndex + 1)) ? 0 : 1;
++    }
+     w.show();
+     return a.exec();
+ }
