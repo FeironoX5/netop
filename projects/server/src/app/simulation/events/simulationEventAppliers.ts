@@ -1,7 +1,9 @@
 import { SimulationRegistry } from '../SimulationRegistry';
 import { SimulationEvent } from './types';
 
-type EventApplier = (event: SimulationEvent.type) => void;
+type EventApplier = (
+  event: SimulationEvent.MutationType,
+) => void;
 
 function getEntity(path: string[]) {
   const entity = SimulationRegistry.get().resolveFull(path);
@@ -50,6 +52,6 @@ export const simulationEventAppliers = {
     }
   },
 } satisfies Record<
-  SimulationEvent.type['scope'],
+  SimulationEvent.MutationType['scope'],
   EventApplier
 >;

@@ -7,7 +7,7 @@ import {
 import { SimulationEvent } from '../events/types';
 
 type EntityEvent = Extract<
-  SimulationEvent.type,
+  SimulationEvent.MutationType,
   { scope: 'entity' }
 >;
 

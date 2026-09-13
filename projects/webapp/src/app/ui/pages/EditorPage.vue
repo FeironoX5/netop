@@ -51,7 +51,7 @@ const handlers = useHandlers(
   () => wsService.disconnect(),
   (handler) => wsService.subscribe(handler),
   (message) => {
-    if (message.status === 'error') {
+    if (message.level === 'error') {
       console.error(message.message);
     } else {
       console.info(message.message);

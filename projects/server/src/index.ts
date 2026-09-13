@@ -9,6 +9,8 @@ import {
   type ClientMessage,
   type ServerMessage,
 } from '@netop/types';
+import { ActionCodec } from '@netop/utils';
+import { SimulationRegistry } from '@simulation/SimulationRegistry';
 import '@/db';
 import { PORT } from '@/config';
 import { CORS_HEADERS, withCors } from '@/utils';
@@ -38,8 +40,8 @@ const process = (message: ClientMessage): ServerMessage => {
         };
       default:
         return {
-          type: ServerMessageType.Status,
-          status: 'error',
+          type: ServerMessageType.Log,
+          level: 'error',
           message: 'Unknown message type',
         };
     }
@@ -69,8 +71,8 @@ const server = Bun.serve({
   port: PORT,
   error: (error) => {
     sendBroadcast({
-      type: ServerMessageType.Status,
-      status: 'error',
+      type: ServerMessageType.Log,
+      level: 'error',
       message: error.message,
     });
     return new Response('Internal Server Error', {
@@ -89,8 +91,8 @@ const server = Bun.serve({
     open(ws) {
       connections.add(ws);
       sendBroadcast({
-        type: ServerMessageType.Status,
-        status: 'info',
+        type: ServerMessageType.Log,
+        level: 'info',
         message: 'WebSocket client connected',
       });
     },
@@ -103,8 +105,8 @@ const server = Bun.serve({
       const message = parse(raw);
       if (!message) {
         send(ws, {
-          type: ServerMessageType.Status,
-          status: 'error',
+          type: ServerMessageType.Log,
+          level: 'error',
           message: 'Invalid JSON message',
         });
         return;
@@ -135,3 +137,13 @@ simulationUndoHandler.eventBus.subscribe(
     sendBroadcast(serverMessage);
   },
 );
+
+SimulationRegistry.get().eventBus.subscribe((event) => {
+  if (event.scope !== 'log') return;
+
+  sendBroadcast({
+    type: ServerMessageType.Log,
+    level: event.level,
+    message: `${ActionCodec.join(event.source)}: ${event.message}`,
+  });
+});

@@ -18,5 +18,10 @@ export namespace SimulationEvent {
         oldData: Simulation.Event.ConnectionPayload['data'];
       });
 
-  export type type = CreateType | UpdateType | DeleteType;
+  export type MutationType =
+    | CreateType
+    | UpdateType
+    | DeleteType;
+
+  export type type = MutationType | Simulation.Event.Log;
 }

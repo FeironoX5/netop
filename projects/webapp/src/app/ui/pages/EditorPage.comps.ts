@@ -1,7 +1,7 @@
 import {
   ServerMessageType,
   type ServerMessage,
-  type StatusMessage,
+  type LogMessage,
 } from '@netop/types';
 
 export function useHandlers(
@@ -10,13 +10,13 @@ export function useHandlers(
   subscribe: (
     handler: (message: ServerMessage) => void,
   ) => () => void,
-  reportStatus: (message: StatusMessage) => void,
+  reportLog: (message: LogMessage) => void,
 ) {
   let unsubscribe: (() => void) | undefined;
 
   function message(message: ServerMessage) {
-    if (message.type === ServerMessageType.Status) {
-      reportStatus(message);
+    if (message.type === ServerMessageType.Log) {
+      reportLog(message);
     }
   }
 

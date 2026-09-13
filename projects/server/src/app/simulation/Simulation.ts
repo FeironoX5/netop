@@ -35,10 +35,33 @@ export class Simulation {
 
   start() {
     this.timer.start(500);
+    this.log(
+      'info',
+      this.rootEntity.path,
+      'Simulation started',
+    );
   }
 
   stop() {
     this.timer.stop();
+    this.log(
+      'info',
+      this.rootEntity.path,
+      'Simulation stopped',
+    );
+  }
+
+  log(
+    level: SimulationType.Event.Log['level'],
+    source: PathSegment[],
+    message: string,
+  ) {
+    this.eventBus.call({
+      scope: 'log',
+      level,
+      source,
+      message,
+    });
   }
 
   get rootEntity() {

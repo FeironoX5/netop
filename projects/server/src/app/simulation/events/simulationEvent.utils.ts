@@ -1,8 +1,8 @@
 import { SimulationEvent } from './types';
 
 export function invertSimulationEvent(
-  event: SimulationEvent.type,
-): SimulationEvent.type {
+  event: SimulationEvent.MutationType,
+): SimulationEvent.MutationType {
   switch (event.operation) {
     case 'create':
       return { ...event, operation: 'delete' };

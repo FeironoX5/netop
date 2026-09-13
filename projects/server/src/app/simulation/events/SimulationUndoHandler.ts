@@ -3,11 +3,13 @@ import { SimulationRegistry } from '../SimulationRegistry';
 import { invertSimulationEvent } from './simulationEvent.utils';
 import { SimulationEvent } from './types';
 
-type EventApplier = (event: SimulationEvent.type) => void;
+type EventApplier = (
+  event: SimulationEvent.MutationType,
+) => void;
 
 type EventEntry = {
   id: number;
-  event: SimulationEvent.type;
+  event: SimulationEvent.MutationType;
 };
 
 type EventGroup = EventEntry[];
@@ -20,11 +22,13 @@ export class SimulationUndoHandler {
 
   constructor(
     private appliers: Record<
-      SimulationEvent.type['scope'],
+      SimulationEvent.MutationType['scope'],
       EventApplier
     >,
   ) {
     SimulationRegistry.get().eventBus.subscribe((e) => {
+      if (e.scope === 'log') return;
+
       const id = this.eventCounter++;
       const group = this.activeGroup ?? [];
       const entry = { id, event: e };

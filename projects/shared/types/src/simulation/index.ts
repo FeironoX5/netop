@@ -53,9 +53,18 @@ export namespace Simulation {
     export type UpdateEvent = Update & Payload;
     export type DeleteEvent = Delete & Payload;
 
-    export type type =
+    export type Mutation =
       | CreateEvent
       | UpdateEvent
       | DeleteEvent;
+
+    export type Log = {
+      scope: 'log';
+      level: 'info' | 'error';
+      source: PathSegment[];
+      message: string;
+    };
+
+    export type type = Mutation | Log;
   }
 }

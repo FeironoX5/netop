@@ -2,12 +2,12 @@ import type { ItemHeaderTone } from '@bits/ItemHeader.props';
 import type { Simulation } from '@netop/types';
 
 export const EVENT_ICON: Record<
-  Simulation.Event.type['operation'],
+  Simulation.Event.Mutation['operation'],
   string
 > = { create: 'plus', update: 'pencil', delete: 'trash' };
 
 export const EVENT_TONE: Record<
-  Simulation.Event.type['operation'],
+  Simulation.Event.Mutation['operation'],
   ItemHeaderTone
 > = {
   create: 'success',

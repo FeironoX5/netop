@@ -18,7 +18,7 @@ export class Hub extends PhysicalDevice {
       }),
       from: Hub,
       tick(e) {
-        SimulationRegistry.behaviours.repeater(e);
+        SimulationRegistry.fromChain<Hub>([e]).repeat();
         SimulationRegistry.behaviours.entity(e);
       },
     });
@@ -28,5 +28,21 @@ export class Hub extends PhysicalDevice {
     return SimulationRegistry.getManager(
       PortCategory.PHYSICAL,
     ).build(id);
+  }
+
+  private repeat() {
+    const collided =
+      this.ports.filter((port) => port.in.length > 0)
+        .length > 1;
+
+    SimulationRegistry.behaviours.repeater(this.entity);
+
+    if (collided) {
+      SimulationRegistry.get().log(
+        'error',
+        this.path,
+        'Collision caused data loss',
+      );
+    }
   }
 }

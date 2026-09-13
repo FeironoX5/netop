@@ -12,7 +12,7 @@ import {
 } from './EventDetails.consts';
 
 export function getEventDetails(
-  event: Simulation.Event.type,
+  event: Simulation.Event.Mutation,
 ): readonly DetailsRow[] {
   if (event.scope === 'connection') {
     return getConnectionDetails(event.data);
@@ -36,13 +36,13 @@ export function getEventDetails(
 }
 
 export function getEventIcon(
-  event: Simulation.Event.type,
+  event: Simulation.Event.Mutation,
 ): string {
   return EVENT_ICON[event.operation];
 }
 
 export function getEventTone(
-  event: Simulation.Event.type,
+  event: Simulation.Event.Mutation,
 ): ItemHeaderTone {
   return EVENT_TONE[event.operation];
 }
