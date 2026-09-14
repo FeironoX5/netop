@@ -1,25 +1,25 @@
+import { useDebounceFn } from '@vueuse/core';
 import type { Stage } from 'konva/lib/Stage';
 import { nextTick } from 'vue';
 import {
   SCALE_STEP_MULTIPLIER,
   SCALE_LIMITS,
 } from './CanvasView.consts';
+import { GRID_RENDER_DEBOUNCE } from './components/CanvasGrid.consts';
 
 export function useHandlers(
   getStage: () => Stage | undefined,
   updateGrid: (stage: Stage) => void,
   setSize: (width: number, height: number) => void,
 ) {
-  let rafId: number | null = null;
-
-  function scheduleUpdate() {
-    if (rafId !== null) return;
-    rafId = requestAnimationFrame(() => {
-      rafId = null;
+  const scheduleUpdate = useDebounceFn(
+    () => {
       const stage = getStage();
       if (stage) updateGrid(stage);
-    });
-  }
+    },
+    GRID_RENDER_DEBOUNCE,
+    { maxWait: GRID_RENDER_DEBOUNCE },
+  );
 
   return {
     mount: () => scheduleUpdate(),

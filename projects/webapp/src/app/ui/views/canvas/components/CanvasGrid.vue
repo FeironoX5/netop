@@ -3,14 +3,15 @@
 </template>
 
 <script setup lang="ts">
+import { watchDebounced } from '@vueuse/core';
 import Konva from 'konva';
 import type { Layer } from 'konva/lib/Layer';
 import type { Stage } from 'konva/lib/Stage';
 import { storeToRefs } from 'pinia';
 import {
+  computed,
   useTemplateRef,
   onBeforeUnmount,
-  watch,
 } from 'vue';
 import { Layer as VLayer } from 'vue-konva';
 import { appTheme } from '@/app/App.theme';
@@ -20,18 +21,25 @@ import {
 } from '@/app/stores/canvasStore';
 import {
   CELL_HEIGHT,
+  CANVAS_STROKE_WIDTH,
   CELL_WIDTH,
+  GRID_RENDER_DEBOUNCE,
   PIECE_MAX_CELLS,
+  SUBCELL_OPACITY,
   ZOOM_THRESHOLD,
 } from './CanvasGrid.consts';
 import {
+  drawCell,
+  drawSubcells,
+  getCellPoints,
   getViewportBounds,
   getBlockAxisLayout,
-  drawDiamondCell,
-  drawRectangleCell,
 } from './CanvasGrid.utils';
 
 const { cursorMode } = storeToRefs(useCanvasStore());
+const cellPoints = computed(() =>
+  getCellPoints(cursorMode.value),
+);
 
 const layerRef = useTemplateRef<{ getNode(): Layer }>(
   'layerRef',
@@ -74,11 +82,6 @@ function computeMetrics(
 function createPiece(cellsX: number, cellsY: number) {
   const pw = cellsX * CELL_WIDTH;
   const ph = cellsY * CELL_HEIGHT;
-  const drawCell =
-    cursorMode.value === CanvasCursorMode.Drag
-      ? drawDiamondCell
-      : drawRectangleCell;
-
   const shape = new Konva.Shape({
     width: pw,
     height: ph,
@@ -88,21 +91,48 @@ function createPiece(cellsX: number, cellsY: number) {
     strokeEnabled: true,
     hitStrokeWidth: 0,
     stroke: appTheme.c.border,
-    strokeWidth: 1,
+    strokeWidth: CANVAS_STROKE_WIDTH,
     sceneFunc: (ctx, shape) => {
       const w = shape.width();
       const h = shape.height();
       ctx.beginPath();
       for (let x = 0; x < w; x += CELL_WIDTH) {
         for (let y = 0; y < h; y += CELL_HEIGHT) {
-          drawCell(ctx, x, y);
+          drawCell(ctx, cellPoints.value, x, y);
         }
       }
       ctx.strokeShape(shape);
+
+      ctx.beginPath();
+      for (let x = 0; x < w; x += CELL_WIDTH) {
+        for (let y = 0; y < h; y += CELL_HEIGHT) {
+          drawSubcells(ctx, cellPoints.value, x, y);
+          if (cursorMode.value === CanvasCursorMode.Drag) {
+            drawSubcells(
+              ctx,
+              cellPoints.value,
+              x + CELL_WIDTH / 2,
+              y + CELL_HEIGHT / 2,
+            );
+          }
+        }
+      }
+      ctx.save();
+      ctx.globalAlpha = SUBCELL_OPACITY;
+      ctx.strokeShape(shape);
+      ctx.restore();
     },
   });
 
+  return shape;
+}
+
+function cachePiece(shape: Konva.Shape): Konva.Shape {
   shape.cache({
+    x: -CELL_WIDTH / 2,
+    y: -CELL_HEIGHT / 2,
+    width: shape.width() + CELL_WIDTH,
+    height: shape.height() + CELL_HEIGHT,
     pixelRatio: Math.min(window.devicePixelRatio || 1, 2),
   });
   return shape;
@@ -170,7 +200,7 @@ function syncTiles(
 
   needed.forEach((key) => {
     const [x, y] = key.split(',').map(Number);
-    layer.add(active!.clone({ x, y }));
+    layer.add(cachePiece(active!.clone({ x, y })));
   });
 
   if (toDestroy.length || needed.size) {
@@ -231,10 +261,14 @@ function update(stage: Stage) {
   lastYCount = yLayout.count;
 }
 
-watch(cursorMode, () => {
-  cleanup();
-  if (currentStage) update(currentStage);
-});
+watchDebounced(
+  cellPoints,
+  () => {
+    cleanup();
+    if (currentStage) update(currentStage);
+  },
+  { debounce: GRID_RENDER_DEBOUNCE },
+);
 
 defineExpose({ update });
 </script>
