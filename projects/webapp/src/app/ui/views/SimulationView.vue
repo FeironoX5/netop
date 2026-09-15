@@ -57,7 +57,10 @@
             <Button
               :icon="entry.icon"
               :text="entry.text"
-              isQuiet
+              :isActive="selectedEntityPath === entry.key"
+              @click="
+                canvasStore.setSelectedEntityPath(entry.key)
+              "
             />
           </template>
         </TreeList>
@@ -72,6 +75,9 @@
           :key="entry.path"
           :entity="entry.entity"
           :path="entry.path"
+          @click="
+            canvasStore.setSelectedEntityPath(entry.path)
+          "
         />
       </div>
 
@@ -102,6 +108,7 @@ import TabbedGroup from '@components/TabbedGroup.vue';
 import TreeList from '@components/TreeList.vue';
 import { storeToRefs } from 'pinia';
 import { computed, ref } from 'vue';
+import { useCanvasStore } from '@/app/stores/canvasStore';
 import { useSimulationStore } from '@/app/stores/simulationStore';
 import ConnectionDetails from '../parts/ConnectionDetails.vue';
 import EntityDetails from '../parts/EntityDetails.vue';
@@ -116,8 +123,10 @@ const entityView = ref<EntityView>('tree');
 const query = ref('');
 
 const simulationStore = useSimulationStore();
+const canvasStore = useCanvasStore();
 const { entities, connections, loading, error } =
   storeToRefs(simulationStore);
+const { selectedEntityPath } = storeToRefs(canvasStore);
 const entityEntries = computed(() =>
   getEntityEntries(entities.value, query.value),
 );

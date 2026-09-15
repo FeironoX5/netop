@@ -73,7 +73,6 @@ const groupConfig = computed(() => {
         props.path,
       ),
     ),
-    listening: false,
   };
 });
 
@@ -91,11 +90,12 @@ const outlineShapeConfig = computed(() => ({
     bodyHeight.value,
   ),
 }));
-const textConfig = computed(() =>
-  getCellTextConfig(
+const textConfig = computed(() => ({
+  ...getCellTextConfig(
     getDeviceCapText(props.entity.category)!,
     false,
     cursorMode.value === CanvasCursorMode.Drag,
   ),
-);
+  listening: cursorMode.value === CanvasCursorMode.Select,
+}));
 </script>

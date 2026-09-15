@@ -3,6 +3,7 @@
     <VStage
       ref="stageRef"
       :config="stageConfig"
+      @mousedown="handlers.deselect"
       @wheel="handlers.wheel"
       @dragmove="handlers.stageChange"
     >
@@ -31,6 +32,7 @@ import {
   ref,
   useTemplateRef,
   onMounted,
+  watch,
   watchEffect,
 } from 'vue';
 import {
@@ -47,6 +49,7 @@ import {
 } from './CanvasView.utils';
 import { isDevicePositionAvailable } from './components/CanvasDevice.utils';
 import {
+  getCanvasEntityPosition,
   getDirectChildren,
   getDeviceCapText,
 } from './components/CanvasEntity.utils';
@@ -55,6 +58,7 @@ import CanvasGrid from './components/CanvasGrid.vue';
 
 const { entities } = storeToRefs(useSimulationStore());
 const canvasStore = useCanvasStore();
+const { selectedEntityPath } = storeToRefs(canvasStore);
 const canvasEntityLayers = computed(() =>
   getCanvasEntityLayers(entities.value),
 );
@@ -103,11 +107,24 @@ const stageConfig = ref<
 const handlers = useHandlers(
   () => stageRef.value?.getStage(),
   (stage) => gridRef.value?.update(stage),
+  () => canvasStore.setSelectedEntityPath(null),
   (width, height) => {
     stageConfig.value.width = width;
     stageConfig.value.height = height;
   },
 );
+
+function focusEntity(path: string | null): void {
+  if (!path) return;
+  const position = getCanvasEntityPosition(
+    entities.value,
+    canvasStore.devicePositions,
+    path,
+  );
+  if (position) handlers.focus(path, position);
+}
+
+watch(selectedEntityPath, focusEntity);
 
 useResizeObserver(stageContainerRef, ([entry]) => {
   if (!entry) return;

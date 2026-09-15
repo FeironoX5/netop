@@ -1,7 +1,7 @@
 import type { PropType } from 'vue';
 
 export type TreeListEntry = {
-  key: PropertyKey;
+  key: string;
   depth: number;
   text: string;
   icon?: string;

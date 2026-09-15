@@ -12,12 +12,22 @@ export type CanvasCellPosition = { x: number; y: number };
 
 export const useCanvasStore = defineStore('canvas', () => {
   const cursorMode = ref(CanvasCursorMode.Select);
+  const selectedEntityPath = ref<string | null>(null);
   const devicePositions = ref(
     new Map<string, CanvasCellPosition>(),
   );
 
   function setCursorMode(mode: CanvasCursorMode): void {
+    if (cursorMode.value !== mode) {
+      selectedEntityPath.value = null;
+    }
     cursorMode.value = mode;
+  }
+
+  function setSelectedEntityPath(
+    path: string | null,
+  ): void {
+    selectedEntityPath.value = path;
   }
 
   function getDevicePosition(
@@ -35,8 +45,10 @@ export const useCanvasStore = defineStore('canvas', () => {
 
   return {
     cursorMode,
+    selectedEntityPath,
     devicePositions,
     setCursorMode,
+    setSelectedEntityPath,
     getDevicePosition,
     setDevicePosition,
   } as const;

@@ -1,5 +1,6 @@
 import {
   DeviceCategory,
+  SceneCategory,
   type FlatSimulationEntity,
   PortCategory,
   type Simulation,
@@ -62,6 +63,24 @@ export function getPortPosition(
 ): CanvasCellPosition {
   const position = positions.get(getParentPath(path))!;
   return { x: position.x, y: position.y + index + 1 };
+}
+
+export function getCanvasEntityPosition(
+  entities: Map<string, FlatSimulationEntity>,
+  positions: ReadonlyMap<string, CanvasCellPosition>,
+  path: string,
+): CanvasCellPosition | undefined {
+  const entity = entities.get(path)!;
+  if (entity.category === SceneCategory) return;
+  if (entity.category === DeviceCategory.COMPUTER)
+    return getComputerPosition(entities, positions, path);
+  if (isPortCategory(entity.category))
+    return getPortPosition(
+      positions,
+      path,
+      getChildIndex(entities, path),
+    );
+  return positions.get(path);
 }
 
 export function getDeviceCapText(
