@@ -6,7 +6,10 @@ import {
   type Simulation,
 } from '@netop/types';
 import { ActionCodec } from '@netop/utils';
-import type { CanvasCellPosition } from '@/app/stores/canvasStore';
+import type {
+  CanvasCellPosition,
+  CanvasPositions,
+} from '@/app/stores/canvasStore';
 
 export function getParentPath(path: string): string {
   return ActionCodec.join(
@@ -45,29 +48,29 @@ export function getChildIndex(
 
 export function getComputerPosition(
   entities: Map<string, FlatSimulationEntity>,
-  positions: ReadonlyMap<string, CanvasCellPosition>,
+  positions: Readonly<CanvasPositions>,
   path: string,
 ): CanvasCellPosition {
   const { path: networkCardPath } = getComputerNetworkCard(
     entities,
     path,
   );
-  const position = positions.get(networkCardPath)!;
+  const position = positions[networkCardPath]!;
   return { x: position.x, y: position.y - 1 };
 }
 
 export function getPortPosition(
-  positions: ReadonlyMap<string, CanvasCellPosition>,
+  positions: Readonly<CanvasPositions>,
   path: string,
   index: number,
 ): CanvasCellPosition {
-  const position = positions.get(getParentPath(path))!;
+  const position = positions[getParentPath(path)]!;
   return { x: position.x, y: position.y + index + 1 };
 }
 
 export function getCanvasEntityPosition(
   entities: Map<string, FlatSimulationEntity>,
-  positions: ReadonlyMap<string, CanvasCellPosition>,
+  positions: Readonly<CanvasPositions>,
   path: string,
 ): CanvasCellPosition | undefined {
   const entity = entities.get(path)!;
@@ -80,7 +83,7 @@ export function getCanvasEntityPosition(
       path,
       getChildIndex(entities, path),
     );
-  return positions.get(path);
+  return positions[path];
 }
 
 export function getDeviceCapText(

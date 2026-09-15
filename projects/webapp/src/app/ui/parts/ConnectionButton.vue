@@ -12,36 +12,8 @@
     />
     <Button
       class="view-picker"
-      text="View 1"
-      @click.stop="
-        openMenu([
-          { name: 'New View', icon: 'plus' },
-          {
-            name: 'Import',
-            icon: 'upload',
-            action: () =>
-              openSubmenu([
-                {
-                  name: 'From clipboard',
-                  icon: 'clipboard',
-                },
-                { name: 'From file', icon: 'file' },
-              ]),
-          },
-          {
-            name: 'Export',
-            icon: 'share',
-            action: () =>
-              openSubmenu([
-                { name: 'To clipboard', icon: 'clipboard' },
-                { name: 'To file', icon: 'file' },
-              ]),
-          },
-          { name: `View 1` },
-          { name: `View 2` },
-          { name: `View 3` },
-        ])
-      "
+      :text="canvasStore.activeView.name"
+      @click.stop="openMenu(viewItems)"
     />
   </ButtonSections>
   <Teleport to="body">
@@ -95,12 +67,13 @@
 <script setup lang="ts">
 import Button from '@bits/Button.vue';
 import ButtonSections from '@bits/ButtonSections.vue';
-import { openMenu, openSubmenu } from '@bits/menu';
+import { openMenu } from '@bits/menu';
 import type { MenuItemData } from '@bits/menu';
 import { useWebSocket } from '@vueuse/core';
 import { computed, ref, useTemplateRef, watch } from 'vue';
 import { wsService } from '@/app/services/wsService';
 import { useAppStore } from '@/app/stores/appStore';
+import { useCanvasStore } from '@/app/stores/canvasStore';
 
 type TestStatus = 'idle' | 'testing' | 'success' | 'error';
 
@@ -129,6 +102,7 @@ const connectionText = computed(() => {
 });
 
 const appStore = useAppStore();
+const canvasStore = useCanvasStore();
 const connectionDialog = useTemplateRef<HTMLDialogElement>(
   'connectionDialog',
 );
@@ -176,6 +150,22 @@ const connectionItems = computed<readonly MenuItemData[]>(
     },
   ],
 );
+
+const viewItems = computed<readonly MenuItemData[]>(() => [
+  ...canvasStore.views.map((view, index) => ({
+    name: view.name,
+    endIcon:
+      index === canvasStore.activeViewIndex
+        ? 'check'
+        : undefined,
+    action: () => canvasStore.setActiveView(index),
+  })),
+  {
+    name: 'New View',
+    icon: 'plus',
+    action: canvasStore.addView,
+  },
+]);
 
 function openConnectionDialog(): void {
   testStatus.value = 'idle';

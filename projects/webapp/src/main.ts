@@ -1,5 +1,9 @@
 import { createPinia } from 'pinia';
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import { createApp } from 'vue';
 import App from './app/App.vue';
 
-createApp(App).use(createPinia()).mount('#app');
+const pinia = createPinia();
+pinia.use(piniaPluginPersistedstate);
+
+createApp(App).use(pinia).mount('#app');

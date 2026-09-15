@@ -1,7 +1,10 @@
 import type { Context } from 'konva/lib/Context';
 import type { Shape } from 'konva/lib/Shape';
 import { appTheme } from '@/app/App.theme';
-import type { CanvasCellPosition } from '@/app/stores/canvasStore';
+import type {
+  CanvasCellPosition,
+  CanvasPositions,
+} from '@/app/stores/canvasStore';
 import {
   DEVICE_CLEARANCE,
   ISOMETRIC_TEXT,
@@ -89,14 +92,16 @@ function getCellEdge(points: CellPoints, lower: boolean) {
 }
 
 export function isDevicePositionAvailable(
-  positions: ReadonlyMap<string, CanvasCellPosition>,
+  positions: Readonly<CanvasPositions>,
   path: string,
   position: CanvasCellPosition,
   getBodyCells: (path: string) => number,
 ): boolean {
   const bottom = position.y + getBodyCells(path);
 
-  for (const [otherPath, otherPosition] of positions) {
+  for (const [otherPath, otherPosition] of Object.entries(
+    positions,
+  )) {
     if (
       otherPath !== path &&
       Math.abs(position.x - otherPosition.x) <=
