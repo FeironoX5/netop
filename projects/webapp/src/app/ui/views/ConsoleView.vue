@@ -75,13 +75,9 @@ import Icon from '@bits/Icon.vue';
 import { openMenu } from '@bits/menu';
 import Textarea from '@bits/Textarea.vue';
 import EmptyView from '@components/EmptyView.vue';
-import {
-  useClipboard,
-  useFocus,
-  useScroll,
-} from '@vueuse/core';
+import { useClipboard, useScroll } from '@vueuse/core';
 import { storeToRefs } from 'pinia';
-import { ref, useTemplateRef, watch } from 'vue';
+import { onMounted, ref, useTemplateRef, watch } from 'vue';
 import { useConsoleStore } from '@/app/stores/consoleStore';
 import { useWsStore } from '@/app/stores/wsStore';
 import { useHandlers } from './ConsoleView.comps';
@@ -102,9 +98,6 @@ const consoleStore = useConsoleStore();
 const { log } = storeToRefs(consoleStore);
 const wsStore = useWsStore();
 const { copy } = useClipboard();
-const { focused } = useFocus(promptTextarea as any, {
-  initialValue: true,
-});
 const { y: scrollY } = useScroll(outputArea, {
   behavior: 'smooth',
 });
@@ -113,9 +106,13 @@ const handlers = useHandlers(
   (command) => {
     consoleStore.addCommand(command);
     input.value = '';
-    focused.value = true;
+    focusPrompt();
   },
 );
+
+function focusPrompt(): void {
+  promptTextarea.value?.focus({ preventScroll: true });
+}
 
 function openConsoleMenu(event: MouseEvent) {
   void openMenu(
@@ -149,6 +146,8 @@ watch(
   },
   { flush: 'post' },
 );
+
+onMounted(focusPrompt);
 </script>
 
 <style scoped>
